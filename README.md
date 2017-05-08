@@ -1,6 +1,8 @@
 # Message Indicator
 
-![preview](preview.jpg)
+<p align="center">
+  <img src="preview.jpg" height="300" >
+</p>
 
 ### The Problem
 I commonly open chats in Messages on my computer to make the 'unread' indicator go away.  However, if there's any delay in answering them back, it's quite common that I'll simply forget to respond to the text for a while.
