@@ -30,6 +30,35 @@ static char response_indicator;
 @property(retain) NSView *unreadIndicator;
 @end
 
+@interface MessageIndicator: NSView
+@end
+
+@implementation MessageIndicator
+- (id)initWithFrame:(NSRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.wantsLayer = true;
+        self.layer.backgroundColor = [NSColor colorWithCalibratedRed:162.0f/255.0f green:162.0f/255.0f blue:162.0f/255.0f alpha:1.0f].CGColor;
+        self.layer.cornerRadius = frame.size.width * 0.5;
+        self.layer.masksToBounds = true;
+    }
+    return self;
+}
+
+- (void)mouseDown:(NSEvent *)event {
+    ZKSuper(void, event);
+
+    // if (event.modifierFlags & NSControlKeyMask) {
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setMessageText:@"Alert"];
+    [alert setInformativeText:[NSString stringWithFormat:@"NSCriticalAlertStyle\r"]];
+    [alert setAlertStyle:NSCriticalAlertStyle];
+    [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+    // }
+}
+@end
+
 // Gets the indicator layer if it exists by recursing on subviews
 static NSView* getIndicator(NSView *view) {
     for (NSView *subview in [view subviews]) {
@@ -41,18 +70,6 @@ static NSView* getIndicator(NSView *view) {
     }
     
     return nil;
-}
-
-// Creates an indicator NSView (gray, slightly below)
-static NSView *indicator() {
-    NSView *indicator = [[NSView alloc] initWithFrame: CGRectMake(6, 12, 9, 9)];
-    
-    indicator.wantsLayer = true;
-    indicator.layer.backgroundColor = [NSColor colorWithCalibratedRed:162.0f/255.0f green:162.0f/255.0f blue:162.0f/255.0f alpha:1.0f].CGColor;
-    indicator.layer.cornerRadius = 5;
-    indicator.layer.masksToBounds = true;
-    
-    return indicator;
 }
 
 // Hooks into the ChatTableCellView and hijacks the layouts to add the indicator
@@ -74,7 +91,7 @@ ZKSwizzleInterface(custom_cellView, ChatTableCellView, NSTableCellView)
     // If no indicator, then create and add it
     if (currentIndicator == nil) {
         // Makes the "unresponded to" indicator
-        NSView *newIndicator = indicator();
+        MessageIndicator *newIndicator = [[MessageIndicator alloc] initWithFrame:CGRectMake(6, 12, 9, 9)];
         
         // Add attribute to identify it
         objc_setAssociatedObject(newIndicator, &response_indicator, @"RESPONSE", OBJC_ASSOCIATION_RETAIN);
@@ -90,6 +107,22 @@ ZKSwizzleInterface(custom_cellView, ChatTableCellView, NSTableCellView)
     } else if (!needsResponse) {
         [currentIndicator setHidden:true];
     }
+}
+
+- (id)hitTest:(struct CGPoint)arg1 {
+    NSLog(@"hit test");
+    
+    id a = ZKSuper(id, arg1);
+    
+//    NSAlert *alert = [[NSAlert alloc] init];
+//    [alert addButtonWithTitle:@"OK"];
+//    [alert setMessageText:@"Alert"];
+//    [alert setInformativeText:[NSString stringWithFormat:@"NSCriticalAlertStyle\r%@", a]];
+//    [alert setAlertStyle:NSCriticalAlertStyle];
+//    [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+    
+    return a;
+    // return ZKOrig(id);
 }
 
 @end
