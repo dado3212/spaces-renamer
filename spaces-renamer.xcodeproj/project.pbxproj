@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C398D84715BD8B0700543187 /* messageIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* messageIndicator.m */; };
+		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8D5B49B6048680CD000E48DA /* message-indicator.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "message-indicator.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D5B49B6048680CD000E48DA /* spaces-renamer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "spaces-renamer.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = "message-indicator/Info.plist"; sourceTree = "<group>"; };
-		C398D84615BD8B0700543187 /* messageIndicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = messageIndicator.m; path = "message-indicator/messageIndicator.m"; sourceTree = "<group>"; };
+		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "message-indicator/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "message-indicator/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "message-indicator/ZKSwizzle.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -53,7 +53,7 @@
 			children = (
 				FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */,
 				FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */,
-				C398D84615BD8B0700543187 /* messageIndicator.m */,
+				C398D84615BD8B0700543187 /* spacesRenamer.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 		19C28FB8FE9D52D311CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D5B49B6048680CD000E48DA /* message-indicator.bundle */,
+				8D5B49B6048680CD000E48DA /* spaces-renamer.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,9 +69,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8D5B49AC048680CD000E48DA /* message-indicator */ = {
+		8D5B49AC048680CD000E48DA /* spaces-renamer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB913A08733D840010E9CD /* Build configuration list for PBXNativeTarget "message-indicator" */;
+			buildConfigurationList = 1DEB913A08733D840010E9CD /* Build configuration list for PBXNativeTarget "spaces-renamer" */;
 			buildPhases = (
 				8D5B49AF048680CD000E48DA /* Resources */,
 				8D5B49B1048680CD000E48DA /* Sources */,
@@ -81,10 +81,10 @@
 			);
 			dependencies = (
 			);
-			name = "message-indicator";
+			name = "spaces-renamer";
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = ColorfulSidebar;
-			productReference = 8D5B49B6048680CD000E48DA /* message-indicator.bundle */;
+			productReference = 8D5B49B6048680CD000E48DA /* spaces-renamer.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -96,7 +96,7 @@
 				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = cvz.;
 			};
-			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "message-indicator" */;
+			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "spaces-renamer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -107,7 +107,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8D5B49AC048680CD000E48DA /* message-indicator */,
+				8D5B49AC048680CD000E48DA /* spaces-renamer */,
 			);
 		};
 /* End PBXProject section */
@@ -127,7 +127,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C398D84715BD8B0700543187 /* messageIndicator.m in Sources */,
+				C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */,
 				FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -148,8 +148,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/message-indicator/Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.${PRODUCT_NAME:rfc1034Identifier}";
-				PRODUCT_NAME = "message-indicator";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.spaces-renamer";
+				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
@@ -164,8 +164,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/message-indicator/Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.${PRODUCT_NAME:rfc1034Identifier}";
-				PRODUCT_NAME = "message-indicator";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.spaces-renamer";
+				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;
@@ -235,7 +235,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB913A08733D840010E9CD /* Build configuration list for PBXNativeTarget "message-indicator" */ = {
+		1DEB913A08733D840010E9CD /* Build configuration list for PBXNativeTarget "spaces-renamer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB913B08733D840010E9CD /* Debug */,
@@ -244,7 +244,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "message-indicator" */ = {
+		1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "spaces-renamer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB913F08733D840010E9CD /* Debug */,

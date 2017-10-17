@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
                BuildableName = "message-indicator.bundle"
-               BlueprintName = "message-indicator"
-               ReferencedContainer = "container:message-indicator.xcodeproj">
+               BlueprintName = "spaces-renamer"
+               ReferencedContainer = "container:spaces-renamer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -36,6 +37,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -47,8 +49,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
             BuildableName = "message-indicator.bundle"
-            BlueprintName = "message-indicator"
-            ReferencedContainer = "container:message-indicator.xcodeproj">
+            BlueprintName = "spaces-renamer"
+            ReferencedContainer = "container:spaces-renamer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -65,8 +67,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
             BuildableName = "message-indicator.bundle"
-            BlueprintName = "message-indicator"
-            ReferencedContainer = "container:message-indicator.xcodeproj">
+            BlueprintName = "spaces-renamer"
+            ReferencedContainer = "container:spaces-renamer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
