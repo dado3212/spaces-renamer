@@ -10,13 +10,13 @@
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
 
-static char response_indicator;
-
 @interface IMMessage : NSObject
+@property(retain, nonatomic) NSString *guid;
 @property(readonly, nonatomic) BOOL isFromMe;
 @end
 
 @interface IMChat : NSObject
+@property(readonly, nonatomic) NSString *guid;
 @property(readonly, nonatomic) IMMessage *lastFinishedMessage;
 @property(readonly, nonatomic) NSArray *participants;
 @end
@@ -31,41 +31,51 @@ static char response_indicator;
 @end
 
 @interface MessageIndicator: NSView
+@property(retain, nonatomic) IMChat *chat;
 @end
 
 @implementation MessageIndicator
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithChat:(IMChat *)chat {
+    NSRect frame = CGRectMake(6, 12, 9, 9);
     self = [super initWithFrame:frame];
     if (self) {
         self.wantsLayer = true;
         self.layer.backgroundColor = [NSColor colorWithCalibratedRed:162.0f/255.0f green:162.0f/255.0f blue:162.0f/255.0f alpha:1.0f].CGColor;
         self.layer.cornerRadius = frame.size.width * 0.5;
         self.layer.masksToBounds = true;
+        
+        self.chat = chat;
     }
     return self;
 }
 
 - (void)mouseDown:(NSEvent *)event {
-    ZKSuper(void, event);
-
-    // if (event.modifierFlags & NSControlKeyMask) {
-    NSAlert *alert = [[NSAlert alloc] init];
-    [alert addButtonWithTitle:@"OK"];
-    [alert setMessageText:@"Alert"];
-    [alert setInformativeText:[NSString stringWithFormat:@"NSCriticalAlertStyle\r"]];
-    [alert setAlertStyle:NSCriticalAlertStyle];
-    [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:nil contextInfo:nil];
-    // }
+    // Control and click
+    if (event.modifierFlags & NSControlKeyMask) {
+        // Saves the ID for the most recent message in the chat, to hide it
+        NSString *messageGuid = self.chat.lastFinishedMessage.guid;
+        NSString *chatGuid = self.chat.guid;
+        
+        NSUserDefaults *cachedDefaults = [NSUserDefaults standardUserDefaults];
+        NSMutableDictionary *cached = [[cachedDefaults dictionaryForKey:@"cached"]  mutableCopy];
+        
+        if (cached == nil) {
+            cached = [[NSMutableDictionary alloc] init];
+        }
+        cached[chatGuid] = messageGuid;
+        [cachedDefaults setObject:cached forKey:@"cached"];
+        [cachedDefaults synchronize];
+         
+        [self setHidden:true];
+    }
 }
 @end
 
 // Gets the indicator layer if it exists by recursing on subviews
-static NSView* getIndicator(NSView *view) {
+static MessageIndicator* getIndicator(NSView *view) {
     for (NSView *subview in [view subviews]) {
-        if ([subview isKindOfClass: [NSView class]]) {
-            if ([objc_getAssociatedObject(subview, &response_indicator) isEqualToString:@"RESPONSE"]) {
-                return (NSView *)subview;
-            }
+        if ([subview isKindOfClass: [MessageIndicator class]]) {
+            return (MessageIndicator *)subview;
         }
     }
     
@@ -85,16 +95,35 @@ ZKSwizzleInterface(custom_cellView, ChatTableCellView, NSTableCellView)
     //  - it's not a group message
     bool needsResponse = !((ChatTableCellView *)self).chatDisplayController.chat.lastFinishedMessage.isFromMe && ((ChatTableCellView *)self).chatDisplayController.chat.participants.count == 1;
     
+    // Check from cache, limit only if could change needsResponse
+    if (needsResponse) {
+        NSString *messageGuid = ((ChatTableCellView *)self).chatDisplayController.chat.lastFinishedMessage.guid;
+        NSString *chatGuid =((ChatTableCellView *)self).chatDisplayController.chat.guid;
+        
+        NSUserDefaults *cachedDefaults = [NSUserDefaults standardUserDefaults];
+        NSMutableDictionary *cached = [[cachedDefaults dictionaryForKey:@"cached"]  mutableCopy];
+
+        // If it needs response but the most recent is saved in the cleared caching, then don't show indicator
+        if (cached && cached[chatGuid]) {
+            if ([cached[chatGuid] isEqualToString:messageGuid]) {
+                needsResponse = false;
+            } else {
+                // If it's been updated, save space by removing the chat from the array
+                [cached removeObjectForKey:chatGuid];
+                [cachedDefaults setObject:cached forKey:@"cached"];
+                [cachedDefaults synchronize];
+            }
+        }
+        [cached release];
+    }
+    
     // Get current indicator (check to see if it's already there)
-    NSView *currentIndicator = getIndicator(self);
+    MessageIndicator *currentIndicator = getIndicator(self);
     
     // If no indicator, then create and add it
     if (currentIndicator == nil) {
         // Makes the "unresponded to" indicator
-        MessageIndicator *newIndicator = [[MessageIndicator alloc] initWithFrame:CGRectMake(6, 12, 9, 9)];
-        
-        // Add attribute to identify it
-        objc_setAssociatedObject(newIndicator, &response_indicator, @"RESPONSE", OBJC_ASSOCIATION_RETAIN);
+        MessageIndicator *newIndicator = [[MessageIndicator alloc] initWithChat:((ChatTableCellView *)self).chatDisplayController.chat];
         
         [self addSubview:newIndicator];
         
@@ -103,26 +132,10 @@ ZKSwizzleInterface(custom_cellView, ChatTableCellView, NSTableCellView)
     
     // Toggle visibility based on status
     if (needsResponse) {
+        currentIndicator.chat = ((ChatTableCellView *) self).chatDisplayController.chat;
         [currentIndicator setHidden:false];
     } else if (!needsResponse) {
         [currentIndicator setHidden:true];
     }
 }
-
-- (id)hitTest:(struct CGPoint)arg1 {
-    NSLog(@"hit test");
-    
-    id a = ZKSuper(id, arg1);
-    
-//    NSAlert *alert = [[NSAlert alloc] init];
-//    [alert addButtonWithTitle:@"OK"];
-//    [alert setMessageText:@"Alert"];
-//    [alert setInformativeText:[NSString stringWithFormat:@"NSCriticalAlertStyle\r%@", a]];
-//    [alert setAlertStyle:NSCriticalAlertStyle];
-//    [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:nil contextInfo:nil];
-    
-    return a;
-    // return ZKOrig(id);
-}
-
 @end
