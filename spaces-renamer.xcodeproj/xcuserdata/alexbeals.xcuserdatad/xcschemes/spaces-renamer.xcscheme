@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
-               BuildableName = "message-indicator.bundle"
+               BuildableName = "spaces-renamer.bundle"
                BlueprintName = "spaces-renamer"
                ReferencedContainer = "container:spaces-renamer.xcodeproj">
             </BuildableReference>
@@ -48,7 +48,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
-            BuildableName = "message-indicator.bundle"
+            BuildableName = "spaces-renamer.bundle"
             BlueprintName = "spaces-renamer"
             ReferencedContainer = "container:spaces-renamer.xcodeproj">
          </BuildableReference>
@@ -66,7 +66,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
-            BuildableName = "message-indicator.bundle"
+            BuildableName = "spaces-renamer.bundle"
             BlueprintName = "spaces-renamer"
             ReferencedContainer = "container:spaces-renamer.xcodeproj">
          </BuildableReference>
