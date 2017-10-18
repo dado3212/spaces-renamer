@@ -26,53 +26,32 @@
 @interface WAWindow : NSObject
 @property(readonly, nonatomic) NSArray *windows; // @dynamic windows;
 @property(readonly, nonatomic) NSArray *descendents; // @dynamic descendents;
+@property(readonly, nonatomic) NSString *displayName; // @dynamic displayName;
 @end
 
-ZKSwizzleInterface(custom_expose, WVDisplaySpaces, NSObject)
-@implementation custom_expose
-//- (_Bool)switchToSpace:(id)arg1 fromServer:(BOOL)arg2 updatePSN:(BOOL)arg3 {
-//    return ZKSuper(BOOL, arg1, arg2, arg3);
-//}
-//- (_Bool)switchToNextSpaceForApplication:(struct CPSProcessSerNum)arg1;
-//- (void)switchForWindowDrag:(_Bool)arg1;
-//- (_Bool)switchToNextSpace:(_Bool)arg1;
-//- (_Bool)switchToPreviousSpace:(_Bool)arg1;
-//- (void)switchToLastSpace;
-//- (_Bool)canAddUserSpace;
-- (void)insertSpace:(id)arg1 afterSpace:(id)arg2  {
-    NSString *str = [arg1 description]; //Your text or XML
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1, arg2);
+ZKSwizzleInterface(HookWVMinimizedAndRecentsItemLayer, WVMinimizedAndRecentsItemLayer, CALayer)
+@implementation HookWVMinimizedAndRecentsItemLayer
+- (struct CGRect)_frameForHighlight {
+    return CGRectMake(0, 0, 0, 0);
 }
-- (void)moveSpace:(id)arg1 afterSpace:(id)arg2  {
-    NSString *str = [arg1 description]; //Your text or XML
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1, arg2);
+@end
+
+ZKSwizzleInterface(HookWVSpacesItemLayer, WVSpacesItemLayer, CALayer)
+@implementation HookWVSpacesItemLayer
+-(void)layoutSublayers {
+    ZKOrig(void);
+    [self setHidden:true];
 }
-- (void)removeSpace:(id)arg1  {
-    NSString *str = [arg1 description]; //Your text or XML
+- (void)layoutSpaceWindows {
+    ZKOrig(void);
+
+    NSString *str = @"lmao";
     [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1);
 }
-- (void)setCurrentSpace:(id)arg1  {
-    NSString *str = [arg1 description]; //Your text or XML
+- (void)layout {
+    ZKOrig(void);
+    NSString *str = @"lmao";
     [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1);
-}
-- (void)addUserSpace:(id)arg1  {
-    NSString *str = [arg1 description]; //Your text or XML
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1);
-}
-- (void)insertSpace:(id)arg1 atIndex:(unsigned long long)arg2  {
-    NSString *str = [arg1 description]; //Your text or XML
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1, arg2);
-}
-- (void)addSpace:(id)arg1 {
-    NSString *str = [arg1 description]; //Your text or XML
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-    ZKOrig(void, arg1);
 }
 @end
 
@@ -81,9 +60,8 @@ ZKSwizzleInterface(custom_space, WAWindow, NSObject)
 @implementation custom_space
 - (void)updateFrame {
 
-//    NSString *str = [((WAWindow *)self) description]; //Your text or XML
+//    NSString *str = ((WAWindow *)self).displayName;
 //    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-
 
 //    [alert addButtonWithTitle:@"OK"];
 //    [alert addButtonWithTitle:@"Cancel"];
