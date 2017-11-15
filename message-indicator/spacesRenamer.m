@@ -73,47 +73,21 @@ ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
           @"%@",
           unexpandedViews[0].sublayers
         );
-        self.superlayer.opacity = 1; // Overall top view
-        // self.opacity = 0; // The expanded view
-        // self.sublayers[3] has 3 children and is the only relevant thing
-        self.sublayers[3].sublayers[0].sublayers[0].opacity = 0;
 
-
-        unexpandedViews[0].opacity = 0.2;
-    }
-
-    if (false) {
-        /*
-         Prevent coloring of some layers
-         Floor = Dock Background Frost Layer
-         CALayer = Mission Control
-         ECBezelIconListLayer = Application switcher background
-         */
-
-        if (// self.superlayer.class != NSClassFromString(@"Dock.FloorLayer")
-            self.superlayer.class != NSClassFromString(@"DOCKFloorLayer")
-            && self.superlayer.class != NSClassFromString(@"CALayer")
-            && self.superlayer.class != NSClassFromString(@"ECBezelIconListLayer")) {
-
-            NSUInteger _material = ZKHookIvar(self, NSUInteger, "_material");
-            if (_material != 0) {
-                //                CALayer *_tintLayer = ZKHookIvar(self, CALayer *, "_tintLayer");
-                //                [_tintLayer setBackgroundColor:[[NSColor colorWithCalibratedWhite:0 alpha:0] CGColor]];
-                //                [_tintLayer setOpacity:0];
-                //                _tintLayer.compositingFilter = nil;
-
-                CALayer *_backdropLayer = ZKHookIvar(self, CALayer *, "_backdropLayer");
-                NSColor *_newColor = NSColor.blackColor;
-                [_backdropLayer setBackgroundColor:[_newColor CGColor]];
-                [_backdropLayer setOpacity:40.0 / 100.0];
-
+        // Set the text layer to be "Hello" for now.
+        for (int i = 0; i < unexpandedViews[0].sublayers.count; i++) {
+            if (unexpandedViews[0].sublayers[i].class == NSClassFromString(@"ECTextLayer")) {
+                ((CATextLayer *)unexpandedViews[0].sublayers[i]).string = @"Hello";
             }
-
         }
+
+        // See if can cast to WVSpacesItemLayer from the expandedViews (seemingly no)
     }
 }
 
 @end
+
+static func 
 
 // Hooks into the ChatTableCellView and hijacks the layouts to add the indicator
 ZKSwizzleInterface(custom_space, WAWindow, NSObject)
