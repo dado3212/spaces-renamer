@@ -36,22 +36,11 @@ ZKSwizzleInterface(HookWVMinimizedAndRecentsItemLayer, WVMinimizedAndRecentsItem
 }
 @end
 
-ZKSwizzleInterface(HookWVSpacesItemLayer, WVSpacesItemLayer, CALayer)
-@implementation HookWVSpacesItemLayer
--(void)layoutSublayers {
+ZKSwizzleInterface(HookECBezelIconListLabelLayer, ECBezelIconListLabelLayer, CALayer)
+@implementation HookECBezelIconListLabelLayer
+- (void)setString:(id)arg1 maxWidth:(unsigned int)arg2 {
+    NSLog(@"hackingdartmouth - layout sublayers");
     ZKOrig(void);
-    [self setHidden:true];
-}
-- (void)layoutSpaceWindows {
-    ZKOrig(void);
-
-    NSString *str = @"lmao";
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
-}
-- (void)layout {
-    ZKOrig(void);
-    NSString *str = @"lmao";
-    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
 }
 @end
 
@@ -59,6 +48,8 @@ ZKSwizzleInterface(HookWVSpacesItemLayer, WVSpacesItemLayer, CALayer)
 ZKSwizzleInterface(custom_space, WAWindow, NSObject)
 @implementation custom_space
 - (void)updateFrame {
+
+    NSLog(@"hackingdartmouth - Updating frame");
 
 //    NSString *str = ((WAWindow *)self).displayName;
 //    [str writeToFile:@"/Users/alexbeals/Desktop/log.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
