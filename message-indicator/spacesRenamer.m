@@ -46,6 +46,28 @@ ZKSwizzleInterface(HookWVMinimizedAndRecentsItemLayer, WVMinimizedAndRecentsItem
 }
 @end
 
+static void setTextLayer(CALayer *view, NSString *newString) {
+    if (view.class == NSClassFromString(@"ECTextLayer")) {
+        ((CATextLayer *)view).string = newString;
+    } else {
+        for (int i = 0; i < view.sublayers.count; i++) {
+            setTextLayer(view.sublayers[i], newString);
+        }
+    }
+}
+
+static void textChange(CALayer *view, NSString *newString, NSString *path) {
+    // Apply to self
+    if (view.class == NSClassFromString(@"ECTextLayer")) {
+        NSLog(@"hackingdartmouth - Found ECTextLayer with path %@", path);
+        ((CATextLayer *)view).string = newString;
+    }
+    // Apply to all children
+    for (int i = 0; i < view.sublayers.count; i++) {
+        textChange(view.sublayers[i], newString, [NSString stringWithFormat:@"%@%d", path, i]);
+    }
+}
+
 ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _CDECMaterialLayer
 
@@ -70,24 +92,21 @@ ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
 
         // Super layer only has it as its sublayer
         NSLog(
-          @"%@",
-          unexpandedViews[0].sublayers
+          @"hackingdartmouth sublayers - %@",
+          expandedViews[0].sublayers[0].sublayers
         );
 
+        setTextLayer(expandedViews[0], @"1 Opened");
+        setTextLayer(unexpandedViews[0], @"1 Closed");
+
         // Set the text layer to be "Hello" for now.
-        for (int i = 0; i < unexpandedViews[0].sublayers.count; i++) {
-            if (unexpandedViews[0].sublayers[i].class == NSClassFromString(@"ECTextLayer")) {
-                ((CATextLayer *)unexpandedViews[0].sublayers[i]).string = @"Hello";
-            }
-        }
+        // setTextLayer(unexpandedViews[0], @"Hello");
 
         // See if can cast to WVSpacesItemLayer from the expandedViews (seemingly no)
     }
 }
 
 @end
-
-static func 
 
 // Hooks into the ChatTableCellView and hijacks the layouts to add the indicator
 ZKSwizzleInterface(custom_space, WAWindow, NSObject)
