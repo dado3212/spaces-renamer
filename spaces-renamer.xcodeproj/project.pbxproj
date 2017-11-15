@@ -11,6 +11,7 @@
 		A80DDE2E1FBCE4D600794F8F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE2D1FBCE4D600794F8F /* ViewController.swift */; };
 		A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE2F1FBCE4D600794F8F /* Assets.xcassets */; };
 		A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE311FBCE4D600794F8F /* Main.storyboard */; };
+		A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE391FBCE89B00794F8F /* EventMonitor.swift */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
@@ -25,6 +26,7 @@
 		A80DDE321FBCE4D600794F8F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A80DDE341FBCE4D600794F8F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpacesRenamer.entitlements; sourceTree = "<group>"; };
+		A80DDE391FBCE89B00794F8F /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "message-indicator/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "message-indicator/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "message-indicator/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -90,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
+				A80DDE391FBCE89B00794F8F /* EventMonitor.swift */,
 				A80DDE2D1FBCE4D600794F8F /* ViewController.swift */,
 				A80DDE2F1FBCE4D600794F8F /* Assets.xcassets */,
 				A80DDE311FBCE4D600794F8F /* Main.storyboard */,
@@ -205,6 +208,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */,
 				A80DDE2E1FBCE4D600794F8F /* ViewController.swift in Sources */,
 				A80DDE2C1FBCE4D600794F8F /* AppDelegate.swift in Sources */,
 			);

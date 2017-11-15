@@ -25,3 +25,18 @@ class ViewController: NSViewController {
 
 }
 
+extension ViewController {
+    // MARK: Storyboard instantiation
+    static func freshController() -> ViewController {
+        //1.
+        let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
+        //2.
+        let identifier = NSStoryboard.SceneIdentifier(rawValue: "Popup")
+        //3.
+        guard let viewcontroller = storyboard.instantiateController(withIdentifier: identifier) as? ViewController else {
+            fatalError("Why cant i find QuotesViewController? - Check Main.storyboard")
+        }
+        return viewcontroller
+    }
+}
+
