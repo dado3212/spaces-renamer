@@ -14,13 +14,6 @@
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
 
 @interface ECMaterialLayer : CALayer
-{
-    CALayer *_backdropLayer;
-    CALayer *_tintLayer;
-    NSString *_groupName;
-    _Bool _reduceTransparency;
-    NSUInteger _material;
-}
 @end
 
 static void setTextLayer(CALayer *view, NSString *newString) {
@@ -33,25 +26,10 @@ static void setTextLayer(CALayer *view, NSString *newString) {
     }
 }
 
-static void textChange(CALayer *view, NSString *newString, NSString *path) {
-    // Apply to self
-    if (view.class == NSClassFromString(@"ECTextLayer")) {
-        NSLog(@"hackingdartmouth - Found ECTextLayer with path %@", path);
-        ((CATextLayer *)view).string = newString;
-    }
-    // Apply to all children
-    for (int i = 0; i < view.sublayers.count; i++) {
-        textChange(view.sublayers[i], newString, [NSString stringWithFormat:@"%@%d", path, i]);
-    }
-}
-
 static NSMutableArray *getNamesFromPlist() {
     NSDictionary *dict = [[NSDictionary dictionaryWithContentsOfFile:plistPath] valueForKey:@"spaces_renaming"];
-    NSLog(@"%@", dict);
     NSDictionary *spaces = [NSDictionary dictionaryWithContentsOfFile:spacesPath];
     NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"][0];
-
-    NSLog(@"Spaces: %@", listOfSpaces);
 
     NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
 
@@ -63,8 +41,6 @@ static NSMutableArray *getNamesFromPlist() {
             newNames[i] = @"";
         }
     }
-
-    NSLog(@"Filtered list: %@", newNames);
 
     return newNames;
 }
@@ -84,7 +60,7 @@ ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
         NSMutableArray* names = getNamesFromPlist();
         // Change them if set
         for (int i = 0; i < names.count; i++) {
-            if (names[i] != nil) {
+            if (names[i] != nil && ![names[i] isEqualToString:@""]) {
                 setTextLayer(expandedViews[i], names[i]);
                 setTextLayer(unexpandedViews[i], names[i]);
             }

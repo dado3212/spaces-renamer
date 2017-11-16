@@ -21,8 +21,6 @@ class ViewController: NSViewController {
         guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
         let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
 
-        print(allSpaces.count)
-
         var prev: DesktopSnippet?
 
         for i in 1...allSpaces.count { // allSpaces.count
@@ -54,10 +52,14 @@ class ViewController: NSViewController {
     override func viewWillAppear() {
         super.viewWillAppear()
 
-        print("Hello")
+        let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
+        let currentMapping = (preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary) ?? NSMutableDictionary()
         // Update with the current names
-
-        // snippet.textField.stringValue = "Desktop \(i)"
+        for (uuid, textField) in desktops {
+            if let newName = currentMapping.value(forKey: uuid) {
+                textField.stringValue = newName as! String
+            }
+        }
     }
 
     @IBAction func pressChangeName(_ sender: Any) {
@@ -69,7 +71,7 @@ class ViewController: NSViewController {
         for (uuid, textField) in desktops {
             currentMapping.setValue(textField.stringValue, forKey: uuid)
         }
-        print(currentMapping)
+
         preferencesDict.setValue(currentMapping, forKey: "spaces_renaming")
 
         // Resave
@@ -78,15 +80,11 @@ class ViewController: NSViewController {
 }
 
 extension ViewController {
-    // MARK: Storyboard instantiation
     static func freshController() -> ViewController {
-        //1.
         let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-        //2.
         let identifier = NSStoryboard.SceneIdentifier(rawValue: "Popup")
-        //3.
         guard let viewcontroller = storyboard.instantiateController(withIdentifier: identifier) as? ViewController else {
-            fatalError("Why cant i find QuotesViewController? - Check Main.storyboard")
+            fatalError("Bugged")
         }
         return viewcontroller
     }
