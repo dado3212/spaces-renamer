@@ -17,10 +17,40 @@ class ViewController: NSViewController {
         // Do any additional setup after loading the view.
     }
 
+    
+
+    func getCurrentSpace() -> String {
+        var a = CurrentSpace()
+        a.someMethod()
+
+
+//        for i in 1...CFArrayGetCount(windows)-1 {
+//            let windict = CFArrayGetValueAtIndex(windows, i)
+//            if let dict = windict as! CFDictionary {
+//                //let spacenum = CFDictionaryGetValue(windict as! CFDictionary, kCGWindowNumber)
+//                let spacenum = CFDictionaryGetValue(dict, unsafeBitCast(kCGWindowNumber, to: UnsafeRawPointer.self))
+//                print(spacenum)
+//            }
+//
+//        }
+
+//        for (i = 0, n = CFArrayGetCount(windows); i < n; i++) {
+//            CFDictionaryRef windict = CFArrayGetValueAtIndex(windows, i);
+//            CFNumberRef spacenum = CFDictionaryGetValue(windict, kCGWindowWorkspace);
+//            if (spacenum) {
+//                CFNumberGetValue(spacenum,  kCFNumberIntType, &space);
+//                return space;
+//            }
+//        }
+        return "";
+    }
+
     @IBAction func pressChangeName(_ sender: Any) {
         // Get the current desktop...?
         guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
         let currentSpace = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Current Space.uuid") as! NSArray)[0] as! String
+        print(currentSpace)
+        print(getCurrentSpace())
 
         // Load from preferences the current mapping
         let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
@@ -33,12 +63,6 @@ class ViewController: NSViewController {
 
         // Resave
         preferencesDict.write(toFile: Utils.plistPath, atomically: true)
-    }
-
-    override var representedObject: Any? {
-        didSet {
-        // Update the view, if already loaded.
-        }
     }
 }
 

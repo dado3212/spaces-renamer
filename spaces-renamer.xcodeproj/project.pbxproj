@@ -13,6 +13,7 @@
 		A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE311FBCE4D600794F8F /* Main.storyboard */; };
 		A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE391FBCE89B00794F8F /* EventMonitor.swift */; };
 		A80DDE3C1FBCEBDE00794F8F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE3B1FBCEBDE00794F8F /* Utils.swift */; };
+		A80DDE3F1FBE29CE00794F8F /* CurrentSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
@@ -29,6 +30,9 @@
 		A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpacesRenamer.entitlements; sourceTree = "<group>"; };
 		A80DDE391FBCE89B00794F8F /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		A80DDE3B1FBCEBDE00794F8F /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		A80DDE3D1FBE29CD00794F8F /* SpacesRenamer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SpacesRenamer-Bridging-Header.h"; sourceTree = "<group>"; };
+		A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CurrentSpace.m; sourceTree = "<group>"; };
+		A80DDE401FBE29F100794F8F /* CurrentSpace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurrentSpace.h; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "message-indicator/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "message-indicator/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "message-indicator/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -55,7 +59,7 @@
 		089C166AFE841209C02AAC07 /* ColorfulSidebar */ = {
 			isa = PBXGroup;
 			children = (
-				08FB77AFFE84173DC02AAC07 /* Classes */,
+				08FB77AFFE84173DC02AAC07 /* SIMBL Bundle */,
 				089C167CFE841241C02AAC07 /* Resources */,
 				A80DDE2A1FBCE4D600794F8F /* SpacesRenamer */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
@@ -71,14 +75,14 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		08FB77AFFE84173DC02AAC07 /* Classes */ = {
+		08FB77AFFE84173DC02AAC07 /* SIMBL Bundle */ = {
 			isa = PBXGroup;
 			children = (
 				FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */,
 				FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */,
 				C398D84615BD8B0700543187 /* spacesRenamer.m */,
 			);
-			name = Classes;
+			name = "SIMBL Bundle";
 			sourceTree = "<group>";
 		};
 		19C28FB8FE9D52D311CA2CBB /* Products */ = {
@@ -96,11 +100,14 @@
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
 				A80DDE391FBCE89B00794F8F /* EventMonitor.swift */,
 				A80DDE2D1FBCE4D600794F8F /* ViewController.swift */,
+				A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */,
+				A80DDE401FBE29F100794F8F /* CurrentSpace.h */,
 				A80DDE3B1FBCEBDE00794F8F /* Utils.swift */,
 				A80DDE2F1FBCE4D600794F8F /* Assets.xcassets */,
 				A80DDE311FBCE4D600794F8F /* Main.storyboard */,
 				A80DDE341FBCE4D600794F8F /* Info.plist */,
 				A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */,
+				A80DDE3D1FBE29CD00794F8F /* SpacesRenamer-Bridging-Header.h */,
 			);
 			path = SpacesRenamer;
 			sourceTree = "<group>";
@@ -156,6 +163,7 @@
 					A80DDE281FBCE4D500794F8F = {
 						CreatedOnToolsVersion = 9.0;
 						DevelopmentTeam = K2WR3HLA57;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -215,6 +223,7 @@
 				A80DDE2E1FBCE4D600794F8F /* ViewController.swift in Sources */,
 				A80DDE2C1FBCE4D600794F8F /* AppDelegate.swift in Sources */,
 				A80DDE3C1FBCEBDE00794F8F /* Utils.swift in Sources */,
+				A80DDE3F1FBE29CE00794F8F /* CurrentSpace.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +347,7 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_COMMA = YES;
@@ -371,6 +381,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "SpacesRenamer/SpacesRenamer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
@@ -385,6 +396,7 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_COMMA = YES;
@@ -413,6 +425,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SpacesRenamer/SpacesRenamer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.0;
 			};

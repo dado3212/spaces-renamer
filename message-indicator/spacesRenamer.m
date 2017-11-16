@@ -10,6 +10,9 @@
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
 
+#define plistPath [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
+#define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
+
 @interface ECMaterialLayer : CALayer
 {
     CALayer *_backdropLayer;
@@ -42,41 +45,47 @@ static void textChange(CALayer *view, NSString *newString, NSString *path) {
     }
 }
 
+static NSMutableArray *getNamesFromPlist() {
+    NSDictionary *dict = [[NSDictionary dictionaryWithContentsOfFile:plistPath] valueForKey:@"spaces_renaming"];
+    NSLog(@"%@", dict);
+    NSDictionary *spaces = [NSDictionary dictionaryWithContentsOfFile:spacesPath];
+    NSLog(@"%@", spaces);
+    NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"];
+
+    NSLog(@"Spaces: %@", listOfSpaces);
+
+    NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
+
+    for (int i = 0; i < listOfSpaces.count; i++) {
+        id name = [dict objectForKey:listOfSpaces[0][i][@"uuid"]];
+        if (name != nil) {
+            newNames[i] = name;
+        }
+    }
+
+    return newNames;
+}
+
 ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _CDECMaterialLayer
 
 - (void)setBounds:(CGRect)arg1 {
     ZKOrig(void, arg1);
 
-    NSLog(@"hackingdartmouth - setting bounds: %@", self.superlayer.class);
-
+    // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
-        // --- SUBLAYERS ---
-        // "<CABackdropLayer: 0x608000224240>", -> The background color
-        // "<CALayer: 0x6080002298a0>", -> unknown
-        // "<CALayer: 0x6080002207c0>", -> unknown
-        // "<CALayer: 0x608000225e20>" -> THANK GOD EVERYTHING RELEVANT
-
-        // "<CALayer"> -> The un-zoomed text
-        // "<CALayer"> -> Everything else? (has 7 children layers [7 desktops!!!])
-        // "<CALayer"> -> Really unclear
-
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
-        // Super layer only has it as its sublayer
-        NSLog(
-          @"hackingdartmouth sublayers - %@",
-          expandedViews[0].sublayers[0].sublayers
-        );
-
-        setTextLayer(expandedViews[0], @"1 Opened");
-        setTextLayer(unexpandedViews[0], @"1 Closed");
-
-        // Set the text layer to be "Hello" for now.
-        // setTextLayer(unexpandedViews[0], @"Hello");
-
-        // See if can cast to WVSpacesItemLayer from the expandedViews (seemingly no)
+        // Get all of the names
+        NSMutableArray* names = getNamesFromPlist();
+        // Change them if set
+        for (int i = 0; i < names.count; i++) {
+            if (names[i] != nil) {
+                setTextLayer(expandedViews[i], names[i]);
+                setTextLayer(unexpandedViews[i], names[i]);
+            }
+        }
     }
 }
 
