@@ -49,19 +49,22 @@ static NSMutableArray *getNamesFromPlist() {
     NSDictionary *dict = [[NSDictionary dictionaryWithContentsOfFile:plistPath] valueForKey:@"spaces_renaming"];
     NSLog(@"%@", dict);
     NSDictionary *spaces = [NSDictionary dictionaryWithContentsOfFile:spacesPath];
-    NSLog(@"%@", spaces);
-    NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"];
+    NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"][0];
 
     NSLog(@"Spaces: %@", listOfSpaces);
 
     NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
 
     for (int i = 0; i < listOfSpaces.count; i++) {
-        id name = [dict objectForKey:listOfSpaces[0][i][@"uuid"]];
+        id name = [dict objectForKey:listOfSpaces[i][@"uuid"]];
         if (name != nil) {
             newNames[i] = name;
+        } else {
+            newNames[i] = @"";
         }
     }
+
+    NSLog(@"Filtered list: %@", newNames);
 
     return newNames;
 }

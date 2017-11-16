@@ -689,25 +689,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="240" height="100"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uj7-at-c0G">
-                                <rect key="frame" x="49" y="72" width="143" height="17"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name Current Desktop" id="laF-wJ-uCC">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kVq-h4-qDD">
-                                <rect key="frame" x="51" y="42" width="139" height="22"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="YTf-QD-eGM">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="s0d-4E-whr">
-                                <rect key="frame" x="70" y="8" width="100" height="25"/>
-                                <buttonCell key="cell" type="roundTextured" title="Change Name" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ok8-bF-IQm">
+                                <rect key="frame" x="68" y="8" width="104" height="25"/>
+                                <buttonCell key="cell" type="roundTextured" title="Update Names" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ok8-bF-IQm">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
@@ -717,18 +701,12 @@
                             </button>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="kVq-h4-qDD" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="1XY-Oa-VY9"/>
-                            <constraint firstItem="kVq-h4-qDD" firstAttribute="top" secondItem="uj7-at-c0G" secondAttribute="bottom" constant="8" id="1Xs-U2-jGL"/>
                             <constraint firstItem="s0d-4E-whr" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="Qpi-rm-Qj9"/>
-                            <constraint firstItem="uj7-at-c0G" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="11" id="SqD-zJ-gqp"/>
                             <constraint firstAttribute="bottom" secondItem="s0d-4E-whr" secondAttribute="bottom" constant="10" id="U2F-b1-eCi"/>
-                            <constraint firstItem="s0d-4E-whr" firstAttribute="top" secondItem="kVq-h4-qDD" secondAttribute="bottom" constant="10" id="X5e-n6-6av"/>
-                            <constraint firstItem="kVq-h4-qDD" firstAttribute="width" secondItem="uj7-at-c0G" secondAttribute="width" id="a07-9f-T5L"/>
-                            <constraint firstItem="uj7-at-c0G" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="qYz-eF-ndu"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="nameField" destination="kVq-h4-qDD" id="Z8H-a1-eNs"/>
+                        <outlet property="updateButton" destination="s0d-4E-whr" id="VpH-PI-Vi5"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

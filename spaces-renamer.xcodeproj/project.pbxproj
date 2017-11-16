@@ -13,7 +13,8 @@
 		A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE311FBCE4D600794F8F /* Main.storyboard */; };
 		A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE391FBCE89B00794F8F /* EventMonitor.swift */; };
 		A80DDE3C1FBCEBDE00794F8F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE3B1FBCEBDE00794F8F /* Utils.swift */; };
-		A80DDE3F1FBE29CE00794F8F /* CurrentSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */; };
+		A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */; };
+		A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
@@ -30,9 +31,8 @@
 		A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpacesRenamer.entitlements; sourceTree = "<group>"; };
 		A80DDE391FBCE89B00794F8F /* EventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		A80DDE3B1FBCEBDE00794F8F /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		A80DDE3D1FBE29CD00794F8F /* SpacesRenamer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SpacesRenamer-Bridging-Header.h"; sourceTree = "<group>"; };
-		A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CurrentSpace.m; sourceTree = "<group>"; };
-		A80DDE401FBE29F100794F8F /* CurrentSpace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CurrentSpace.h; sourceTree = "<group>"; };
+		A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DesktopSnippet.xib; sourceTree = "<group>"; };
+		A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSnippet.swift; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "message-indicator/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "message-indicator/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "message-indicator/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -100,14 +100,13 @@
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
 				A80DDE391FBCE89B00794F8F /* EventMonitor.swift */,
 				A80DDE2D1FBCE4D600794F8F /* ViewController.swift */,
-				A80DDE3E1FBE29CE00794F8F /* CurrentSpace.m */,
-				A80DDE401FBE29F100794F8F /* CurrentSpace.h */,
 				A80DDE3B1FBCEBDE00794F8F /* Utils.swift */,
 				A80DDE2F1FBCE4D600794F8F /* Assets.xcassets */,
 				A80DDE311FBCE4D600794F8F /* Main.storyboard */,
+				A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */,
+				A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */,
 				A80DDE341FBCE4D600794F8F /* Info.plist */,
 				A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */,
-				A80DDE3D1FBE29CD00794F8F /* SpacesRenamer-Bridging-Header.h */,
 			);
 			path = SpacesRenamer;
 			sourceTree = "<group>";
@@ -199,6 +198,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */,
+				A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */,
 				A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -220,10 +220,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */,
+				A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */,
 				A80DDE2E1FBCE4D600794F8F /* ViewController.swift in Sources */,
 				A80DDE2C1FBCE4D600794F8F /* AppDelegate.swift in Sources */,
 				A80DDE3C1FBCEBDE00794F8F /* Utils.swift in Sources */,
-				A80DDE3F1FBE29CE00794F8F /* CurrentSpace.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -381,7 +381,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OBJC_BRIDGING_HEADER = "SpacesRenamer/SpacesRenamer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
@@ -425,7 +424,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SpacesRenamer/SpacesRenamer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.0;
 			};

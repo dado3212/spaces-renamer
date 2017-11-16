@@ -10,54 +10,65 @@ import Cocoa
 
 class ViewController: NSViewController {
 
-    @IBOutlet var nameField: NSTextField!
+    @IBOutlet var updateButton: NSButton!
+
+    var desktops: [String: NSTextField] = [String: NSTextField]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+        // Load in a list of all of the spaces
+        guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
+        let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+
+        print(allSpaces.count)
+
+        var prev: DesktopSnippet?
+
+        for i in 1...allSpaces.count { // allSpaces.count
+            let snippet = DesktopSnippet.instanceFromNib()
+            snippet.label.stringValue = "Desktop \(i)"
+            self.view.addSubview(snippet)
+
+            let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
+
+            desktops[uuid] = snippet.textField
+
+            var verticalConstraint: NSLayoutConstraint?
+
+            if (prev == nil) {
+                verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
+            } else {
+                verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
+            }
+
+            self.view.addConstraints([verticalConstraint!])
+            prev = snippet
+        }
+
+        let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
+
+        self.view.addConstraints([verticalConstraint])
     }
 
-    
+    override func viewWillAppear() {
+        super.viewWillAppear()
 
-    func getCurrentSpace() -> String {
-        var a = CurrentSpace()
-        a.someMethod()
+        print("Hello")
+        // Update with the current names
 
-
-//        for i in 1...CFArrayGetCount(windows)-1 {
-//            let windict = CFArrayGetValueAtIndex(windows, i)
-//            if let dict = windict as! CFDictionary {
-//                //let spacenum = CFDictionaryGetValue(windict as! CFDictionary, kCGWindowNumber)
-//                let spacenum = CFDictionaryGetValue(dict, unsafeBitCast(kCGWindowNumber, to: UnsafeRawPointer.self))
-//                print(spacenum)
-//            }
-//
-//        }
-
-//        for (i = 0, n = CFArrayGetCount(windows); i < n; i++) {
-//            CFDictionaryRef windict = CFArrayGetValueAtIndex(windows, i);
-//            CFNumberRef spacenum = CFDictionaryGetValue(windict, kCGWindowWorkspace);
-//            if (spacenum) {
-//                CFNumberGetValue(spacenum,  kCFNumberIntType, &space);
-//                return space;
-//            }
-//        }
-        return "";
+        // snippet.textField.stringValue = "Desktop \(i)"
     }
 
     @IBAction func pressChangeName(_ sender: Any) {
-        // Get the current desktop...?
-        guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
-        let currentSpace = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Current Space.uuid") as! NSArray)[0] as! String
-        print(currentSpace)
-        print(getCurrentSpace())
-
         // Load from preferences the current mapping
         let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
         let currentMapping = (preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary) ?? NSMutableDictionary()
 
         // Update accordingly
-        currentMapping.setValue(nameField.stringValue, forKey: currentSpace)
+        for (uuid, textField) in desktops {
+            currentMapping.setValue(textField.stringValue, forKey: uuid)
+        }
         print(currentMapping)
         preferencesDict.setValue(currentMapping, forKey: "spaces_renaming")
 
