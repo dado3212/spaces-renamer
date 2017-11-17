@@ -1,16 +1,24 @@
 # Spaces Renamer
 
+Spaces Renamer is a combination of an application and SIMBL plugin to allow you to rename your spaces.
+
 <p align="center">
-  <img src="smallView.jpg" height="300" >
+  <img src="smallView.jpg" height="45" >
 </p>
+
+The compressed view after pressing F3.
 
 <p align="center">
   <img src="largeView.jpg" height="300" >
 </p>
 
+The expanded view after hovering.
+
 <p align="center">
   <img src="renameView.jpg" height="300" >
 </p>
+
+The interface
 
 ### The Problem
 I want to be able to rename my spaces.  While TotalSpaces has this functionality, it's not free, and it has a bunch of other features that I'm not really interested in.
