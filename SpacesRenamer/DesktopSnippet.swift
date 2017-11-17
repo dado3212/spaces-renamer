@@ -3,7 +3,7 @@
 //  SpacesRenamer
 //
 //  Created by Alex Beals on 11/16/17.
-//  Copyright © 2017 cvz. All rights reserved.
+//  Copyright © 2017 Alex Beals. All rights reserved.
 //
 
 import Cocoa

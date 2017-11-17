@@ -3,7 +3,7 @@
 //  SpacesRenamer
 //
 //  Created by Alex Beals on 11/15/17.
-//  Copyright © 2017 cvz. All rights reserved.
+//  Copyright © 2017 Alex Beals. All rights reserved.
 //
 
 import Cocoa
@@ -48,10 +48,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func closePopover(sender: Any?) {
         popover.performClose(sender)
         eventMonitor?.stop()
-    }
-
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
     }
 }
 
