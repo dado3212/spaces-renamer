@@ -38,6 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showPopover(sender: Any?) {
+        NSApplication.shared.activate(ignoringOtherApps: true)
         eventMonitor?.start()
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
@@ -52,7 +53,5 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }
-
-
 }
 

@@ -33,6 +33,7 @@ class ViewController: NSViewController {
             desktops[uuid] = snippet.textField
 
             var verticalConstraint: NSLayoutConstraint?
+            let horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0)
 
             if (prev == nil) {
                 verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
@@ -40,7 +41,7 @@ class ViewController: NSViewController {
                 verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
             }
 
-            self.view.addConstraints([verticalConstraint!])
+            self.view.addConstraints([verticalConstraint!, horizontalConstraint])
             prev = snippet
         }
 
@@ -76,6 +77,10 @@ class ViewController: NSViewController {
 
         // Resave
         preferencesDict.write(toFile: Utils.plistPath, atomically: true)
+
+        // Close the popup
+        let delegate = NSApplication.shared.delegate as! AppDelegate
+        delegate.closePopover(sender: delegate)
     }
 }
 

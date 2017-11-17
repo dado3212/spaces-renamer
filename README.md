@@ -1,20 +1,27 @@
-# Message Indicator
+# Spaces Renamer
 
 <p align="center">
-  <img src="preview.jpg" height="300" >
+  <img src="smallView.jpg" height="300" >
+</p>
+
+<p align="center">
+  <img src="largeView.jpg" height="300" >
+</p>
+
+<p align="center">
+  <img src="renameView.jpg" height="300" >
 </p>
 
 ### The Problem
-I commonly open chats in Messages on my computer to make the 'unread' indicator go away.  However, if there's any delay in answering them back, it's quite common that I'll simply forget to respond to the text for a while.
+I want to be able to rename my spaces.  While TotalSpaces has this functionality, it's not free, and it has a bunch of other features that I'm not really interested in.
 
 ### The Solution
-I read about SIMBL, a plugin manager for Mac OS X, a while ago in pursuing a different project.  Effectively, it acts much like Cydia does for iOS, but for your Mac instead.  I used it to build a bundle that inserts itself into the Messages application, and adds a small gray indicator icon on chats in which you were not the last person to respond (it doesn't show up on group chats, as it quickly becomes unwieldy in large chats).  This makes it a lot easier to see the messages that you haven't responded back to.  I've only tested this on 10.12, but it should conceivably work on earlier versions.
-
-To clear an indicator, merely Ctrl-Click (right-click) on it.  This will clear it until the next message in the chat.
+This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming spaces from a saved plist.  The application adds an icon to the status bar that allows you to rename the spaces and update the plist.
 
 ## Installation:
 1. Download [mySIMBL](https://github.com/w0lfschild/app_updates/raw/master/mySIMBL/mySIMBL_0.2.5.zip).
-2. Download [Message Indicator](https://github.com/dado3212/message-indicator/raw/master/build/message-indicator.zip).
+2. Download [Spaces Renamer](https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip).
 3. Unzip the downloaded .zip file.
-4. Open `message-indicator.bundle` with `mySIMBL.app`, or simply drag and drop it.
-5. Restart Messages.
+4. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it.
+5. Run `killall -9 Dock` in Terminal to restart the Dock application.
+6. Run the application 'SpacesRenamer'.

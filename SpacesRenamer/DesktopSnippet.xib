@@ -10,11 +10,11 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView autoresizesSubviews="NO" id="c22-O7-iKe" customClass="DesktopSnippet" customModule="SpacesRenamer" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="204" height="69"/>
+            <rect key="frame" x="0.0" y="0.0" width="190" height="61"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wvu-SF-o6F">
-                    <rect key="frame" x="18" y="42" width="65" height="17"/>
+                    <rect key="frame" x="18" y="34" width="65" height="17"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Desktop 1" id="nr2-VF-6O7">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -35,8 +35,9 @@
             </subviews>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="TnO-sv-nVQ" secondAttribute="bottom" constant="10" id="Lx1-ez-k4T"/>
+                <constraint firstAttribute="trailing" secondItem="TnO-sv-nVQ" secondAttribute="trailing" constant="20" id="UBA-JF-HQF"/>
                 <constraint firstItem="TnO-sv-nVQ" firstAttribute="leading" secondItem="Wvu-SF-o6F" secondAttribute="leading" id="XXZ-0X-FGS"/>
-                <constraint firstItem="TnO-sv-nVQ" firstAttribute="top" secondItem="Wvu-SF-o6F" secondAttribute="bottom" constant="10" id="icB-Lk-sed"/>
+                <constraint firstItem="TnO-sv-nVQ" firstAttribute="top" secondItem="Wvu-SF-o6F" secondAttribute="bottom" constant="2" id="icB-Lk-sed"/>
                 <constraint firstItem="Wvu-SF-o6F" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="10" id="uB9-VE-W0Z"/>
                 <constraint firstItem="Wvu-SF-o6F" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="xlI-dt-mpo"/>
             </constraints>
