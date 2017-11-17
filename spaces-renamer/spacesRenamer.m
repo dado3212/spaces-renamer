@@ -11,6 +11,8 @@
 #import <QuartzCore/QuartzCore.h>
 
 static char OVERRIDDEN_STRING;
+static char OVERRIDDEN_FRAME;
+static char FRAME;
 
 #define plistPath [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
@@ -18,22 +20,18 @@ static char OVERRIDDEN_STRING;
 @interface ECMaterialLayer : CALayer
 @end
 
+static void assign(id a, void *key, id assigned) {
+    objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 static void setTextLayer(CALayer *view, NSString *newString) {
     if (view.class == NSClassFromString(@"ECTextLayer")) {
         ((CATextLayer *)view).string = newString;
-        objc_setAssociatedObject(
-            view,
-            &OVERRIDDEN_STRING,
-            newString,
-            OBJC_ASSOCIATION_RETAIN_NONATOMIC
-        );
-        NSLog(@"hackingdartmouth - %@", NSStringFromRect(view.bounds));
-//        self.viewNo2.frame.size.width, self.viewNo2.frame.size.height);
-//        self.customLayer = [CALayer layer];
-//        self.customLayer.frame = viewNo2.frame;
-//        self.customLayer.contentsGravity = kCAGravityResizeAspectFill;
-//        [self.view.layer addSublayer:self.customLayer];
+        NSLog(@"hackingdartmouth - frame: %@, %@", NSStringFromRect(view.frame), [NSValue valueWithRect:view.frame]);
+        assign(view, &OVERRIDDEN_STRING, newString);
+        assign(view, &FRAME, [NSValue valueWithRect:view.frame]);
     } else {
+        // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
             setTextLayer(view.sublayers[i], newString);
         }
@@ -59,28 +57,45 @@ static NSMutableArray *getNamesFromPlist() {
     return newNames;
 }
 
-static NSString *pad(NSString *string, int length) {
-    if ([string length] >= length) { return string; }
-    int add = length - [string length];
-    if (add % 2 == 0) {
-        return [NSString stringWithFormat:@"%*c%@%*c", add / 2, ' ', string, add / 2, ' '];
-    } else {
-        return [NSString stringWithFormat:@"%*c%@%*c", (add + 1) / 2, ' ', string, (add - 1) / 2, ' '];
+ZKSwizzleInterface(_CDCALayer, CALayer, CALayer);
+@implementation _CDCALayer
+- (void)setBounds:(CGRect)arg1 {
+
+    id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
+    if ([overridden isEqualToString:@"text"]) {
+        // ZKOrig(void, NSRectToCGRect([objc_getAssociatedObject(self, &FRAME) rectValue]));
+        objc_removeAssociatedObjects(self);
+        // ZKOrig(void, CGRectMake(0, 0, 67, 17));
+        ZKOrig(void, arg1);
+        return;
+    } else if ([overridden isEqualToString:@"background"]) {
+        ZKOrig(void, CGRectMake(30, 0, 88, 22));
+        return;
     }
+
+    if (
+        self.sublayers.count == 2 &&
+        self.sublayers[0].class == NSClassFromString(@"CALayer") &&
+        self.sublayers[0].cornerRadius == 5.0 &&
+        self.sublayers[1].class == NSClassFromString(@"ECTextLayer")
+    ) {
+        // This is the part of the background and the text when scrolling
+        assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
+        assign(self.sublayers[1], &OVERRIDDEN_FRAME, @"text");
+    }
+
+    ZKOrig(void, arg1);
 }
+@end
 
 ZKSwizzleInterface(_CDECTextLayer, ECTextLayer, CATextLayer);
 @implementation _CDECTextLayer
-
-
 - (void)setBounds:(CGRect)arg1 {
     ZKOrig(void, arg1);
 
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-    } @catch(id anException){
-        //do nothing, obviously it wasn't attached because an exception was thrown
-    }
+    } @catch(id anException) {}
     [self addObserver:self
                        forKeyPath:@"propertiesChanged"
                           options:NSKeyValueObservingOptionNew
@@ -90,15 +105,11 @@ ZKSwizzleInterface(_CDECTextLayer, ECTextLayer, CATextLayer);
 -(void)dealloc {
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-    } @catch(id anException){
-        //do nothing, obviously it wasn't attached because an exception was thrown
-    }
+    } @catch(id anException) {}
     ZKOrig(void);
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    NSLog(@"hackingdartmouth - observe: %@, %@", self.string, change);
-
     id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
     if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
         self.string = overridden;
@@ -123,8 +134,6 @@ ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
 
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
-        NSLog(@"hackingdartmouth bounds - %@", NSStringFromRect(arg1));
-
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
@@ -133,8 +142,8 @@ ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
         // Change them if set
         for (int i = 0; i < names.count; i++) {
             if (names[i] != nil && ![names[i] isEqualToString:@""]) {
-                setTextLayer(expandedViews[i], pad(names[i], 1));
-                setTextLayer(unexpandedViews[i], pad(names[i], 1));
+                setTextLayer(expandedViews[i], names[i]);
+                setTextLayer(unexpandedViews[i], names[i]);
             }
         }
     }
