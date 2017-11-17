@@ -252,7 +252,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/message-indicator/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
@@ -268,7 +268,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/message-indicator/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hackingdartmouth.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
