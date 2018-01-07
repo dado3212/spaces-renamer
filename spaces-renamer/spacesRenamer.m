@@ -57,8 +57,8 @@ static NSMutableArray *getNamesFromPlist() {
     return newNames;
 }
 
-ZKSwizzleInterface(_CDCALayer, CALayer, CALayer);
-@implementation _CDCALayer
+ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
+@implementation _SRCALayer
 - (void)setBounds:(CGRect)arg1 {
 
     id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
@@ -88,8 +88,8 @@ ZKSwizzleInterface(_CDCALayer, CALayer, CALayer);
 }
 @end
 
-ZKSwizzleInterface(_CDECTextLayer, ECTextLayer, CATextLayer);
-@implementation _CDECTextLayer
+ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
+@implementation _SRECTextLayer
 - (void)setBounds:(CGRect)arg1 {
     ZKOrig(void, arg1);
 
@@ -126,8 +126,8 @@ ZKSwizzleInterface(_CDECTextLayer, ECTextLayer, CATextLayer);
 
 @end
 
-ZKSwizzleInterface(_CDECMaterialLayer, ECMaterialLayer, CALayer);
-@implementation _CDECMaterialLayer
+ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
+@implementation _SRECMaterialLayer
 
 - (void)setBounds:(CGRect)arg1 {
     ZKOrig(void, arg1);

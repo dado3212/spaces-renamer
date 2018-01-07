@@ -90,6 +90,10 @@ class ViewController: NSViewController {
         }
     }
 
+    @IBAction func quitMenuApp(_ sender: Any) {
+        NSApp.terminate(nil)
+    }
+
     @IBAction func pressChangeName(_ sender: Any) {
         // Load from preferences the current mapping
         let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
