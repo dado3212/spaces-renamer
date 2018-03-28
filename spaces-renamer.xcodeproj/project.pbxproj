@@ -33,6 +33,7 @@
 		A80DDE3B1FBCEBDE00794F8F /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DesktopSnippet.xib; sourceTree = "<group>"; };
 		A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSnippet.swift; sourceTree = "<group>"; };
+		A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpacesRenamerBridge.h; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "spaces-renamer/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "spaces-renamer/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -98,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
+				A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */,
 				A80DDE391FBCE89B00794F8F /* EventMonitor.swift */,
 				A80DDE2D1FBCE4D600794F8F /* ViewController.swift */,
 				A80DDE3B1FBCEBDE00794F8F /* Utils.swift */,
