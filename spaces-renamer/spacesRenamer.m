@@ -15,6 +15,7 @@ static char OVERRIDDEN_FRAME;
 static char FRAME;
 
 #define plistPath [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
+#define spacesPathCustom [@"~/Library/Preferences/com.alexbeals.spacesrenamer.current.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
 
 @interface ECMaterialLayer : CALayer
@@ -40,8 +41,13 @@ static void setTextLayer(CALayer *view, NSString *newString) {
 
 static NSMutableArray *getNamesFromPlist() {
     NSDictionary *dict = [[NSDictionary dictionaryWithContentsOfFile:plistPath] valueForKey:@"spaces_renaming"];
+    NSDictionary *spacesCustom = [NSDictionary dictionaryWithContentsOfFile:spacesPathCustom];
     NSDictionary *spaces = [NSDictionary dictionaryWithContentsOfFile:spacesPath];
     NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"][0];
+
+    if ([spacesCustom valueForKeyPath:@"Spaces"]) {
+        listOfSpaces = [spacesCustom valueForKeyPath:@"Spaces"];
+    }
 
     NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
 

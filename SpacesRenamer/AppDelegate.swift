@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var workspace: NSWorkspace?
 
     let spacesMonitorFile = "~/Library/Preferences/com.apple.spaces.plist"
+    let spacesAltFile = "~/Library/Preferences/com.alexbeals.spacesrenamer.current.plist"
     let conn = _CGSDefaultConnection()
 
     fileprivate func configureObservers() {
@@ -64,6 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let activeSpaceID = (displayInfo["Current Space"]! as! NSDictionary)["ManagedSpaceID"] as! Int
         let spaces = displayInfo["Spaces"] as! NSArray
         print(displayInfo)
+        displayInfo.write(toFile: (spacesAltFile as NSString).expandingTildeInPath, atomically: true)
         for (index, space) in spaces.enumerated() {
             let spaceID = (space as! NSDictionary)["ManagedSpaceID"] as! Int
             let spaceNumber = index + 1

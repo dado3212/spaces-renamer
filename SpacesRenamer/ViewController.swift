@@ -37,7 +37,12 @@ class ViewController: NSViewController {
     func setupViews() {
         // Load in a list of all of the spaces
         guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
-        let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+        var allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+
+        if let altDict = NSDictionary(contentsOfFile: Utils.spacesPathCustom),
+            let altSpaces = altDict.value(forKeyPath: "Spaces") as? NSArray {
+            allSpaces = altSpaces
+        }
 
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
