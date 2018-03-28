@@ -63,11 +63,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let displayInfo = info[0]
         let activeSpaceID = (displayInfo["Current Space"]! as! NSDictionary)["ManagedSpaceID"] as! Int
         let spaces = displayInfo["Spaces"] as! NSArray
+        print(displayInfo)
         for (index, space) in spaces.enumerated() {
             let spaceID = (space as! NSDictionary)["ManagedSpaceID"] as! Int
             let spaceNumber = index + 1
             if spaceID == activeSpaceID {
-                statusBarItem.button?.title = String("\(spaceNumber)")
+                // statusBarItem.button?.title = String("\(spaceNumber)")
                 return
             }
         }
