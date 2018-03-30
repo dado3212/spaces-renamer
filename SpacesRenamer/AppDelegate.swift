@@ -3,17 +3,65 @@
 //  SpacesRenamer
 //
 //  Created by Alex Beals on 11/15/17.
-//  Copyright © 2017 Alex Beals. All rights reserved.
+//  Copyright © 2018 Alex Beals. All rights reserved.
 //
 
 import Cocoa
 
 @NSApplicationMain
+@objc
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     let popover = NSPopover()
     var eventMonitor: EventMonitor?
+
+    var workspace: NSWorkspace?
+
+    let conn = _CGSDefaultConnection()
+
+    fileprivate func configureObservers() {
+        workspace = NSWorkspace.shared
+        workspace?.notificationCenter.addObserver(
+            self,
+            selector: #selector(AppDelegate.updateActiveSpaces),
+            name: NSWorkspace.activeSpaceDidChangeNotification,
+            object: workspace
+        )
+    }
+
+    fileprivate func configureSpaceMonitor() {
+        let fullPath = (Utils.spacesPath as NSString).expandingTildeInPath
+        let queue = DispatchQueue.global(qos: .default)
+        let fildes = open(fullPath.cString(using: String.Encoding.utf8)!, O_EVTONLY)
+        if fildes == -1 {
+            NSLog("Failed to open file: \(Utils.spacesPath)")
+            return
+        }
+
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fildes, eventMask: DispatchSource.FileSystemEvent.delete, queue: queue)
+
+        source.setEventHandler { () -> Void in
+            let flags = source.data.rawValue
+            if (flags & DispatchSource.FileSystemEvent.delete.rawValue != 0) {
+                source.cancel()
+                self.updateActiveSpaces()
+                self.configureSpaceMonitor()
+            }
+        }
+
+        source.setCancelHandler { () -> Void in
+            close(fildes)
+        }
+
+        source.resume()
+    }
+
+    @objc func updateActiveSpaces() {
+        let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
+        let displayInfo = info[0]
+        displayInfo.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+    }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
@@ -26,6 +74,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if let strongSelf = self, strongSelf.popover.isShown {
                 strongSelf.closePopover(sender: event)
             }
+        }
+
+        configureObservers()
+        configureSpaceMonitor()
+        updateActiveSpaces()
+
+        if !FileManager.default.fileExists(atPath: Utils.listOfSpacesPlist) {
+            guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
+            let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+
+            let listOfSpacesDict = NSMutableDictionary()
+            listOfSpacesDict.setValue(allSpaces, forKey: "Spaces")
+
+            listOfSpacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
         }
     }
 

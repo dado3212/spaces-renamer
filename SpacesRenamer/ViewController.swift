@@ -3,7 +3,7 @@
 //  SpacesRenamer
 //
 //  Created by Alex Beals on 11/15/17.
-//  Copyright © 2017 Alex Beals. All rights reserved.
+//  Copyright © 2018 Alex Beals. All rights reserved.
 //
 
 import Cocoa
@@ -36,8 +36,8 @@ class ViewController: NSViewController {
 
     func setupViews() {
         // Load in a list of all of the spaces
-        guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
-        let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+        guard let spacesDict = NSDictionary(contentsOfFile: Utils.listOfSpacesPlist),
+            let allSpaces = spacesDict.value(forKeyPath: "Spaces") as? NSArray else { return }
 
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
@@ -80,8 +80,12 @@ class ViewController: NSViewController {
         teardownViews()
         setupViews()
 
-        let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
-        let currentMapping = (preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary) ?? NSMutableDictionary()
+        var currentMapping = NSMutableDictionary()
+        if let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist),
+            let spacesRemaining = preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary {
+            currentMapping = spacesRemaining
+        }
+        
         // Update with the current names
         for (uuid, textField) in desktops {
             if let newName = currentMapping.value(forKey: uuid) {
@@ -96,7 +100,7 @@ class ViewController: NSViewController {
 
     @IBAction func pressChangeName(_ sender: Any) {
         // Load from preferences the current mapping
-        let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.plistPath) ?? NSMutableDictionary()
+        let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist) ?? NSMutableDictionary()
         let currentMapping = (preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary) ?? NSMutableDictionary()
 
         // Update accordingly
@@ -107,7 +111,7 @@ class ViewController: NSViewController {
         preferencesDict.setValue(currentMapping, forKey: "spaces_renaming")
 
         // Resave
-        preferencesDict.write(toFile: Utils.plistPath, atomically: true)
+        preferencesDict.write(toFile: Utils.customNamesPlist, atomically: true)
 
         // Close the popup
         let delegate = NSApplication.shared.delegate as! AppDelegate

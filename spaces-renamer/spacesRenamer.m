@@ -14,7 +14,8 @@ static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_FRAME;
 static char FRAME;
 
-#define plistPath [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
+#define customNamesPlist [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
+#define listOfSpacesPlist [@"~/Library/Preferences/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
 
 @interface ECMaterialLayer : CALayer
@@ -27,7 +28,6 @@ static void assign(id a, void *key, id assigned) {
 static void setTextLayer(CALayer *view, NSString *newString) {
     if (view.class == NSClassFromString(@"ECTextLayer")) {
         ((CATextLayer *)view).string = newString;
-        NSLog(@"hackingdartmouth - frame: %@, %@", NSStringFromRect(view.frame), [NSValue valueWithRect:view.frame]);
         assign(view, &OVERRIDDEN_STRING, newString);
         assign(view, &FRAME, [NSValue valueWithRect:view.frame]);
     } else {
@@ -38,10 +38,22 @@ static void setTextLayer(CALayer *view, NSString *newString) {
     }
 }
 
+/*
+ 1. Load the customNamesPlist for named spaces
+ 2. Load the listOfSpacesPlist to get the current list of spaces
+ 3. Crosslist and return the custom names for each plist
+ */
 static NSMutableArray *getNamesFromPlist() {
-    NSDictionary *dict = [[NSDictionary dictionaryWithContentsOfFile:plistPath] valueForKey:@"spaces_renaming"];
-    NSDictionary *spaces = [NSDictionary dictionaryWithContentsOfFile:spacesPath];
-    NSArray *listOfSpaces = [spaces valueForKeyPath:@"SpacesDisplayConfiguration.Management Data.Monitors.Spaces"][0];
+    NSDictionary *dictOfNames = [NSDictionary dictionaryWithContentsOfFile:customNamesPlist];
+    if (!dictOfNames) {
+        return [NSMutableArray arrayWithCapacity:0];
+    }
+    NSDictionary *dict = [dictOfNames valueForKey:@"spaces_renaming"];
+    NSDictionary *spacesCustom = [NSDictionary dictionaryWithContentsOfFile:listOfSpacesPlist];
+    if (!spacesCustom) {
+        return [NSMutableArray arrayWithCapacity:0];
+    }
+    NSArray *listOfSpaces = [spacesCustom valueForKeyPath:@"Spaces"];
 
     NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
 
