@@ -18,26 +18,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var workspace: NSWorkspace?
 
-    let spacesMonitorFile = "~/Library/Preferences/com.apple.spaces.plist"
-    let spacesAltFile = "~/Library/Preferences/com.alexbeals.spacesrenamer.current.plist"
     let conn = _CGSDefaultConnection()
 
     fileprivate func configureObservers() {
         workspace = NSWorkspace.shared
         workspace?.notificationCenter.addObserver(
             self,
-            selector: #selector(AppDelegate.updateActiveSpace),
+            selector: #selector(AppDelegate.updateActiveSpaces),
             name: NSWorkspace.activeSpaceDidChangeNotification,
             object: workspace
         )
     }
 
     fileprivate func configureSpaceMonitor() {
-        let fullPath = (spacesMonitorFile as NSString).expandingTildeInPath
+        let fullPath = (Utils.spacesPath as NSString).expandingTildeInPath
         let queue = DispatchQueue.global(qos: .default)
         let fildes = open(fullPath.cString(using: String.Encoding.utf8)!, O_EVTONLY)
         if fildes == -1 {
-            NSLog("Failed to open file: \(spacesMonitorFile)")
+            NSLog("Failed to open file: \(Utils.spacesPath)")
             return
         }
 
@@ -47,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let flags = source.data.rawValue
             if (flags & DispatchSource.FileSystemEvent.delete.rawValue != 0) {
                 source.cancel()
-                self.updateActiveSpace()
+                self.updateActiveSpaces()
                 self.configureSpaceMonitor()
             }
         }
@@ -59,21 +57,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         source.resume()
     }
 
-    @objc func updateActiveSpace() {
+    @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
         let displayInfo = info[0]
-        let activeSpaceID = (displayInfo["Current Space"]! as! NSDictionary)["ManagedSpaceID"] as! Int
-        let spaces = displayInfo["Spaces"] as! NSArray
-        print(displayInfo)
-        displayInfo.write(toFile: (spacesAltFile as NSString).expandingTildeInPath, atomically: true)
-        for (index, space) in spaces.enumerated() {
-            let spaceID = (space as! NSDictionary)["ManagedSpaceID"] as! Int
-            let spaceNumber = index + 1
-            if spaceID == activeSpaceID {
-                // statusBarItem.button?.title = String("\(spaceNumber)")
-                return
-            }
-        }
+        displayInfo.write(toFile: Utils.listOfSpacesPlist, atomically: true)
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -91,7 +78,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         configureObservers()
         configureSpaceMonitor()
-        updateActiveSpace()
+        updateActiveSpaces()
+
+        if !FileManager.default.fileExists(atPath: Utils.listOfSpacesPlist) {
+            guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
+            let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+
+            let listOfSpacesDict = NSMutableDictionary()
+            listOfSpacesDict.setValue(allSpaces, forKey: "Spaces")
+
+            listOfSpacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+        }
     }
 
     @objc func togglePopover(_ sender: Any?) {

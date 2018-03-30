@@ -10,7 +10,7 @@ import Foundation
 class Utils {
 
     static let libraryPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-    static let plistPath = Utils.libraryPath.appending("/Preferences/com.alexbeals.spacesrenamer.plist")
-    static let spacesPathCustom = Utils.libraryPath.appending("/Preferences/com.alexbeals.spacesrenamer.current.plist")
+    static let customNamesPlist = Utils.libraryPath.appending("/Preferences/com.alexbeals.spacesrenamer.plist")
+    static let listOfSpacesPlist = Utils.libraryPath.appending("/Preferences/com.alexbeals.spacesrenamer.currentspaces.plist")
     static let spacesPath = Utils.libraryPath.appending("/Preferences/com.apple.spaces.plist")
 }
