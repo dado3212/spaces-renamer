@@ -42,22 +42,30 @@ class ViewController: NSViewController {
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
 
+        print(spacesDict)
+
         // For each space, make a text field
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
+            let currentSpace = (allMonitors[j-1] as? NSDictionary)?.value(forKeyPath: "Current Space.uuid") as! String
+
             for i in 1...allSpaces.count {
+                let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
+
                 let snippet = DesktopSnippet.instanceFromNib()
+                var snippetLabel = ""
                 if (allMonitors.count > 1) {
-                    snippet.label.stringValue = "Monitor \(j) - Desktop \(i)"
-                } else {
-                    snippet.label.stringValue = "Desktop \(i)"
+                   snippetLabel += "Monitor \(j) - "
+                }
+                snippetLabel += "Desktop \(i)"
+                if (uuid == currentSpace) {
+                    snippet.starImage.isHidden = false
                 }
 
+                snippet.label.stringValue = snippetLabel
                 self.view.addSubview(snippet)
                 snippets.append(snippet)
-
-                let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
 
                 desktops[uuid] = snippet.textField
 

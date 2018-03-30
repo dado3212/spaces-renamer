@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13196" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13196"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customView autoresizesSubviews="NO" id="c22-O7-iKe" customClass="DesktopSnippet" customModule="SpacesRenamer" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="190" height="61"/>
+        <customView autoresizesSubviews="NO" misplaced="YES" id="c22-O7-iKe" customClass="DesktopSnippet" customModule="SpacesRenamer" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="194" height="61"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wvu-SF-o6F">
-                    <rect key="frame" x="18" y="34" width="65" height="17"/>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="752" translatesAutoresizingMaskIntoConstraints="NO" id="Wvu-SF-o6F">
+                    <rect key="frame" x="22" y="34" width="65" height="17"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Desktop 1" id="nr2-VF-6O7">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -22,7 +24,7 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TnO-sv-nVQ">
-                    <rect key="frame" x="20" y="10" width="150" height="22"/>
+                    <rect key="frame" x="24" y="10" width="150" height="22"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="150" id="CRA-f2-hvN"/>
                     </constraints>
@@ -32,23 +34,37 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <imageView hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Bpq-wP-nJK">
+                    <rect key="frame" x="10" y="38" width="9" height="9"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="Bpq-wP-nJK" secondAttribute="height" multiplier="1:1" id="3zB-yQ-P44"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="star" id="Msq-qB-gki"/>
+                </imageView>
             </subviews>
             <constraints>
+                <constraint firstItem="Bpq-wP-nJK" firstAttribute="centerY" secondItem="Wvu-SF-o6F" secondAttribute="centerY" id="4LZ-HU-bUY"/>
                 <constraint firstAttribute="bottom" secondItem="TnO-sv-nVQ" secondAttribute="bottom" constant="10" id="Lx1-ez-k4T"/>
                 <constraint firstAttribute="trailing" secondItem="TnO-sv-nVQ" secondAttribute="trailing" constant="20" id="UBA-JF-HQF"/>
+                <constraint firstItem="Bpq-wP-nJK" firstAttribute="height" secondItem="Wvu-SF-o6F" secondAttribute="height" multiplier="0.6" id="XTp-la-L9T"/>
                 <constraint firstItem="TnO-sv-nVQ" firstAttribute="leading" secondItem="Wvu-SF-o6F" secondAttribute="leading" id="XXZ-0X-FGS"/>
+                <constraint firstItem="Wvu-SF-o6F" firstAttribute="leading" secondItem="Bpq-wP-nJK" secondAttribute="trailing" constant="5" id="geT-Px-VOE"/>
                 <constraint firstItem="TnO-sv-nVQ" firstAttribute="top" secondItem="Wvu-SF-o6F" secondAttribute="bottom" constant="2" id="icB-Lk-sed"/>
+                <constraint firstItem="Bpq-wP-nJK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="10" id="o73-9G-Kn9"/>
                 <constraint firstItem="Wvu-SF-o6F" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="10" id="uB9-VE-W0Z"/>
-                <constraint firstItem="Wvu-SF-o6F" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="20" id="xlI-dt-mpo"/>
             </constraints>
             <userDefinedRuntimeAttributes>
                 <userDefinedRuntimeAttribute type="boolean" keyPath="translatesAutoresizingMaskIntoConstraints" value="NO"/>
             </userDefinedRuntimeAttributes>
             <connections>
                 <outlet property="label" destination="Wvu-SF-o6F" id="vVt-ke-QU0"/>
+                <outlet property="starImage" destination="Bpq-wP-nJK" id="WuG-Kw-xUi"/>
                 <outlet property="textField" destination="TnO-sv-nVQ" id="zGc-yG-Jps"/>
             </connections>
-            <point key="canvasLocation" x="1" y="74.5"/>
+            <point key="canvasLocation" x="13" y="74.5"/>
         </customView>
     </objects>
+    <resources>
+        <image name="star" width="100" height="100"/>
+    </resources>
 </document>
