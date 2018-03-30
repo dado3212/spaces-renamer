@@ -41,15 +41,39 @@ class ViewController: NSViewController {
 
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
+        var above: NSView?
 
         print(spacesDict)
 
-        // For each space, make a text field
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
             let currentSpace = (allMonitors[j-1] as? NSDictionary)?.value(forKeyPath: "Current Space.uuid") as! String
 
+            // Create a label for the monitor (if there is more than one monitor)
+            if (allMonitors.count > 1) {
+                let monitorLabel = NSTextField(labelWithString: "Monitor \(j)")
+                monitorLabel.font = NSFont(name: "HelveticaNeue-Bold", size: 14)
+                monitorLabel.translatesAutoresizingMaskIntoConstraints = false
+
+                var topConstraint: NSLayoutConstraint?
+                if (above != nil) {
+                    topConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .top, relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
+                } else {
+                    topConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
+                }
+
+                let leftConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
+
+                constraints.append(topConstraint!)
+                constraints.append(leftConstraint)
+                self.view.addSubview(monitorLabel)
+                self.view.addConstraints([topConstraint!, leftConstraint])
+
+                above = monitorLabel
+            }
+
+            // For each space, make a text field
             for i in 1...allSpaces.count {
                 let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
 
@@ -70,8 +94,14 @@ class ViewController: NSViewController {
 
                 desktops[uuid] = snippet.textField
 
-                let verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
                 var horizontalConstraint: NSLayoutConstraint?
+                var verticalConstraint: NSLayoutConstraint?
+                if (above != nil) {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
+                } else {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
+                }
+
 
                 if (prev == nil) {
                     horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
@@ -79,9 +109,9 @@ class ViewController: NSViewController {
                     horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
                 }
 
-                constraints.append(verticalConstraint)
+                constraints.append(verticalConstraint!)
                 constraints.append(horizontalConstraint!)
-                self.view.addConstraints([verticalConstraint, horizontalConstraint!])
+                self.view.addConstraints([verticalConstraint!, horizontalConstraint!])
                 prev = snippet
             }
         }
