@@ -13,9 +13,11 @@ Spaces Renamer is a combination of an application and SIMBL plugin to allow you 
 </p>
 
 <p align="center">
-  <img src="renameView.jpg" height="300" ><br>
+  <img src="renameView.jpg" height="100" ><br>
   <i>The interface for renaming the spaces</i>
 </p>
+
+Spaces Renamer supports multiple monitors, and highlights the current space in each monitor with an outline.
 
 ### The Problem
 I want to be able to rename my spaces.  While TotalSpaces has this functionality, it's not free, and it has a bunch of other features that I'm not really interested in.
