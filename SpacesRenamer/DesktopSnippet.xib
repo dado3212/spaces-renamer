@@ -4,29 +4,36 @@
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customView autoresizesSubviews="NO" misplaced="YES" id="c22-O7-iKe" customClass="DesktopSnippet" customModule="SpacesRenamer" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="194" height="61"/>
+        <customView autoresizesSubviews="NO" id="c22-O7-iKe" customClass="DesktopSnippet" customModule="SpacesRenamer" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="130" height="87"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uMj-Pj-FQq" userLabel="Monitor Image">
+                    <rect key="frame" x="37" y="42" width="56" height="35"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="35" id="DQK-2A-fuC"/>
+                        <constraint firstAttribute="width" secondItem="uMj-Pj-FQq" secondAttribute="height" multiplier="29:18" id="zj5-ft-T1O"/>
+                    </constraints>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Monitor" id="W2N-jf-XR9"/>
+                </imageView>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="752" translatesAutoresizingMaskIntoConstraints="NO" id="Wvu-SF-o6F">
-                    <rect key="frame" x="22" y="34" width="65" height="17"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Desktop 1" id="nr2-VF-6O7">
-                        <font key="font" metaFont="system"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                    <rect key="frame" x="57" y="51" width="17" height="24"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="1" id="nr2-VF-6O7">
+                        <font key="font" size="16" name="HelveticaNeue-Bold"/>
+                        <color key="textColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="TnO-sv-nVQ">
-                    <rect key="frame" x="24" y="10" width="150" height="22"/>
+                    <rect key="frame" x="5" y="10" width="120" height="22"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="150" id="CRA-f2-hvN"/>
+                        <constraint firstAttribute="width" constant="120" id="CRA-f2-hvN"/>
                     </constraints>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="WAL-RR-xNz">
                         <font key="font" metaFont="system"/>
@@ -34,37 +41,30 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <imageView hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Bpq-wP-nJK">
-                    <rect key="frame" x="10" y="38" width="9" height="9"/>
-                    <constraints>
-                        <constraint firstAttribute="width" secondItem="Bpq-wP-nJK" secondAttribute="height" multiplier="1:1" id="3zB-yQ-P44"/>
-                    </constraints>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="star" id="Msq-qB-gki"/>
-                </imageView>
             </subviews>
             <constraints>
-                <constraint firstItem="Bpq-wP-nJK" firstAttribute="centerY" secondItem="Wvu-SF-o6F" secondAttribute="centerY" id="4LZ-HU-bUY"/>
-                <constraint firstAttribute="bottom" secondItem="TnO-sv-nVQ" secondAttribute="bottom" constant="10" id="Lx1-ez-k4T"/>
-                <constraint firstAttribute="trailing" secondItem="TnO-sv-nVQ" secondAttribute="trailing" constant="20" id="UBA-JF-HQF"/>
-                <constraint firstItem="Bpq-wP-nJK" firstAttribute="height" secondItem="Wvu-SF-o6F" secondAttribute="height" multiplier="0.6" id="XTp-la-L9T"/>
-                <constraint firstItem="TnO-sv-nVQ" firstAttribute="leading" secondItem="Wvu-SF-o6F" secondAttribute="leading" id="XXZ-0X-FGS"/>
-                <constraint firstItem="Wvu-SF-o6F" firstAttribute="leading" secondItem="Bpq-wP-nJK" secondAttribute="trailing" constant="5" id="geT-Px-VOE"/>
-                <constraint firstItem="TnO-sv-nVQ" firstAttribute="top" secondItem="Wvu-SF-o6F" secondAttribute="bottom" constant="2" id="icB-Lk-sed"/>
-                <constraint firstItem="Bpq-wP-nJK" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="10" id="o73-9G-Kn9"/>
-                <constraint firstItem="Wvu-SF-o6F" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="10" id="uB9-VE-W0Z"/>
+                <constraint firstAttribute="bottom" secondItem="TnO-sv-nVQ" secondAttribute="bottom" constant="10" id="9jR-xH-6G3"/>
+                <constraint firstAttribute="trailing" secondItem="TnO-sv-nVQ" secondAttribute="trailing" constant="5" id="9vd-QM-1PN"/>
+                <constraint firstItem="uMj-Pj-FQq" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" constant="10" id="Ea7-jI-evS"/>
+                <constraint firstItem="Wvu-SF-o6F" firstAttribute="centerY" secondItem="uMj-Pj-FQq" secondAttribute="centerY" constant="-3" id="PPc-mf-Nnc"/>
+                <constraint firstItem="TnO-sv-nVQ" firstAttribute="centerX" secondItem="c22-O7-iKe" secondAttribute="centerX" id="ddH-XH-sGb"/>
+                <constraint firstItem="TnO-sv-nVQ" firstAttribute="top" secondItem="uMj-Pj-FQq" secondAttribute="bottom" constant="10" id="e9q-A4-P47"/>
+                <constraint firstItem="Wvu-SF-o6F" firstAttribute="centerX" secondItem="uMj-Pj-FQq" secondAttribute="centerX" id="pa5-X0-AOK"/>
+                <constraint firstItem="TnO-sv-nVQ" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="5" id="q74-fp-OyD"/>
+                <constraint firstItem="uMj-Pj-FQq" firstAttribute="centerX" secondItem="c22-O7-iKe" secondAttribute="centerX" id="yfj-Kf-eNa"/>
             </constraints>
             <userDefinedRuntimeAttributes>
                 <userDefinedRuntimeAttribute type="boolean" keyPath="translatesAutoresizingMaskIntoConstraints" value="NO"/>
             </userDefinedRuntimeAttributes>
             <connections>
                 <outlet property="label" destination="Wvu-SF-o6F" id="vVt-ke-QU0"/>
-                <outlet property="starImage" destination="Bpq-wP-nJK" id="WuG-Kw-xUi"/>
+                <outlet property="monitorImage" destination="uMj-Pj-FQq" id="BbJ-oG-odQ"/>
                 <outlet property="textField" destination="TnO-sv-nVQ" id="zGc-yG-Jps"/>
             </connections>
-            <point key="canvasLocation" x="13" y="74.5"/>
+            <point key="canvasLocation" x="13" y="89"/>
         </customView>
     </objects>
     <resources>
-        <image name="star" width="100" height="100"/>
+        <image name="Monitor" width="318" height="208"/>
     </resources>
 </document>

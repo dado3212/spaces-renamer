@@ -58,9 +58,10 @@ class ViewController: NSViewController {
                 if (allMonitors.count > 1) {
                    snippetLabel += "Monitor \(j) - "
                 }
-                snippetLabel += "Desktop \(i)"
+                snippetLabel += "\(i)"
                 if (uuid == currentSpace) {
-                    snippet.starImage.isHidden = false
+                    snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
+                    // snippet.starImage.isHidden = false
                 }
 
                 snippet.label.stringValue = snippetLabel
@@ -69,26 +70,28 @@ class ViewController: NSViewController {
 
                 desktops[uuid] = snippet.textField
 
-                var verticalConstraint: NSLayoutConstraint?
-                let horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0)
+                let verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
+                var horizontalConstraint: NSLayoutConstraint?
 
                 if (prev == nil) {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
+                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
                 } else {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
+                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
                 }
 
-                constraints.append(verticalConstraint!)
-                constraints.append(horizontalConstraint)
-                self.view.addConstraints([verticalConstraint!, horizontalConstraint])
+                constraints.append(verticalConstraint)
+                constraints.append(horizontalConstraint!)
+                self.view.addConstraints([verticalConstraint, horizontalConstraint!])
                 prev = snippet
             }
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
+        let lastHorizontal = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
         constraints.append(verticalConstraint)
+        constraints.append(lastHorizontal)
 
-        self.view.addConstraints([verticalConstraint])
+        self.view.addConstraints([verticalConstraint, lastHorizontal])
     }
 
     override func viewWillAppear() {
