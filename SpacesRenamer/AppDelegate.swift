@@ -28,6 +28,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSWorkspace.activeSpaceDidChangeNotification,
             object: workspace
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(AppDelegate.updateActiveSpaces),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
     }
 
     fileprivate func configureSpaceMonitor() {

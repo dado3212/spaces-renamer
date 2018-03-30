@@ -48,7 +48,12 @@ class ViewController: NSViewController {
 
             for i in 1...allSpaces.count {
                 let snippet = DesktopSnippet.instanceFromNib()
-                snippet.label.stringValue = "Monitor \(j) - Desktop \(i)"
+                if (allMonitors.count > 1) {
+                    snippet.label.stringValue = "Monitor \(j) - Desktop \(i)"
+                } else {
+                    snippet.label.stringValue = "Desktop \(i)"
+                }
+
                 self.view.addSubview(snippet)
                 snippets.append(snippet)
 
