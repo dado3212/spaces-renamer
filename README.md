@@ -8,7 +8,7 @@ Spaces Renamer is a combination of an application and SIMBL plugin to allow you 
 </p>
 
 <p align="center">
-  <img src="largeView.jpg" height="80" ><br>
+  <img src="largeViewUpdated.jpg" height="80" ><br>
   <i>The expanded view after hovering</i>
 </p>
 
