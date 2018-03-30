@@ -14,8 +14,8 @@ static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_FRAME;
 static char FRAME;
 
-#define customNamesPlist [@"~/Library/Preferences/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
-#define listOfSpacesPlist [@"~/Library/Preferences/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
+#define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
+#define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
 
 @interface ECMaterialLayer : CALayer
