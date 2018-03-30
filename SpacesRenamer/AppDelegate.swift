@@ -60,6 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
         let displayInfo = info[0]
+        print(info)
         displayInfo.write(toFile: Utils.listOfSpacesPlist, atomically: true)
     }
 

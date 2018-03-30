@@ -153,7 +153,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         NSMutableArray* names = getNamesFromPlist();
         // Change them if set
         for (int i = 0; i < names.count; i++) {
-            if (names[i] != nil && ![names[i] isEqualToString:@""]) {
+            if (names[i] != nil && ![names[i] isEqualToString:@""] && i < MAX(expandedViews.count, unexpandedViews.count)) {
                 setTextLayer(expandedViews[i], names[i]);
                 setTextLayer(unexpandedViews[i], names[i]);
             }
