@@ -12,6 +12,7 @@ class DesktopSnippet: NSView {
 
     @IBOutlet var label: NSTextField!
     @IBOutlet var textField: NSTextField!
+    @IBOutlet var monitorImage: NSImageView!
 
     class func instanceFromNib() -> DesktopSnippet {
         var topLevelObjects : NSArray?

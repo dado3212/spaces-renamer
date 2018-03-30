@@ -41,40 +41,81 @@ class ViewController: NSViewController {
 
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
+        var above: NSView?
 
-        // For each space, make a text field
+        print(spacesDict)
+
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
-            for i in 1...allSpaces.count {
-                let snippet = DesktopSnippet.instanceFromNib()
-                if (allMonitors.count > 1) {
-                    snippet.label.stringValue = "Monitor \(j) - Desktop \(i)"
+            let currentSpace = (allMonitors[j-1] as? NSDictionary)?.value(forKeyPath: "Current Space.uuid") as! String
+
+            // Create a label for the monitor (if there is more than one monitor)
+            if (allMonitors.count > 1) {
+                let monitorLabel = NSTextField(labelWithString: "Monitor \(j)")
+                monitorLabel.font = NSFont(name: "HelveticaNeue-Bold", size: 14)
+                monitorLabel.translatesAutoresizingMaskIntoConstraints = false
+
+                var topConstraint: NSLayoutConstraint?
+                if (above != nil) {
+                    topConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .top, relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
                 } else {
-                    snippet.label.stringValue = "Desktop \(i)"
+                    topConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
                 }
 
+                let leftConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
+
+                constraints.append(topConstraint!)
+                constraints.append(leftConstraint)
+                self.view.addSubview(monitorLabel)
+                self.view.addConstraints([topConstraint!, leftConstraint])
+
+                above = monitorLabel
+            }
+
+            prev = nil
+
+            // For each space, make a text field
+            for i in 1...allSpaces.count {
+                let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
+
+                let snippet = DesktopSnippet.instanceFromNib()
+                if (uuid == currentSpace) {
+                    snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
+                    // snippet.starImage.isHidden = false
+                }
+
+                snippet.label.stringValue = "\(i)"
                 self.view.addSubview(snippet)
                 snippets.append(snippet)
 
-                let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
-
                 desktops[uuid] = snippet.textField
 
+                var horizontalConstraint: NSLayoutConstraint?
                 var verticalConstraint: NSLayoutConstraint?
-                let horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0)
+                if (above != nil) {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
+                } else {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
+                }
+
 
                 if (prev == nil) {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
+                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
                 } else {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
+                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
                 }
 
                 constraints.append(verticalConstraint!)
-                constraints.append(horizontalConstraint)
-                self.view.addConstraints([verticalConstraint!, horizontalConstraint])
+                constraints.append(horizontalConstraint!)
+                self.view.addConstraints([verticalConstraint!, horizontalConstraint!])
                 prev = snippet
             }
+            above = prev
+
+            let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .greaterThanOrEqual, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
+            constraints.append(horizontalLayout)
+            self.view.addConstraints([horizontalLayout])
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
