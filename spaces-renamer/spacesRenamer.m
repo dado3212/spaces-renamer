@@ -18,6 +18,8 @@ static char FRAME;
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
 
+int monitorIndex = 0;
+
 @interface ECMaterialLayer : CALayer
 @end
 
@@ -53,17 +55,23 @@ static NSMutableArray *getNamesFromPlist() {
     if (!spacesCustom) {
         return [NSMutableArray arrayWithCapacity:0];
     }
-    NSArray *listOfSpaces = [spacesCustom valueForKeyPath:@"Spaces"];
+    NSArray *listOfMonitors = [spacesCustom valueForKeyPath:@"Monitors"];
 
-    NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
+    NSMutableArray *newNames = [NSMutableArray arrayWithCapacity:listOfMonitors.count];
 
-    for (int i = 0; i < listOfSpaces.count; i++) {
-        id name = [dict objectForKey:listOfSpaces[i][@"uuid"]];
-        if (name != nil) {
-            newNames[i] = name;
-        } else {
-            newNames[i] = @"";
+    for (int i = 0; i < listOfMonitors.count; i++) {
+        NSArray *listOfSpaces = [listOfMonitors[i] valueForKeyPath:@"Spaces"];
+
+        NSMutableArray *monitorNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
+        for (int j = 0; j < listOfSpaces.count; j++) {
+            id name = [dict objectForKey:listOfSpaces[j][@"uuid"]];
+            if (name != nil) {
+                monitorNames[j] = name;
+            } else {
+                monitorNames[j] = @"";
+            }
         }
+        newNames[i] = monitorNames;
     }
 
     return newNames;
@@ -151,13 +159,17 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
         // Get all of the names
         NSMutableArray* names = getNamesFromPlist();
-        // Change them if set
-        for (int i = 0; i < names.count; i++) {
-            if (names[i] != nil && ![names[i] isEqualToString:@""] && i < MAX(expandedViews.count, unexpandedViews.count)) {
-                setTextLayer(expandedViews[i], names[i]);
-                setTextLayer(unexpandedViews[i], names[i]);
+
+        monitorIndex = monitorIndex % names.count;
+
+        for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+            if (names[monitorIndex][i] != nil && ![names[monitorIndex][i] isEqualToString:@""] && i < MAX(expandedViews.count, unexpandedViews.count)) {
+                setTextLayer(expandedViews[i], names[monitorIndex][i]);
+                setTextLayer(unexpandedViews[i], names[monitorIndex][i]);
             }
         }
+
+        monitorIndex += 1;
     }
 }
 

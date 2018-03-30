@@ -59,9 +59,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
-        let displayInfo = info[0]
-        print(info)
-        displayInfo.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+        let spacesDict = NSMutableDictionary()
+        spacesDict.setValue(info, forKey: "Monitors")
+        spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -83,10 +83,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !FileManager.default.fileExists(atPath: Utils.listOfSpacesPlist) {
             guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
-            let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors.Spaces") as! NSArray)[0] as! NSArray
+            let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors") as! NSArray)
 
             let listOfSpacesDict = NSMutableDictionary()
-            listOfSpacesDict.setValue(allSpaces, forKey: "Spaces")
+            listOfSpacesDict.setValue(allSpaces, forKey: "Monitors")
 
             listOfSpacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
         }
