@@ -37,35 +37,44 @@ class ViewController: NSViewController {
     func setupViews() {
         // Load in a list of all of the spaces
         guard let spacesDict = NSDictionary(contentsOfFile: Utils.listOfSpacesPlist),
-            let allSpaces = spacesDict.value(forKeyPath: "Spaces") as? NSArray else { return }
+            let allMonitors = spacesDict.value(forKeyPath: "Monitors") as? NSArray else { return }
 
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
 
         // For each space, make a text field
-        for i in 1...allSpaces.count {
-            let snippet = DesktopSnippet.instanceFromNib()
-            snippet.label.stringValue = "Desktop \(i)"
-            self.view.addSubview(snippet)
-            snippets.append(snippet)
+        for j in 1...allMonitors.count {
+            let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
-            let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
+            for i in 1...allSpaces.count {
+                let snippet = DesktopSnippet.instanceFromNib()
+                if (allMonitors.count > 1) {
+                    snippet.label.stringValue = "Monitor \(j) - Desktop \(i)"
+                } else {
+                    snippet.label.stringValue = "Desktop \(i)"
+                }
 
-            desktops[uuid] = snippet.textField
+                self.view.addSubview(snippet)
+                snippets.append(snippet)
 
-            var verticalConstraint: NSLayoutConstraint?
-            let horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0)
+                let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
 
-            if (prev == nil) {
-                verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
-            } else {
-                verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
+                desktops[uuid] = snippet.textField
+
+                var verticalConstraint: NSLayoutConstraint?
+                let horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0)
+
+                if (prev == nil) {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 0)
+                } else {
+                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 0)
+                }
+
+                constraints.append(verticalConstraint!)
+                constraints.append(horizontalConstraint)
+                self.view.addConstraints([verticalConstraint!, horizontalConstraint])
+                prev = snippet
             }
-
-            constraints.append(verticalConstraint!)
-            constraints.append(horizontalConstraint)
-            self.view.addConstraints([verticalConstraint!, horizontalConstraint])
-            prev = snippet
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
