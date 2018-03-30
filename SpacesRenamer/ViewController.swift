@@ -73,22 +73,19 @@ class ViewController: NSViewController {
                 above = monitorLabel
             }
 
+            prev = nil
+
             // For each space, make a text field
             for i in 1...allSpaces.count {
                 let uuid = (allSpaces[i-1] as! [AnyHashable: Any])["uuid"] as! String
 
                 let snippet = DesktopSnippet.instanceFromNib()
-                var snippetLabel = ""
-                if (allMonitors.count > 1) {
-                   snippetLabel += "Monitor \(j) - "
-                }
-                snippetLabel += "\(i)"
                 if (uuid == currentSpace) {
                     snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
                     // snippet.starImage.isHidden = false
                 }
 
-                snippet.label.stringValue = snippetLabel
+                snippet.label.stringValue = "\(i)"
                 self.view.addSubview(snippet)
                 snippets.append(snippet)
 
@@ -114,14 +111,17 @@ class ViewController: NSViewController {
                 self.view.addConstraints([verticalConstraint!, horizontalConstraint!])
                 prev = snippet
             }
+            above = prev
+
+            let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .greaterThanOrEqual, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
+            constraints.append(horizontalLayout)
+            self.view.addConstraints([horizontalLayout])
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
-        let lastHorizontal = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
         constraints.append(verticalConstraint)
-        constraints.append(lastHorizontal)
 
-        self.view.addConstraints([verticalConstraint, lastHorizontal])
+        self.view.addConstraints([verticalConstraint])
     }
 
     override func viewWillAppear() {
