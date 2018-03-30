@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13196"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -686,36 +686,49 @@
             <objects>
                 <viewController storyboardIdentifier="Popup" id="XfG-lQ-9wD" customClass="ViewController" customModule="SpacesRenamer" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="240" height="100"/>
+                        <rect key="frame" x="0.0" y="0.0" width="332" height="100"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="s0d-4E-whr">
-                                <rect key="frame" x="116" y="8" width="104" height="25"/>
-                                <buttonCell key="cell" type="roundTextured" title="Update Names" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ok8-bF-IQm">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="pressChangeName:" target="XfG-lQ-9wD" id="xRu-0o-cOr"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w3O-ch-uD1">
-                                <rect key="frame" x="14" y="3" width="66" height="32"/>
-                                <buttonCell key="cell" type="push" title="Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2H9-5M-bDh">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="quitMenuApp:" target="XfG-lQ-9wD" id="jGl-DB-K6j"/>
-                                </connections>
-                            </button>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="RK2-Sv-MtU">
+                                <rect key="frame" x="39" y="10" width="254" height="42"/>
+                                <subviews>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="s0d-4E-whr">
+                                        <rect key="frame" x="10" y="8" width="150" height="25"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="Ngv-75-PXU"/>
+                                        </constraints>
+                                        <buttonCell key="cell" type="roundTextured" title="Update Names" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ok8-bF-IQm">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="pressChangeName:" target="XfG-lQ-9wD" id="xRu-0o-cOr"/>
+                                        </connections>
+                                    </button>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w3O-ch-uD1">
+                                        <rect key="frame" x="184" y="4" width="66" height="32"/>
+                                        <buttonCell key="cell" type="push" title="Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="2H9-5M-bDh">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="quitMenuApp:" target="XfG-lQ-9wD" id="jGl-DB-K6j"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="s0d-4E-whr" secondAttribute="bottom" constant="10" id="7RI-Ti-ioC"/>
+                                    <constraint firstAttribute="trailing" secondItem="w3O-ch-uD1" secondAttribute="trailing" constant="10" id="MLe-aJ-YjQ"/>
+                                    <constraint firstItem="w3O-ch-uD1" firstAttribute="top" secondItem="s0d-4E-whr" secondAttribute="top" id="Psa-DT-vb1"/>
+                                    <constraint firstItem="s0d-4E-whr" firstAttribute="leading" secondItem="RK2-Sv-MtU" secondAttribute="leading" constant="10" id="aao-LM-SSK"/>
+                                    <constraint firstItem="w3O-ch-uD1" firstAttribute="leading" secondItem="s0d-4E-whr" secondAttribute="trailing" constant="30" id="md8-r4-Yw7"/>
+                                    <constraint firstAttribute="top" secondItem="s0d-4E-whr" secondAttribute="top" constant="-10" id="w9Z-Rg-UgG"/>
+                                </constraints>
+                            </customView>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="w3O-ch-uD1" secondAttribute="bottom" constant="10" id="3AI-rg-zBL"/>
-                            <constraint firstItem="s0d-4E-whr" firstAttribute="leading" secondItem="w3O-ch-uD1" secondAttribute="trailing" constant="42" id="9M2-jc-nxU"/>
-                            <constraint firstAttribute="trailing" secondItem="s0d-4E-whr" secondAttribute="trailing" constant="20" id="PFR-yM-fbc"/>
-                            <constraint firstItem="w3O-ch-uD1" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="Pg9-ug-5a9"/>
-                            <constraint firstAttribute="bottom" secondItem="s0d-4E-whr" secondAttribute="bottom" constant="10" id="U2F-b1-eCi"/>
+                            <constraint firstItem="RK2-Sv-MtU" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="Bja-lp-21j"/>
+                            <constraint firstAttribute="bottom" secondItem="RK2-Sv-MtU" secondAttribute="bottom" constant="10" id="gGA-4w-rl1"/>
                         </constraints>
                     </view>
                     <connections>
@@ -724,7 +737,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="29" y="655"/>
         </scene>
     </scenes>
 </document>
