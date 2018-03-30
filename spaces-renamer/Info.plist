@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.3.0</string>
+	<string>1.3.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -28,18 +28,6 @@
 	<string></string>
 	<key>SIMBLTargetApplications</key>
 	<array>
-		<dict>
-			<key>BundleIdentifier</key>
-			<string>*</string>
-		</dict>
-		<dict>
-			<key>BundleIdentifier</key>
-			<string>com.apple.security.pboxd</string>
-		</dict>
-		<dict>
-			<key>BundleIdentifier</key>
-			<string>com.apple.appkit.xpc.openAndSavePanelService</string>
-		</dict>
 		<dict>
 			<key>BundleIdentifier</key>
 			<string>com.apple.dock</string>
