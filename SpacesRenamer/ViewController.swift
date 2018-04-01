@@ -9,7 +9,6 @@
 import Cocoa
 
 class ViewController: NSViewController {
-
     @IBOutlet var updateButton: NSButton!
 
     var desktops: [String: NSTextField] = [String: NSTextField]()
@@ -42,6 +41,8 @@ class ViewController: NSViewController {
         // Keep reference to previous for constraint
         var prev: DesktopSnippet?
         var above: NSView?
+
+        let maxSpacesPerMonitor = allMonitors.reduce(Int.min, { max($0, (($1 as? NSDictionary)?.value(forKey: "Spaces") as! NSArray).count) })
 
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
@@ -111,9 +112,11 @@ class ViewController: NSViewController {
             }
             above = prev
 
-            let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .greaterThanOrEqual, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
-            constraints.append(horizontalLayout)
-            self.view.addConstraints([horizontalLayout])
+            if (allSpaces.count == maxSpacesPerMonitor) {
+                let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
+                constraints.append(horizontalLayout)
+                self.view.addConstraints([horizontalLayout])
+            }
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
