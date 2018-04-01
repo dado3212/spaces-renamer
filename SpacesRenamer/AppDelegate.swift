@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Foundation
 
 @NSApplicationMain
 @objc
@@ -34,6 +35,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSApplication.didChangeScreenParametersNotification,
             object: nil
         )
+
+//        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.mouseMoved.rawValue)
+//        guard let eventTap = CGEvent.tapCreate(tap: .cgAnnotatedSessionEventTap,
+//                                               place: .headInsertEventTap,
+//                                               options: .listenOnly,
+//                                               eventsOfInterest: CGEventMask(eventMask),
+//                                               callback: { (proxy, type, event, userInfo) in
+//                                                print(event)
+//                                                //        let obj = Unmanaged<EventTap>.fromOpaque(userInfo!).takeUnretainedValue()
+//                                                //        obj.callback(event, proxy)
+//                                                return nil // Unmanaged.passRetained(event)
+//        },
+//                                               userInfo: nil) else {
+//                                                print("failed to create event tap")
+//                                                exit(1)
+//        }
+//
+//        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+//        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+//        CGEvent.tapEnable(tap: eventTap, enable: true)
+//        CFRunLoopRun()
     }
 
     fileprivate func configureSpaceMonitor() {
@@ -87,6 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         popover.contentViewController = ViewController.freshController()
 
+
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             if let strongSelf = self, strongSelf.popover.isShown {
                 strongSelf.closePopover(sender: event)
@@ -126,7 +149,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func closePopover(sender: Any?) {
+    @objc func closePopover(sender: Any?) {
         popover.performClose(sender)
         eventMonitor?.stop()
     }
