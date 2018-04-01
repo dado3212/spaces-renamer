@@ -18,6 +18,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var workspace: NSWorkspace?
 
+    var spacesActive: Bool = false
+    var holdingKey: Bool = false
+    var wasOpen: Bool = false
+
     let conn = _CGSDefaultConnection()
 
     fileprivate func configureObservers() {
@@ -36,26 +40,71 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
-//        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.mouseMoved.rawValue)
-//        guard let eventTap = CGEvent.tapCreate(tap: .cgAnnotatedSessionEventTap,
-//                                               place: .headInsertEventTap,
-//                                               options: .listenOnly,
-//                                               eventsOfInterest: CGEventMask(eventMask),
-//                                               callback: { (proxy, type, event, userInfo) in
-//                                                print(event)
-//                                                //        let obj = Unmanaged<EventTap>.fromOpaque(userInfo!).takeUnretainedValue()
-//                                                //        obj.callback(event, proxy)
-//                                                return nil // Unmanaged.passRetained(event)
-//        },
-//                                               userInfo: nil) else {
-//                                                print("failed to create event tap")
-//                                                exit(1)
-//        }
-//
-//        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-//        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-//        CGEvent.tapEnable(tap: eventTap, enable: true)
-//        CFRunLoopRun()
+        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+        guard let eventTap = CGEvent.tapCreate(tap: .cghidEventTap,
+                                               place: .tailAppendEventTap,
+                                               options: .listenOnly,
+                                               eventsOfInterest: CGEventMask(eventMask),
+                                               callback: { (proxy, type: CGEventType, event: CGEvent, userInfo) in
+                                                if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
+                                                    (NSApplication.shared.delegate as! AppDelegate).closePopover(sender: nil)
+                                                }
+
+                                                // Listen for F3 press and release
+                                                if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
+
+                                                    // If pressed
+                                                    if let info = userInfo {
+                                                        let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
+                                                        if (type == CGEventType.keyDown) {
+                                                            if (other.isARepeat) {
+                                                                mySelf.holdingKey = true
+                                                            } else {
+                                                                mySelf.holdingKey = false
+                                                                mySelf.spacesActive = !mySelf.spacesActive
+                                                            }
+                                                        } else if (type == CGEventType.keyUp) {
+                                                            // if it's holding, then MAYBE
+                                                            if (mySelf.holdingKey) {
+                                                                mySelf.spacesActive = false
+                                                            }
+                                                            mySelf.holdingKey = false
+                                                        }
+
+                                                        if (mySelf.wasOpen && !mySelf.spacesActive) {
+                                                            mySelf.showPopover(sender: nil)
+                                                        }
+                                                        if (mySelf.spacesActive) {
+                                                            mySelf.closePopover(sender: nil)
+                                                        }
+                                                        print(mySelf.spacesActive)
+                                                    }
+
+                                                    // (NSApplication.shared.delegate as! AppDelegate).closePopover(sender: nil)
+                                                }
+
+//                                                if flags.contains(.maskSecondaryFn) {
+//                                                    msg += "function+"
+//                                                }
+//                                                if let other = NSEvent(cgEvent: event), let chars = other.characters {
+//                                                    print(other)
+//                                                    print(other.characters)
+//                                                    print(other.keyCode)
+//                                                    msg += chars
+//                                                    print(msg)
+//                                                }
+                                                // print("Window: \(getpid()), Targeting: \(event.getIntegerValueField(.eventTargetUnixProcessID)) with type \(type.rawValue)")
+                                                return nil
+        },
+                                               userInfo: UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())) else {
+                                                print("failed to create event tap")
+                                                exit(1)
+        }
+
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+        CGEvent.tapEnable(tap: eventTap, enable: true)
+        CFRunLoopRun()
     }
 
     fileprivate func configureSpaceMonitor() {
@@ -108,7 +157,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         popover.contentViewController = ViewController.freshController()
-
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             if let strongSelf = self, strongSelf.popover.isShown {
