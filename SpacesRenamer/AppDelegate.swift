@@ -11,9 +11,8 @@ import Cocoa
 @NSApplicationMain
 @objc
 class AppDelegate: NSObject, NSApplicationDelegate {
-
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
-    let popover = NSPopover()
+    let popover = CustomPopover()
     var eventMonitor: EventMonitor?
 
     var workspace: NSWorkspace?
@@ -74,8 +73,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
-            button.action = #selector(togglePopover(_:))
         }
+
+        // Listen for left click
+        NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            if event.window == self?.statusItem.button?.window {
+                self?.togglePopover(self?.statusItem.button)
+                return nil
+            }
+
+            return event
+        }
+
         popover.contentViewController = ViewController.freshController()
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
@@ -102,8 +111,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func togglePopover(_ sender: Any?) {
         if popover.isShown {
             closePopover(sender: sender)
+            self.statusItem.button?.isHighlighted = false
         } else {
             showPopover(sender: sender)
+            self.statusItem.button?.isHighlighted = true
         }
     }
 
@@ -120,4 +131,3 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         eventMonitor?.stop()
     }
 }
-

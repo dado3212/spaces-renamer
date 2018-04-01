@@ -43,8 +43,6 @@ class ViewController: NSViewController {
         var prev: DesktopSnippet?
         var above: NSView?
 
-        print(spacesDict)
-
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
