@@ -20,7 +20,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var spacesActive: Bool = false
     var holdingKey: Bool = false
-    var wasOpen: Bool = false
 
     let conn = _CGSDefaultConnection()
 
@@ -40,22 +39,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
-        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+        print("Well damn")
+
+        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
         guard let eventTap = CGEvent.tapCreate(tap: .cghidEventTap,
                                                place: .tailAppendEventTap,
                                                options: .listenOnly,
                                                eventsOfInterest: CGEventMask(eventMask),
                                                callback: { (proxy, type: CGEventType, event: CGEvent, userInfo) in
-                                                if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
-                                                    (NSApplication.shared.delegate as! AppDelegate).closePopover(sender: nil)
-                                                }
+                                                if let info = userInfo {
+                                                    let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
 
-                                                // Listen for F3 press and release
-                                                if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
+                                                    if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
+                                                        mySelf.closePopover(sender: mySelf)
+                                                    }
 
-                                                    // If pressed
-                                                    if let info = userInfo {
-                                                        let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
+//                                                    if (mySelf.spacesActive && type == CGEventType.leftMouseDown) {
+//                                                        mySelf.spacesActive = false
+//                                                    }
+
+                                                    // Listen for F3 press and release
+                                                    if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
+
+                                                        // If pressed
                                                         if (type == CGEventType.keyDown) {
                                                             if (other.isARepeat) {
                                                                 mySelf.holdingKey = true
@@ -71,35 +77,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                                             mySelf.holdingKey = false
                                                         }
 
-                                                        if (mySelf.wasOpen && !mySelf.spacesActive) {
-                                                            mySelf.showPopover(sender: nil)
+                                                        // If it's active, and it's shown, then close it and mark that it was open
+                                                        if (mySelf.spacesActive && mySelf.popover.isShown) {
+                                                            mySelf.closePopover(sender: mySelf)
                                                         }
-                                                        if (mySelf.spacesActive) {
-                                                            mySelf.closePopover(sender: nil)
-                                                        }
-                                                        print(mySelf.spacesActive)
                                                     }
-
-                                                    // (NSApplication.shared.delegate as! AppDelegate).closePopover(sender: nil)
                                                 }
 
-//                                                if flags.contains(.maskSecondaryFn) {
-//                                                    msg += "function+"
-//                                                }
-//                                                if let other = NSEvent(cgEvent: event), let chars = other.characters {
-//                                                    print(other)
-//                                                    print(other.characters)
-//                                                    print(other.keyCode)
-//                                                    msg += chars
-//                                                    print(msg)
-//                                                }
-                                                // print("Window: \(getpid()), Targeting: \(event.getIntegerValueField(.eventTargetUnixProcessID)) with type \(type.rawValue)")
                                                 return nil
         },
                                                userInfo: UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())) else {
-                                                print("failed to create event tap")
-                                                exit(1)
+            print("failed to create event tap")
+            let alert = NSAlert()
+                                                alert.addButton(withTitle: "Open Security & Privacy Preferences")
+                                                alert.messageText = "SpacesRenamer needs permission for automatic closing"
+                                                alert.informativeText = "Enable FunctionFlip in Security & Privacy preferences -> Privacy -> Accessibility, in System Preferences.  Then restart FunctionFlip."
+                                                alert.alertStyle = .warning
+                                                alert.runModal()
+                                                NSWorkspace.shared.openFile("/System/Library/PreferencePanes/Security.prefPane")
+            exit(1)
         }
+
+        print(eventTap)
 
         let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
@@ -139,6 +138,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let spacesDict = NSMutableDictionary()
         spacesDict.setValue(info, forKey: "Monitors")
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+
+        if (popover.isShown) {
+            closePopover(sender: nil)
+        }
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -159,8 +162,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentViewController = ViewController.freshController()
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            if let strongSelf = self, strongSelf.popover.isShown {
-                strongSelf.closePopover(sender: event)
+            if let strongSelf = self {
+                if (strongSelf.popover.isShown) {
+                    strongSelf.closePopover(sender: event)
+                }
             }
         }
 
@@ -182,16 +187,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func togglePopover(_ sender: Any?) {
         if popover.isShown {
             closePopover(sender: sender)
-            self.statusItem.button?.isHighlighted = false
         } else {
             showPopover(sender: sender)
-            self.statusItem.button?.isHighlighted = true
         }
     }
 
     func showPopover(sender: Any?) {
         NSApplication.shared.activate(ignoringOtherApps: true)
         eventMonitor?.start()
+        self.statusItem.button?.isHighlighted = true
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
         }
@@ -199,6 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func closePopover(sender: Any?) {
         popover.performClose(sender)
+        self.statusItem.button?.isHighlighted = false
         eventMonitor?.stop()
     }
 }

@@ -20,6 +20,9 @@ class CustomPopover: NSPopover {
     override func performClose(_ sender: Any?) {
         super.performClose(sender)
         (NSApplication.shared.delegate as! AppDelegate).statusItem.button?.isHighlighted = false
+        if let _ = sender as? AppDelegate {
+            return
+        }
     }
 
     func togglePopover(sender: AnyObject?, button: NSButton) {
