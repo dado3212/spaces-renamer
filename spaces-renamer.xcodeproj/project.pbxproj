@@ -15,6 +15,7 @@
 		A80DDE3C1FBCEBDE00794F8F /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE3B1FBCEBDE00794F8F /* Utils.swift */; };
 		A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */ = {isa = PBXBuildFile; fileRef = A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */; };
 		A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */; };
+		A81F4EFC2070AEED00660338 /* NameChangeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
@@ -34,6 +35,7 @@
 		A80DDE411FBE2D9C00794F8F /* DesktopSnippet.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DesktopSnippet.xib; sourceTree = "<group>"; };
 		A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSnippet.swift; sourceTree = "<group>"; };
 		A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpacesRenamerBridge.h; sourceTree = "<group>"; };
+		A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameChangeWindow.swift; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "spaces-renamer/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "spaces-renamer/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
+				A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */,
 				A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */,
 				A80DDE391FBCE89B00794F8F /* EventMonitor.swift */,
 				A80DDE2D1FBCE4D600794F8F /* ViewController.swift */,
@@ -221,6 +224,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A81F4EFC2070AEED00660338 /* NameChangeWindow.swift in Sources */,
 				A80DDE3A1FBCE89B00794F8F /* EventMonitor.swift in Sources */,
 				A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */,
 				A80DDE2E1FBCE4D600794F8F /* ViewController.swift in Sources */,

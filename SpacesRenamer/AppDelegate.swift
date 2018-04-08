@@ -7,13 +7,14 @@
 //
 
 import Cocoa
+import Foundation
 
 @NSApplicationMain
 @objc
 class AppDelegate: NSObject, NSApplicationDelegate {
-
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
-    let popover = NSPopover()
+    var nameChangeWindow: NameChangeWindow = NameChangeWindow()
+    let hiddenPopover = NSPopover()
     var eventMonitor: EventMonitor?
 
     var workspace: NSWorkspace?
@@ -37,6 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
+    // Watches the file to determine if the spaces update (new one added or deleted)
     fileprivate func configureSpaceMonitor() {
         let fullPath = (Utils.spacesPath as NSString).expandingTildeInPath
         let queue = DispatchQueue.global(qos: .default)
@@ -64,23 +66,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         source.resume()
     }
 
+    // Runs when a space is moved or switched, which confirms that the current list is in the right order
     @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
         let spacesDict = NSMutableDictionary()
         spacesDict.setValue(info, forKey: "Monitors")
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+
+        if (nameChangeWindow.isVisible) {
+            nameChangeWindow.refresh()
+        }
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
-            button.action = #selector(togglePopover(_:))
         }
-        popover.contentViewController = ViewController.freshController()
+
+        // Listen for left click
+        NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+            if event.window == self?.statusItem.button?.window {
+                self?.togglePopover(self?.statusItem.button)
+                return nil
+            }
+
+            return event
+        }
+
+        nameChangeWindow.contentViewController = ViewController.freshController()
+        hiddenPopover.contentViewController = ViewController.freshController()
+        hiddenPopover.animates = false
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            if let strongSelf = self, strongSelf.popover.isShown {
-                strongSelf.closePopover(sender: event)
+            if let strongSelf = self {
+                if (strongSelf.nameChangeWindow.isVisible) {
+                    strongSelf.closeNameChangeWindow(sender: event)
+                }
             }
         }
 
@@ -100,24 +121,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func togglePopover(_ sender: Any?) {
-        if popover.isShown {
-            closePopover(sender: sender)
+        if nameChangeWindow.isVisible {
+            closeNameChangeWindow(sender: sender)
         } else {
-            showPopover(sender: sender)
+            showNameChangeWindow(sender: sender)
         }
     }
 
-    func showPopover(sender: Any?) {
+    func showNameChangeWindow(sender: Any?) {
         NSApplication.shared.activate(ignoringOtherApps: true)
         eventMonitor?.start()
+        self.statusItem.button?.isHighlighted = true
         if let button = statusItem.button {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+            // Use the hidden popover to get the dimensions, and then immediately hide it
+            hiddenPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if let frame = hiddenPopover.contentViewController?.view.window?.frame {
+                nameChangeWindow.setFrame(frame, display: true)
+            }
+            hiddenPopover.close()
+
+            nameChangeWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
 
-    func closePopover(sender: Any?) {
-        popover.performClose(sender)
+    @objc func closeNameChangeWindow(sender: Any?) {
+        nameChangeWindow.setIsVisible(false)
+        DispatchQueue.main.async {
+            self.statusItem.button?.isHighlighted = false
+        }
         eventMonitor?.stop()
     }
 }
-

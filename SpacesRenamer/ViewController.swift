@@ -9,7 +9,6 @@
 import Cocoa
 
 class ViewController: NSViewController {
-
     @IBOutlet var updateButton: NSButton!
 
     var desktops: [String: NSTextField] = [String: NSTextField]()
@@ -43,7 +42,7 @@ class ViewController: NSViewController {
         var prev: DesktopSnippet?
         var above: NSView?
 
-        print(spacesDict)
+        let maxSpacesPerMonitor = allMonitors.reduce(Int.min, { max($0, (($1 as? NSDictionary)?.value(forKey: "Spaces") as! NSArray).count) })
 
         for j in 1...allMonitors.count {
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
@@ -82,7 +81,6 @@ class ViewController: NSViewController {
                 let snippet = DesktopSnippet.instanceFromNib()
                 if (uuid == currentSpace) {
                     snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
-                    // snippet.starImage.isHidden = false
                 }
 
                 snippet.label.stringValue = "\(i)"
@@ -113,9 +111,11 @@ class ViewController: NSViewController {
             }
             above = prev
 
-            let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .greaterThanOrEqual, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
-            constraints.append(horizontalLayout)
-            self.view.addConstraints([horizontalLayout])
+            if (allSpaces.count == maxSpacesPerMonitor) {
+                let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
+                constraints.append(horizontalLayout)
+                self.view.addConstraints([horizontalLayout])
+            }
         }
 
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
@@ -124,9 +124,7 @@ class ViewController: NSViewController {
         self.view.addConstraints([verticalConstraint])
     }
 
-    override func viewWillAppear() {
-        super.viewWillAppear()
-
+    func refreshViews() {
         teardownViews()
         setupViews()
 
@@ -135,13 +133,19 @@ class ViewController: NSViewController {
             let spacesRemaining = preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary {
             currentMapping = spacesRemaining
         }
-        
+
         // Update with the current names
         for (uuid, textField) in desktops {
             if let newName = currentMapping.value(forKey: uuid) {
                 textField.stringValue = newName as! String
             }
         }
+    }
+
+    override func viewWillAppear() {
+        super.viewWillAppear()
+
+        refreshViews()
     }
 
     @IBAction func quitMenuApp(_ sender: Any) {
@@ -165,7 +169,7 @@ class ViewController: NSViewController {
 
         // Close the popup
         let delegate = NSApplication.shared.delegate as! AppDelegate
-        delegate.closePopover(sender: delegate)
+        delegate.closeNameChangeWindow(sender: delegate)
     }
 }
 
