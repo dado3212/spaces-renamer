@@ -124,9 +124,7 @@ class ViewController: NSViewController {
         self.view.addConstraints([verticalConstraint])
     }
 
-    override func viewWillAppear() {
-        super.viewWillAppear()
-
+    func refreshViews() {
         teardownViews()
         setupViews()
 
@@ -135,13 +133,19 @@ class ViewController: NSViewController {
             let spacesRemaining = preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary {
             currentMapping = spacesRemaining
         }
-        
+
         // Update with the current names
         for (uuid, textField) in desktops {
             if let newName = currentMapping.value(forKey: uuid) {
                 textField.stringValue = newName as! String
             }
         }
+    }
+
+    override func viewWillAppear() {
+        super.viewWillAppear()
+
+        refreshViews()
     }
 
     @IBAction func quitMenuApp(_ sender: Any) {

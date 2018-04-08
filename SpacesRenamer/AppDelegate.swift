@@ -39,72 +39,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             name: NSApplication.didChangeScreenParametersNotification,
             object: nil
         )
-
-//        print("Well damn")
-//
-//        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
-//        guard let eventTap = CGEvent.tapCreate(tap: .cghidEventTap,
-//                                               place: .tailAppendEventTap,
-//                                               options: .listenOnly,
-//                                               eventsOfInterest: CGEventMask(eventMask),
-//                                               callback: { (proxy, type: CGEventType, event: CGEvent, userInfo) in
-//                                                if let info = userInfo {
-//                                                    let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
-//
-//                                                    if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
-//                                                        mySelf.closePopover(sender: mySelf)
-//                                                    }
-//
-////                                                    if (mySelf.spacesActive && type == CGEventType.leftMouseDown) {
-////                                                        mySelf.spacesActive = false
-////                                                    }
-//
-//                                                    // Listen for F3 press and release
-//                                                    if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
-//
-//                                                        // If pressed
-//                                                        if (type == CGEventType.keyDown) {
-//                                                            if (other.isARepeat) {
-//                                                                mySelf.holdingKey = true
-//                                                            } else {
-//                                                                mySelf.holdingKey = false
-//                                                                mySelf.spacesActive = !mySelf.spacesActive
-//                                                            }
-//                                                        } else if (type == CGEventType.keyUp) {
-//                                                            // if it's holding, then MAYBE
-//                                                            if (mySelf.holdingKey) {
-//                                                                mySelf.spacesActive = false
-//                                                            }
-//                                                            mySelf.holdingKey = false
-//                                                        }
-//
-//                                                        // If it's active, and it's shown, then close it and mark that it was open
-//                                                        if (mySelf.spacesActive && mySelf.popover.isShown) {
-//                                                            mySelf.closePopover(sender: mySelf)
-//                                                        }
-//                                                    }
-//                                                }
-//
-//                                                return nil
-//        },
-//                                               userInfo: UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())) else {
-//            print("failed to create event tap")
-//            let alert = NSAlert()
-//                                                alert.addButton(withTitle: "Open Security & Privacy Preferences")
-//                                                alert.messageText = "SpacesRenamer needs permission for automatic closing"
-//                                                alert.informativeText = "Enable FunctionFlip in Security & Privacy preferences -> Privacy -> Accessibility, in System Preferences.  Then restart FunctionFlip."
-//                                                alert.alertStyle = .warning
-//                                                alert.runModal()
-//                                                NSWorkspace.shared.openFile("/System/Library/PreferencePanes/Security.prefPane")
-//            exit(1)
-//        }
-//
-//        print(eventTap)
-//
-//        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-//        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-//        CGEvent.tapEnable(tap: eventTap, enable: true)
-//        CFRunLoopRun()
     }
 
     // Watches the file to determine if the spaces update (new one added or deleted)
@@ -143,7 +77,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
         if (nameChangeWindow.isVisible) {
-            closeNameChangeWindow(sender: nil)
+            nameChangeWindow.refresh()
+            // closeNameChangeWindow(sender: nil)
         }
     }
 
@@ -215,9 +150,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func closeNameChangeWindow(sender: Any?) {
-        // nameChangeWindow.close()
         nameChangeWindow.setIsVisible(false)
-        self.statusItem.button?.isHighlighted = false
+        DispatchQueue.main.async{
+            self.statusItem.button?.isHighlighted = false
+        }
         eventMonitor?.stop()
     }
 }
