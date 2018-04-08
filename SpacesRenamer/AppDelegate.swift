@@ -14,6 +14,7 @@ import Foundation
 class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     let popover = CustomPopover()
+    var popoverWindow = NSWindow()
     var eventMonitor: EventMonitor?
 
     var workspace: NSWorkspace?
@@ -144,6 +145,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationDidResignActive(_ notification: Notification) {
+        print("Resigned")
+    }
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
@@ -159,7 +164,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return event
         }
 
+        popoverWindow = NSWindow(contentRect: NSMakeRect(0, 0, NSScreen.main!.frame.midX, NSScreen.main!.frame.midY), styleMask: [.closable], backing: .buffered, defer: false)
+        popoverWindow.title = "New Window"
+        popoverWindow.isOpaque = false
+        popoverWindow.center()
+        popoverWindow.isMovableByWindowBackground = true
+        popoverWindow.backgroundColor = NSColor(calibratedHue: 0, saturation: 0.0, brightness: 100, alpha: 0.95)
+        popoverWindow.collectionBehavior = [.transient, .ignoresCycle]
+        popoverWindow.hidesOnDeactivate = true
+        popoverWindow.level = .modalPanel
+        popoverWindow.contentViewController = ViewController.freshController()
+        popoverWindow.makeKeyAndOrderFront(nil)
+
         popover.contentViewController = ViewController.freshController()
+        // popover.behavior = .transient
+        popover.contentViewController?.view.window?.collectionBehavior = [.transient, .ignoresCycle]
+        popover.contentViewController?.view.window?.collectionBehavior = [.transient, .ignoresCycle]
+
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             if let strongSelf = self {
@@ -197,7 +218,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         eventMonitor?.start()
         self.statusItem.button?.isHighlighted = true
         if let button = statusItem.button {
+            button.window?.collectionBehavior = [.transient, .ignoresCycle]
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+            print(popover.contentSize)
+            print(popover.contentViewController?.view.window?.collectionBehavior)
         }
     }
 
