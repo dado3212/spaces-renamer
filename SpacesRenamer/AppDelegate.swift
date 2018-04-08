@@ -19,9 +19,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var workspace: NSWorkspace?
 
-    var spacesActive: Bool = false
-    var holdingKey: Bool = false
-
     let conn = _CGSDefaultConnection()
 
     fileprivate func configureObservers() {
@@ -78,7 +75,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if (nameChangeWindow.isVisible) {
             nameChangeWindow.refresh()
-            // closeNameChangeWindow(sender: nil)
         }
     }
 
@@ -151,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func closeNameChangeWindow(sender: Any?) {
         nameChangeWindow.setIsVisible(false)
-        DispatchQueue.main.async{
+        DispatchQueue.main.async {
             self.statusItem.button?.isHighlighted = false
         }
         eventMonitor?.stop()
