@@ -13,8 +13,8 @@ import Foundation
 @objc
 class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
-    let popover = CustomPopover()
-    var popoverWindow = NSWindow()
+    var nameChangeWindow: NameChangeWindow = NameChangeWindow()
+    let hiddenPopover = NSPopover()
     var eventMonitor: EventMonitor?
 
     var workspace: NSWorkspace?
@@ -40,73 +40,74 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
-        print("Well damn")
-
-        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
-        guard let eventTap = CGEvent.tapCreate(tap: .cghidEventTap,
-                                               place: .tailAppendEventTap,
-                                               options: .listenOnly,
-                                               eventsOfInterest: CGEventMask(eventMask),
-                                               callback: { (proxy, type: CGEventType, event: CGEvent, userInfo) in
-                                                if let info = userInfo {
-                                                    let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
-
-                                                    if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
-                                                        mySelf.closePopover(sender: mySelf)
-                                                    }
-
-//                                                    if (mySelf.spacesActive && type == CGEventType.leftMouseDown) {
-//                                                        mySelf.spacesActive = false
+//        print("Well damn")
+//
+//        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
+//        guard let eventTap = CGEvent.tapCreate(tap: .cghidEventTap,
+//                                               place: .tailAppendEventTap,
+//                                               options: .listenOnly,
+//                                               eventsOfInterest: CGEventMask(eventMask),
+//                                               callback: { (proxy, type: CGEventType, event: CGEvent, userInfo) in
+//                                                if let info = userInfo {
+//                                                    let mySelf = Unmanaged<AppDelegate>.fromOpaque(info).takeUnretainedValue()
+//
+//                                                    if (getpid() != event.getIntegerValueField(.eventTargetUnixProcessID)) {
+//                                                        mySelf.closePopover(sender: mySelf)
 //                                                    }
-
-                                                    // Listen for F3 press and release
-                                                    if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
-
-                                                        // If pressed
-                                                        if (type == CGEventType.keyDown) {
-                                                            if (other.isARepeat) {
-                                                                mySelf.holdingKey = true
-                                                            } else {
-                                                                mySelf.holdingKey = false
-                                                                mySelf.spacesActive = !mySelf.spacesActive
-                                                            }
-                                                        } else if (type == CGEventType.keyUp) {
-                                                            // if it's holding, then MAYBE
-                                                            if (mySelf.holdingKey) {
-                                                                mySelf.spacesActive = false
-                                                            }
-                                                            mySelf.holdingKey = false
-                                                        }
-
-                                                        // If it's active, and it's shown, then close it and mark that it was open
-                                                        if (mySelf.spacesActive && mySelf.popover.isShown) {
-                                                            mySelf.closePopover(sender: mySelf)
-                                                        }
-                                                    }
-                                                }
-
-                                                return nil
-        },
-                                               userInfo: UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())) else {
-            print("failed to create event tap")
-            let alert = NSAlert()
-                                                alert.addButton(withTitle: "Open Security & Privacy Preferences")
-                                                alert.messageText = "SpacesRenamer needs permission for automatic closing"
-                                                alert.informativeText = "Enable FunctionFlip in Security & Privacy preferences -> Privacy -> Accessibility, in System Preferences.  Then restart FunctionFlip."
-                                                alert.alertStyle = .warning
-                                                alert.runModal()
-                                                NSWorkspace.shared.openFile("/System/Library/PreferencePanes/Security.prefPane")
-            exit(1)
-        }
-
-        print(eventTap)
-
-        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-        CGEvent.tapEnable(tap: eventTap, enable: true)
-        CFRunLoopRun()
+//
+////                                                    if (mySelf.spacesActive && type == CGEventType.leftMouseDown) {
+////                                                        mySelf.spacesActive = false
+////                                                    }
+//
+//                                                    // Listen for F3 press and release
+//                                                    if let other = NSEvent(cgEvent: event), event.flags.contains(.maskSecondaryFn) && other.keyCode == 160 { // F3
+//
+//                                                        // If pressed
+//                                                        if (type == CGEventType.keyDown) {
+//                                                            if (other.isARepeat) {
+//                                                                mySelf.holdingKey = true
+//                                                            } else {
+//                                                                mySelf.holdingKey = false
+//                                                                mySelf.spacesActive = !mySelf.spacesActive
+//                                                            }
+//                                                        } else if (type == CGEventType.keyUp) {
+//                                                            // if it's holding, then MAYBE
+//                                                            if (mySelf.holdingKey) {
+//                                                                mySelf.spacesActive = false
+//                                                            }
+//                                                            mySelf.holdingKey = false
+//                                                        }
+//
+//                                                        // If it's active, and it's shown, then close it and mark that it was open
+//                                                        if (mySelf.spacesActive && mySelf.popover.isShown) {
+//                                                            mySelf.closePopover(sender: mySelf)
+//                                                        }
+//                                                    }
+//                                                }
+//
+//                                                return nil
+//        },
+//                                               userInfo: UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())) else {
+//            print("failed to create event tap")
+//            let alert = NSAlert()
+//                                                alert.addButton(withTitle: "Open Security & Privacy Preferences")
+//                                                alert.messageText = "SpacesRenamer needs permission for automatic closing"
+//                                                alert.informativeText = "Enable FunctionFlip in Security & Privacy preferences -> Privacy -> Accessibility, in System Preferences.  Then restart FunctionFlip."
+//                                                alert.alertStyle = .warning
+//                                                alert.runModal()
+//                                                NSWorkspace.shared.openFile("/System/Library/PreferencePanes/Security.prefPane")
+//            exit(1)
+//        }
+//
+//        print(eventTap)
+//
+//        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+//        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+//        CGEvent.tapEnable(tap: eventTap, enable: true)
+//        CFRunLoopRun()
     }
 
+    // Watches the file to determine if the spaces update (new one added or deleted)
     fileprivate func configureSpaceMonitor() {
         let fullPath = (Utils.spacesPath as NSString).expandingTildeInPath
         let queue = DispatchQueue.global(qos: .default)
@@ -134,19 +135,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         source.resume()
     }
 
+    // Runs when a space is moved or switched, which confirms that the current list is in the right order
     @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
         let spacesDict = NSMutableDictionary()
         spacesDict.setValue(info, forKey: "Monitors")
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
-        if (popover.isShown) {
-            closePopover(sender: nil)
+        if (nameChangeWindow.isVisible) {
+            closeNameChangeWindow(sender: nil)
         }
-    }
-
-    func applicationDidResignActive(_ notification: Notification) {
-        print("Resigned")
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -164,28 +162,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return event
         }
 
-        popoverWindow = NSWindow(contentRect: NSMakeRect(0, 0, NSScreen.main!.frame.midX, NSScreen.main!.frame.midY), styleMask: [.closable], backing: .buffered, defer: false)
-        popoverWindow.title = "New Window"
-        popoverWindow.isOpaque = false
-        popoverWindow.center()
-        popoverWindow.isMovableByWindowBackground = true
-        popoverWindow.backgroundColor = NSColor(calibratedHue: 0, saturation: 0.0, brightness: 100, alpha: 0.95)
-        popoverWindow.collectionBehavior = [.transient, .ignoresCycle]
-        popoverWindow.hidesOnDeactivate = true
-        popoverWindow.level = .modalPanel
-        popoverWindow.contentViewController = ViewController.freshController()
-        popoverWindow.makeKeyAndOrderFront(nil)
-
-        popover.contentViewController = ViewController.freshController()
-        // popover.behavior = .transient
-        popover.contentViewController?.view.window?.collectionBehavior = [.transient, .ignoresCycle]
-        popover.contentViewController?.view.window?.collectionBehavior = [.transient, .ignoresCycle]
-
+        nameChangeWindow.contentViewController = ViewController.freshController()
+        hiddenPopover.contentViewController = ViewController.freshController()
+        hiddenPopover.animates = false
 
         eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             if let strongSelf = self {
-                if (strongSelf.popover.isShown) {
-                    strongSelf.closePopover(sender: event)
+                if (strongSelf.nameChangeWindow.isVisible) {
+                    strongSelf.closeNameChangeWindow(sender: event)
                 }
             }
         }
@@ -206,27 +190,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func togglePopover(_ sender: Any?) {
-        if popover.isShown {
-            closePopover(sender: sender)
+        if nameChangeWindow.isVisible {
+            closeNameChangeWindow(sender: sender)
         } else {
-            showPopover(sender: sender)
+            showNameChangeWindow(sender: sender)
         }
     }
 
-    func showPopover(sender: Any?) {
+    func showNameChangeWindow(sender: Any?) {
         NSApplication.shared.activate(ignoringOtherApps: true)
         eventMonitor?.start()
         self.statusItem.button?.isHighlighted = true
         if let button = statusItem.button {
-            button.window?.collectionBehavior = [.transient, .ignoresCycle]
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
-            print(popover.contentSize)
-            print(popover.contentViewController?.view.window?.collectionBehavior)
+            // Use the hidden popover to get the dimensions, and then immediately hide it
+            hiddenPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if let frame = hiddenPopover.contentViewController?.view.window?.frame {
+                nameChangeWindow.setFrame(frame, display: true)
+            }
+            hiddenPopover.close()
+
+            nameChangeWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
         }
     }
 
-    @objc func closePopover(sender: Any?) {
-        popover.performClose(sender)
+    @objc func closeNameChangeWindow(sender: Any?) {
+        // nameChangeWindow.close()
+        nameChangeWindow.setIsVisible(false)
         self.statusItem.button?.isHighlighted = false
         eventMonitor?.stop()
     }

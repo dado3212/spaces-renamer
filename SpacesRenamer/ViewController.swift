@@ -81,7 +81,6 @@ class ViewController: NSViewController {
                 let snippet = DesktopSnippet.instanceFromNib()
                 if (uuid == currentSpace) {
                     snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
-                    // snippet.starImage.isHidden = false
                 }
 
                 snippet.label.stringValue = "\(i)"
@@ -166,7 +165,7 @@ class ViewController: NSViewController {
 
         // Close the popup
         let delegate = NSApplication.shared.delegate as! AppDelegate
-        delegate.closePopover(sender: delegate)
+        delegate.closeNameChangeWindow(sender: delegate)
     }
 }
 
