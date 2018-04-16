@@ -84,6 +84,7 @@ class ViewController: NSViewController {
                 }
 
                 snippet.label.stringValue = "\(i)"
+                snippet.textField.delegate = self
                 self.view.addSubview(snippet)
                 snippets.append(snippet)
 
@@ -170,6 +171,14 @@ class ViewController: NSViewController {
         // Close the popup
         let delegate = NSApplication.shared.delegate as! AppDelegate
         delegate.closeNameChangeWindow(sender: delegate)
+    }
+}
+
+extension ViewController: NSTextFieldDelegate {
+    override func cancelOperation(_ sender: Any?) {
+        if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
+            appDelegate.closeNameChangeWindow(sender: nil)
+        }
     }
 }
 
