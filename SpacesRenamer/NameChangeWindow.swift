@@ -9,6 +9,7 @@
 import Cocoa
 
 class NameChangeWindow: NSWindow {
+
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: style, backing: backingStoreType, defer: flag)
         self.title = "Spaces Renamer"
@@ -28,6 +29,16 @@ class NameChangeWindow: NSWindow {
         self.standardWindowButton(.miniaturizeButton)?.isHidden = true
         self.standardWindowButton(.closeButton)?.isHidden = true
         self.standardWindowButton(.zoomButton)?.isHidden = true
+    }
+
+    // Close self on 'esc'
+    override func keyDown(with event: NSEvent) {
+        if (event.keyCode == Utils.escapeKey) {
+            if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
+                appDelegate.closeNameChangeWindow(sender: nil)
+            }
+        }
+        super.keyDown(with: event)
     }
 
     func refresh() {

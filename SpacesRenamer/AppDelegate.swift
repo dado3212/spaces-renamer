@@ -93,6 +93,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return event
         }
 
+        // Create the bundle folder if it doesn't exist
+        do {
+            try FileManager.default.createDirectory(atPath: Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)"), withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            print("Not really sure.")
+        }
+
         nameChangeWindow.contentViewController = ViewController.freshController()
         hiddenPopover.contentViewController = ViewController.freshController()
         hiddenPopover.animates = false
