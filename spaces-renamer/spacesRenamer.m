@@ -40,10 +40,20 @@ static void setTextLayer(CALayer *view, NSString *newString) {
     }
 }
 
+// The highlighted space has 2 sublayers, while as a normal space only has 1
+static int getSelected(NSArray<CALayer *> *views) {
+    for (int i = 0; i < views.count; i++) {
+        if (views[i].sublayers.count > 1) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /*
  1. Load the customNamesPlist for named spaces
  2. Load the listOfSpacesPlist to get the current list of spaces
- 3. Crosslist and return the custom names for each plist
+ 3. Crosslist and return the custom names for each plist, and whether it's selected
  */
 static NSMutableArray *getNamesFromPlist() {
     NSDictionary *dictOfNames = [NSDictionary dictionaryWithContentsOfFile:customNamesPlist];
@@ -61,15 +71,21 @@ static NSMutableArray *getNamesFromPlist() {
 
     for (int i = 0; i < listOfMonitors.count; i++) {
         NSArray *listOfSpaces = [listOfMonitors[i] valueForKeyPath:@"Spaces"];
+        NSString *selected = [listOfMonitors[i] valueForKeyPath:@"Current Space.uuid"];
 
         NSMutableArray *monitorNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
         for (int j = 0; j < listOfSpaces.count; j++) {
-            id name = [dict objectForKey:listOfSpaces[j][@"uuid"]];
+            NSString *uuid = listOfSpaces[j][@"uuid"];
+            id name = [dict objectForKey:uuid];
+            NSMutableDictionary *screenDict = [NSMutableDictionary dictionary];
+            screenDict[@"selected"] = @([uuid isEqualToString:selected]);
+            monitorNames[j] = screenDict;
             if (name != nil) {
-                monitorNames[j] = name;
+                screenDict[@"name"] = name;
             } else {
-                monitorNames[j] = @"";
+                screenDict[@"name"] = @"";
             }
+            monitorNames[j] = screenDict;
         }
         newNames[i] = monitorNames;
     }
@@ -157,15 +173,35 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
+        // Get which of the spaces in the current dock is selected
+        int selected = getSelected(unexpandedViews);
+
         // Get all of the names
         NSMutableArray* names = getNamesFromPlist();
+
+        // Take a best guess at which monitor it is
+        NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
+        for (int i = 0; i < names.count; i++) {
+            if (
+                ((NSArray *)names[i]).count == unexpandedViews.count && // Same number of monitors
+                [names[i][selected][@"selected"] boolValue] // Same index is selected
+            ) {
+                [possibleMonitors addObject:[NSNumber numberWithInt:i]];
+            }
+        }
+        // If only one monitor, good to go
+        // If more than one monitor, then just go with the same cycling as it appears to have been last time it was good to go
+        if (possibleMonitors.count == 1) {
+            monitorIndex = [possibleMonitors[0] intValue];
+        }
+        [possibleMonitors release];
 
         monitorIndex = monitorIndex % names.count;
 
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
-            if (names[monitorIndex][i] != nil && ![names[monitorIndex][i] isEqualToString:@""] && i < MAX(expandedViews.count, unexpandedViews.count)) {
-                setTextLayer(expandedViews[i], names[monitorIndex][i]);
-                setTextLayer(unexpandedViews[i], names[monitorIndex][i]);
+            if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""] && i < unexpandedViews.count) {
+                setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
+                setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
             }
         }
 
