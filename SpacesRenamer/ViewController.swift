@@ -80,7 +80,8 @@ class ViewController: NSViewController {
 
                 let snippet = DesktopSnippet.instanceFromNib()
                 if (uuid == currentSpace) {
-                    snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected") )
+                    snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected"))
+                    snippet.isCurrent = true
                 }
 
                 snippet.label.stringValue = "\(i)"
@@ -141,6 +142,17 @@ class ViewController: NSViewController {
                 textField.stringValue = newName as! String
             }
         }
+
+        selectCurrent()
+    }
+
+    func selectCurrent() {
+        for snippet in snippets {
+            if snippet.isCurrent {
+                snippet.textField.becomeFirstResponder()
+                break
+            }
+        }
     }
 
     override func viewWillAppear() {
@@ -179,6 +191,14 @@ extension ViewController: NSTextFieldDelegate {
         if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
             appDelegate.closeNameChangeWindow(sender: nil)
         }
+    }
+
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            self.pressChangeName(textView)
+            return true
+        }
+        return false
     }
 }
 

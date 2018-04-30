@@ -148,6 +148,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             hiddenPopover.close()
 
             nameChangeWindow.makeKeyAndOrderFront(nil)
+            nameChangeWindow.selectCurrent()
             NSApp.activate(ignoringOtherApps: true)
         }
     }
