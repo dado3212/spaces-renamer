@@ -41,6 +41,14 @@ class NameChangeWindow: NSWindow {
         super.keyDown(with: event)
     }
 
+    func selectCurrent() {
+        DispatchQueue.main.async {
+            if let viewController = self.contentViewController as? ViewController {
+                viewController.selectCurrent()
+            }
+        }
+    }
+
     func refresh() {
         DispatchQueue.main.async {
             if let appDelegate = NSApplication.shared.delegate as? AppDelegate, let button = appDelegate.statusItem.button {

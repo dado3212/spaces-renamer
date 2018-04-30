@@ -13,6 +13,7 @@ class DesktopSnippet: NSView {
     @IBOutlet var label: NSTextField!
     @IBOutlet var textField: NSTextField!
     @IBOutlet var monitorImage: NSImageView!
+    var isCurrent: Bool = false
 
     class func instanceFromNib() -> DesktopSnippet {
         var topLevelObjects : NSArray?
