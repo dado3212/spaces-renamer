@@ -173,8 +173,10 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
+        int numMonitors = MAX(unexpandedViews.count, expandedViews.count);
+
         // Get which of the spaces in the current dock is selected
-        int selected = getSelected(unexpandedViews);
+        int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
 
         // Get all of the names
         NSMutableArray* names = getNamesFromPlist();
@@ -183,7 +185,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
         for (int i = 0; i < names.count; i++) {
             if (
-                ((NSArray *)names[i]).count == unexpandedViews.count && // Same number of monitors
+                ((NSArray *)names[i]).count == numMonitors && // Same number of monitors
                 [names[i][selected][@"selected"] boolValue] // Same index is selected
             ) {
                 [possibleMonitors addObject:[NSNumber numberWithInt:i]];
@@ -199,9 +201,13 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         monitorIndex = monitorIndex % names.count;
 
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
-            if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""] && i < unexpandedViews.count) {
-                setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
-                setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+            if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
+                if (i < expandedViews.count) {
+                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
+                }
+                if (i < unexpandedViews.count) {
+                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                }
             }
         }
 
