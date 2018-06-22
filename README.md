@@ -26,7 +26,7 @@ I want to be able to rename my spaces.  While TotalSpaces has this functionality
 This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming spaces from a saved plist.  The application adds an icon to the status bar that allows you to rename the spaces and update the plist.
 
 ## Installation:
-1. Download [mySIMBL](https://github.com/w0lfschild/app_updates/raw/master/mySIMBL/mySIMBL_0.2.5.zip).
+1. Download the [latest mySIMBL version](https://github.com/w0lfschild/mySIMBL/releases/latest).
 2. Download [Spaces Renamer](https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip).
 3. Unzip the downloaded .zip file.
 4. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it.
