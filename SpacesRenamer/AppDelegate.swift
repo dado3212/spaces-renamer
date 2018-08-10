@@ -83,9 +83,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
         }
 
-        // Listen for left click
+        // Listen for left click (without Command)
         NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
-            if event.window == self?.statusItem.button?.window {
+            if event.window == self?.statusItem.button?.window && !event.modifierFlags.contains(NSEvent.ModifierFlags.command) {
                 self?.togglePopover(self?.statusItem.button)
                 return nil
             }
