@@ -39,7 +39,7 @@ class ViewController: NSViewController {
             let allMonitors = spacesDict.value(forKeyPath: "Monitors") as? NSArray else { return }
 
         // Keep reference to previous for constraint
-        var prev: DesktopSnippet?
+        var prev: NSView?
         var above: NSView?
 
         let maxSpacesPerMonitor = allMonitors.reduce(Int.min, { max($0, (($1 as? NSDictionary)?.value(forKey: "Spaces") as! NSArray).count) })
@@ -72,6 +72,28 @@ class ViewController: NSViewController {
                 above = monitorLabel
             }
 
+            // Create a view for all of the snippets
+            let monitorScrollView = NSScrollView()
+            monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
+            monitorScrollView.verticalScrollElasticity = .none
+            monitorScrollView.hasHorizontalScroller = true
+
+            let snippetView = NSView()
+            snippetView.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(monitorScrollView)
+
+            var verticalConstraint: NSLayoutConstraint?
+            if (above != nil) {
+                verticalConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .top  , relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
+            } else {
+                verticalConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
+            }
+            var horizontalConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
+
+            constraints.append(verticalConstraint!)
+            constraints.append(horizontalConstraint)
+            self.view.addConstraints([verticalConstraint!, horizontalConstraint])
+
             prev = nil
 
             // For each space, make a text field
@@ -86,32 +108,45 @@ class ViewController: NSViewController {
 
                 snippet.label.stringValue = "\(i)"
                 snippet.textField.delegate = self
-                self.view.addSubview(snippet)
+                snippetView.addSubview(snippet)
                 snippets.append(snippet)
 
                 desktops[uuid] = snippet.textField
 
                 var horizontalConstraint: NSLayoutConstraint?
-                var verticalConstraint: NSLayoutConstraint?
-                if (above != nil) {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
-                } else {
-                    verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1.0, constant: 10)
-                }
-
+                let verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: snippetView, attribute: .top, multiplier: 1.0, constant: 10)
 
                 if (prev == nil) {
-                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
+                    horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: snippetView, attribute: .leading, multiplier: 1.0, constant: 10)
                 } else {
                     horizontalConstraint = NSLayoutConstraint(item: snippet, attribute: .leading, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
                 }
 
-                constraints.append(verticalConstraint!)
+                constraints.append(verticalConstraint)
                 constraints.append(horizontalConstraint!)
-                self.view.addConstraints([verticalConstraint!, horizontalConstraint!])
+                snippetView.addConstraints([verticalConstraint, horizontalConstraint!])
                 prev = snippet
             }
             above = prev
+
+            verticalConstraint = NSLayoutConstraint(item: snippetView, attribute: .trailing, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
+            horizontalConstraint = NSLayoutConstraint(item: snippetView, attribute: .bottom, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 10)
+
+            constraints.append(verticalConstraint!)
+            constraints.append(horizontalConstraint)
+            snippetView.addConstraints([verticalConstraint!, horizontalConstraint])
+
+            monitorScrollView.documentView = snippetView
+
+            let equalHeight = NSLayoutConstraint(item: monitorScrollView, attribute: .height, relatedBy: .equal, toItem: snippetView, attribute: .height, multiplier: 1.0, constant: 0)
+            constraints.append(equalHeight)
+            self.view.addConstraint(equalHeight)
+
+            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(6.5, Double(allSpaces.count)) * 140.0))
+            constraints.append(widthConstraint)
+            self.view.addConstraints([widthConstraint])
+
+            prev = monitorScrollView
 
             if (allSpaces.count == maxSpacesPerMonitor) {
                 let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
