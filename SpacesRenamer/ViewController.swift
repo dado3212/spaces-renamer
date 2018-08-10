@@ -16,6 +16,8 @@ class ViewController: NSViewController {
     var snippets: [DesktopSnippet] = []
     var viewsToRemove: [NSView] = []
 
+    let widthInDesktops = 6
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -48,14 +50,18 @@ class ViewController: NSViewController {
         var prev: NSView?
         var above: NSView?
 
+        // Get the # of spaces in the maximum monitor
         let maxSpacesPerMonitor = allMonitors.reduce(Int.min, { max($0, (($1 as? NSDictionary)?.value(forKey: "Spaces") as! NSArray).count) })
 
+        // For each monitor
         for j in 1...allMonitors.count {
+            // Get the spaces for that monitor
             let allSpaces = (allMonitors[j-1] as? NSDictionary)?.value(forKey: "Spaces") as! NSArray
 
+            // And the selected monitor
             let currentSpace = (allMonitors[j-1] as? NSDictionary)?.value(forKeyPath: "Current Space.uuid") as! String
 
-            // Create a label for the monitor (if there is more than one monitor)
+            // If there is more than one monitor, make a label for it, and use it as the 'above' marker
             if (allMonitors.count > 1) {
                 let monitorLabel = NSTextField(labelWithString: "Monitor \(j)")
                 monitorLabel.font = NSFont(name: "HelveticaNeue-Bold", size: 14)
@@ -70,6 +76,7 @@ class ViewController: NSViewController {
 
                 let leftConstraint = NSLayoutConstraint(item: monitorLabel, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1.0, constant: 10)
 
+                // Add to arrays so this can be undone later
                 constraints.append(topConstraint!)
                 constraints.append(leftConstraint)
                 self.view.addSubview(monitorLabel)
@@ -79,21 +86,29 @@ class ViewController: NSViewController {
                 above = monitorLabel
             }
 
-            // Create a view for all of the snippets
+            // Create a scrollview for the monitors
             let monitorScrollView = NSScrollView()
             monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
             monitorScrollView.verticalScrollElasticity = .none
-            monitorScrollView.hasHorizontalScroller = true
             monitorScrollView.drawsBackground = false
+            // Don't let it scroll if it's not necessary
+            if (allSpaces.count <= widthInDesktops) {
+                monitorScrollView.horizontalScrollElasticity = .none
+            } else {
+                monitorScrollView.hasHorizontalScroller = true
+            }
 
+            // Make the view that will hold all of the desktops
             let snippetView = NSView()
             snippetView.translatesAutoresizingMaskIntoConstraints = false
             snippetView.wantsLayer = true
             self.view.addSubview(monitorScrollView)
 
+            // Remember to make it removable
             viewsToRemove.append(snippetView)
             viewsToRemove.append(monitorScrollView)
 
+            // Attach the scrollview to the top left of the window
             var verticalConstraint: NSLayoutConstraint?
             if (above != nil) {
                 verticalConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .top  , relatedBy: .equal, toItem: above, attribute: .bottom, multiplier: 1.0, constant: 10)
@@ -125,6 +140,7 @@ class ViewController: NSViewController {
 
                 desktops[uuid] = snippet.textField
 
+                // Attach the desktop to the left of the snippet beforehand
                 var horizontalConstraint: NSLayoutConstraint?
                 let verticalConstraint = NSLayoutConstraint(item: snippet, attribute: .top  , relatedBy: .equal, toItem: snippetView, attribute: .top, multiplier: 1.0, constant: 10)
 
@@ -140,6 +156,7 @@ class ViewController: NSViewController {
                 prev = snippet
             }
 
+            // Attach the bottom right snippet to the bottom right of the snippet view
             verticalConstraint = NSLayoutConstraint(item: snippetView, attribute: .trailing, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
             horizontalConstraint = NSLayoutConstraint(item: snippetView, attribute: .bottom, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 10)
 
@@ -147,19 +164,23 @@ class ViewController: NSViewController {
             constraints.append(horizontalConstraint)
             snippetView.addConstraints([verticalConstraint!, horizontalConstraint])
 
+            // Set the scrollView to be the snippetView
             monitorScrollView.documentView = snippetView
 
+            // Make sure they're the same height
             let equalHeight = NSLayoutConstraint(item: monitorScrollView, attribute: .height, relatedBy: .equal, toItem: snippetView, attribute: .height, multiplier: 1.0, constant: 0)
             constraints.append(equalHeight)
             self.view.addConstraint(equalHeight)
 
-            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(6.5, Double(allSpaces.count)) * 140.0))
+            // Set the scrollView to be the width of 6.5 monitors max, or just the normal width
+            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(Double(widthInDesktops) + 0.5, Double(allSpaces.count)) * 140.0 + 10.0))
             constraints.append(widthConstraint)
             self.view.addConstraints([widthConstraint])
 
             prev = monitorScrollView
             above = monitorScrollView
 
+            // If it's the largest one, then make sure that the overall screen is at least that large
             if (allSpaces.count == maxSpacesPerMonitor) {
                 let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
                 constraints.append(horizontalLayout)
@@ -167,6 +188,7 @@ class ViewController: NSViewController {
             }
         }
 
+        // Move the update button to the bottom
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
         constraints.append(verticalConstraint)
 
