@@ -14,6 +14,7 @@ class ViewController: NSViewController {
     var desktops: [String: NSTextField] = [String: NSTextField]()
     var constraints: [NSLayoutConstraint] = []
     var snippets: [DesktopSnippet] = []
+    var viewsToRemove: [NSView] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,9 +29,14 @@ class ViewController: NSViewController {
             view.removeFromSuperview()
         }
 
+        for view in viewsToRemove {
+            view.removeFromSuperview()
+        }
+
         constraints = []
         snippets = []
         desktops = [String: NSTextField]()
+        viewsToRemove = []
     }
 
     func setupViews() {
@@ -68,6 +74,7 @@ class ViewController: NSViewController {
                 constraints.append(leftConstraint)
                 self.view.addSubview(monitorLabel)
                 self.view.addConstraints([topConstraint!, leftConstraint])
+                viewsToRemove.append(monitorLabel)
 
                 above = monitorLabel
             }
@@ -77,10 +84,15 @@ class ViewController: NSViewController {
             monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
             monitorScrollView.verticalScrollElasticity = .none
             monitorScrollView.hasHorizontalScroller = true
+            monitorScrollView.drawsBackground = false
 
             let snippetView = NSView()
             snippetView.translatesAutoresizingMaskIntoConstraints = false
+            snippetView.wantsLayer = true
             self.view.addSubview(monitorScrollView)
+
+            viewsToRemove.append(snippetView)
+            viewsToRemove.append(monitorScrollView)
 
             var verticalConstraint: NSLayoutConstraint?
             if (above != nil) {
@@ -127,7 +139,6 @@ class ViewController: NSViewController {
                 snippetView.addConstraints([verticalConstraint, horizontalConstraint!])
                 prev = snippet
             }
-            above = prev
 
             verticalConstraint = NSLayoutConstraint(item: snippetView, attribute: .trailing, relatedBy: .equal, toItem: prev, attribute: .trailing, multiplier: 1.0, constant: 10)
             horizontalConstraint = NSLayoutConstraint(item: snippetView, attribute: .bottom, relatedBy: .equal, toItem: prev, attribute: .bottom, multiplier: 1.0, constant: 10)
@@ -147,6 +158,7 @@ class ViewController: NSViewController {
             self.view.addConstraints([widthConstraint])
 
             prev = monitorScrollView
+            above = monitorScrollView
 
             if (allSpaces.count == maxSpacesPerMonitor) {
                 let horizontalLayout = NSLayoutConstraint(item: self.view, attribute: .trailing, relatedBy: .equal, toItem: prev!, attribute: .trailing, multiplier: 1.0, constant: 10)
