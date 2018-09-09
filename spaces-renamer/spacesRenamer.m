@@ -181,6 +181,10 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         // Get all of the names
         NSMutableArray* names = getNamesFromPlist();
 
+        if (names.count == 0) {
+            return;
+        }
+
         // Take a best guess at which monitor it is
         NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
         for (int i = 0; i < names.count; i++) {

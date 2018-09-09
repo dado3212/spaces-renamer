@@ -22,6 +22,7 @@
 		A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
 		A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
 		A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC643214511EA002B4E08 /* GetLoginItems.scpt */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
@@ -60,6 +61,7 @@
 		A85FC62F2144F068002B4E08 /* AddToLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = AddToLogin.scpt; sourceTree = "<group>"; };
 		A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RemoveFromLogin.scpt; sourceTree = "<group>"; };
 		A85FC63A214503E0002B4E08 /* LetsMove.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LetsMove.framework; path = SpacesRenamer/LetsMove.framework; sourceTree = "<group>"; };
+		A85FC643214511EA002B4E08 /* GetLoginItems.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = GetLoginItems.scpt; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "spaces-renamer/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "spaces-renamer/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
 				A85FC62F2144F068002B4E08 /* AddToLogin.scpt */,
 				A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */,
+				A85FC643214511EA002B4E08 /* GetLoginItems.scpt */,
 				A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */,
 				A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */,
 				A85FC62B2144D437002B4E08 /* CenteredClipView.swift */,
@@ -240,6 +243,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */,
 				A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */,
 				A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */,
 				A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */,
