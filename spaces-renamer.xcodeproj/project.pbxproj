@@ -17,9 +17,28 @@
 		A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */; };
 		A81F4EFC2070AEED00660338 /* NameChangeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */; };
 		A85FC62C2144D437002B4E08 /* CenteredClipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85FC62B2144D437002B4E08 /* CenteredClipView.swift */; };
+		A85FC6312144F1AE002B4E08 /* RemoveFromLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */; };
+		A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC62F2144F068002B4E08 /* AddToLogin.scpt */; };
+		A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
+		A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
+		A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A85FC6422145044A002B4E08 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8D5B49B6048680CD000E48DA /* spaces-renamer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "spaces-renamer.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,6 +57,9 @@
 		A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpacesRenamerBridge.h; sourceTree = "<group>"; };
 		A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameChangeWindow.swift; sourceTree = "<group>"; };
 		A85FC62B2144D437002B4E08 /* CenteredClipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenteredClipView.swift; sourceTree = "<group>"; };
+		A85FC62F2144F068002B4E08 /* AddToLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = AddToLogin.scpt; sourceTree = "<group>"; };
+		A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RemoveFromLogin.scpt; sourceTree = "<group>"; };
+		A85FC63A214503E0002B4E08 /* LetsMove.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LetsMove.framework; path = SpacesRenamer/LetsMove.framework; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "spaces-renamer/ZKSwizzle.h"; sourceTree = "<group>"; };
 		FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZKSwizzle.m; path = "spaces-renamer/ZKSwizzle.m"; sourceTree = "<group>"; };
@@ -55,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,6 +91,7 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				A80DDE2A1FBCE4D600794F8F /* SpacesRenamer */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
+				A85FC63621450391002B4E08 /* Frameworks */,
 			);
 			name = ColorfulSidebar;
 			sourceTree = "<group>";
@@ -103,6 +127,8 @@
 			isa = PBXGroup;
 			children = (
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
+				A85FC62F2144F068002B4E08 /* AddToLogin.scpt */,
+				A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */,
 				A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */,
 				A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */,
 				A85FC62B2144D437002B4E08 /* CenteredClipView.swift */,
@@ -117,6 +143,14 @@
 				A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */,
 			);
 			path = SpacesRenamer;
+			sourceTree = "<group>";
+		};
+		A85FC63621450391002B4E08 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A85FC63A214503E0002B4E08 /* LetsMove.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,6 +181,7 @@
 				A80DDE251FBCE4D500794F8F /* Sources */,
 				A80DDE261FBCE4D500794F8F /* Frameworks */,
 				A80DDE271FBCE4D500794F8F /* Resources */,
+				A85FC6422145044A002B4E08 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -205,9 +240,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */,
+				A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */,
 				A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */,
 				A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */,
 				A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */,
+				A85FC6312144F1AE002B4E08 /* RemoveFromLogin.scpt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,6 +414,11 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2WR3HLA57;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/SpacesRenamer",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -426,6 +469,11 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = K2WR3HLA57;
 				ENABLE_NS_ASSERTIONS = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/SpacesRenamer",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;

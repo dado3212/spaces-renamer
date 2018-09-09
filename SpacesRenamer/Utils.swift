@@ -14,4 +14,28 @@ class Utils {
     static let spacesPath = Utils.libraryPath.appending("/Preferences/com.apple.spaces.plist")
 
     static let escapeKey: UInt16 = 0x35
+
+    static func addPathToLoginItems(_ path: String) {
+        let scriptPath = Bundle.main.path(forResource: "AddToLogin", ofType: "scpt")
+
+        if (scriptPath != nil) {
+            let process = Process()
+            process.launchPath = "/usr/bin/osascript"
+            process.arguments = [scriptPath!, path]
+            process.launch()
+            process.waitUntilExit()
+        }
+    }
+
+    static func removeAppFromLoginItems() {
+        let scriptPath = Bundle.main.path(forResource: "RemoveFromLogin", ofType: "scpt")
+
+        if (scriptPath != nil) {
+            let process = Process()
+            process.launchPath = "/usr/bin/osascript"
+            process.arguments = [scriptPath!, "SpacesRenamer"]
+            process.launch()
+            process.waitUntilExit()
+        }
+    }
 }
