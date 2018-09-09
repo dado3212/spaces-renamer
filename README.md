@@ -27,8 +27,9 @@ This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming sp
 
 ## Installation:
 1. Download the [latest mySIMBL version](https://github.com/w0lfschild/mySIMBL/releases/latest).
-2. Download [Spaces Renamer](https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip).
-3. Unzip the downloaded .zip file.
-4. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it.
-5. Run `killall -9 Dock` in Terminal to restart the Dock application.
-6. Run the application 'SpacesRenamer'.
+2. Make sure that it's installed, including disabling SIP (using `csrutil disable`, [here's a tutorial](https://www.imore.com/how-turn-system-integrity-protection-macos)).
+3. Download [Spaces Renamer](https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip).
+4. Unzip the downloaded .zip file.
+5. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it in to install it.
+6. Run `killall -9 Dock` in Terminal to restart the Dock application.
+7. Run the application 'SpacesRenamer'.  Accept the option to move it to /Applications.  It should be automatically added to your Login Items, but you can check to confirm by going to "System Preferences" > "Users & Groups" > "Login Items" and adding it manually if necessary.
