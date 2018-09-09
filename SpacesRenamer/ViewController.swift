@@ -164,7 +164,8 @@ class ViewController: NSViewController {
             constraints.append(horizontalConstraint)
             snippetView.addConstraints([verticalConstraint!, horizontalConstraint])
 
-            // Set the scrollView to be the snippetView
+            // Set the scrollView to be the snippetView (and centered)
+            monitorScrollView.contentView = CenteredClipView()
             monitorScrollView.documentView = snippetView
 
             // Make sure they're the same height
@@ -173,7 +174,7 @@ class ViewController: NSViewController {
             self.view.addConstraint(equalHeight)
 
             // Set the scrollView to be the width of 6.5 monitors max, or just the normal width
-            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(Double(widthInDesktops) + 0.5, Double(allSpaces.count)) * 140.0 + 10.0))
+            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(Double(widthInDesktops) + 0.5, Double(max(2, allSpaces.count))) * 140.0 + 10.0))
             constraints.append(widthConstraint)
             self.view.addConstraints([widthConstraint])
 
@@ -187,6 +188,7 @@ class ViewController: NSViewController {
                 self.view.addConstraints([horizontalLayout])
             }
         }
+
 
         // Move the update button to the bottom
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
