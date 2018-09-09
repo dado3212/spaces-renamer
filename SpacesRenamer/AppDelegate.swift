@@ -8,6 +8,7 @@
 
 import Cocoa
 import Foundation
+import LetsMove
 
 @NSApplicationMain
 @objc
@@ -82,6 +83,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
         }
+
+        // Move it to the /Applications folder, and add it as a login item
+        PFMoveToApplicationsFolderIfNecessary()
+        Utils.addPathToLoginItemsIfNecessary(path: Bundle.main.bundlePath, name: "SpacesRenamer")
 
         // Listen for left click (without Command)
         NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
