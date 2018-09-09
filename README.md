@@ -1,4 +1,7 @@
-# <img src="/SpacesRenamer/Assets.xcassets/AppIcon.appiconset/Icon-3.png?raw=true" height="40" alt=""/> Spaces Renamer
+<h1 align="center">
+  <img src="/SpacesRenamer/Assets.xcassets/AppIcon.appiconset/Icon-1.png?raw=true" height="300" alt=""/>
+  <p align="center">Spaces Renamer</p>
+</h1>
 
 Spaces Renamer is a combination of an application and SIMBL plugin to allow you to rename your spaces.
 
