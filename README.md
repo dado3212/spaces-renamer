@@ -30,7 +30,7 @@ This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming sp
 
 ## Installation:
 1. Download the [latest mySIMBL version](https://github.com/w0lfschild/mySIMBL/releases/latest).
-2. Make sure that it's installed, including disabling SIP (use the command `csrutil disable` in Recovery mode, [following this tutorial](https://www.imore.com/how-turn-system-integrity-protection-macos)).
+2. Make sure that it's installed, including disabling SIP (use the command `csrutil disable` in Recovery mode by [following this tutorial](https://www.imore.com/how-turn-system-integrity-protection-macos)).
 3. Download [Spaces Renamer](https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip).
 4. Unzip the downloaded .zip file.
 5. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it in to install it.
