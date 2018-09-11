@@ -181,7 +181,16 @@ class ViewController: NSViewController {
             self.view.addConstraint(equalHeight)
 
             // Set the scrollView to be the width of 6.5 monitors max, or just the normal width
-            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(Double(widthInDesktops) + 0.5, Double(max(2, allSpaces.count))) * 140.0 + 10.0))
+            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(
+                min(
+                    Double(widthInDesktops) + 0.5,
+                    Double(
+                        max(
+                            maxSpacesPerMonitor == 1 ? 1 : 2,
+                            allSpaces.count
+                    ))
+                ) * 140.0 + 10.0
+            ))
             constraints.append(widthConstraint)
             self.view.addConstraints([widthConstraint])
 
