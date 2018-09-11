@@ -186,7 +186,7 @@ class ViewController: NSViewController {
                     Double(widthInDesktops) + 0.5,
                     Double(
                         max(
-                            maxSpacesPerMonitor == 1 ? 1 : 2,
+                            maxSpacesPerMonitor == 1 ? 2 : 1,
                             allSpaces.count
                     ))
                 ) * 140.0 + 10.0
