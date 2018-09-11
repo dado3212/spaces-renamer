@@ -16,6 +16,8 @@ class ViewController: NSViewController {
     var snippets: [DesktopSnippet] = []
     var viewsToRemove: [NSView] = []
 
+    var scrollView: NSScrollView?
+
     let widthInDesktops = 6
 
     override func viewDidLoad() {
@@ -88,6 +90,7 @@ class ViewController: NSViewController {
 
             // Create a scrollview for the monitors
             let monitorScrollView = NSScrollView()
+            scrollView = monitorScrollView
             monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
             monitorScrollView.verticalScrollElasticity = .none
             monitorScrollView.drawsBackground = false
@@ -166,6 +169,7 @@ class ViewController: NSViewController {
 
             // Set the scrollView to be the snippetView (and centered)
             monitorScrollView.contentView = CenteredClipView()
+            monitorScrollView.contentView.drawsBackground = false
             monitorScrollView.documentView = snippetView
 
             // Make sure they're the same height
@@ -188,7 +192,6 @@ class ViewController: NSViewController {
                 self.view.addConstraints([horizontalLayout])
             }
         }
-
 
         // Move the update button to the bottom
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
@@ -230,6 +233,22 @@ class ViewController: NSViewController {
         super.viewWillAppear()
 
         refreshViews()
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+
+        for snippet in snippets {
+            print(snippet.frame)
+            if snippet.isCurrent {
+                scrollView!.scrollToView(view: snippet)
+                break
+            }
+//            if snippet.isCurrent {
+//                snippet.textField.becomeFirstResponder()
+//                break
+//            }
+        }
     }
 
     @IBAction func quitMenuApp(_ sender: Any) {
