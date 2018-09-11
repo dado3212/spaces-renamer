@@ -70,8 +70,51 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Runs when a space is moved or switched, which confirms that the current list is in the right order
     @objc func updateActiveSpaces() {
         let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
+
         let spacesDict = NSMutableDictionary()
         spacesDict.setValue(info, forKey: "Monitors")
+
+        let prev = NSDictionary(contentsOfFile: Utils.listOfSpacesPlist)
+
+        // Gracefully clear any removed named desktops
+        if (prev != nil) {
+            var newSpaces: [String] = []
+
+            var removed: [String] = []
+
+            for monitor in info {
+                if let monitorSpaces = monitor["Spaces"] as? [[String: AnyObject]] {
+                    for space in monitorSpaces {
+                        newSpaces.append(space["uuid"] as! String)
+                    }
+                }
+            }
+            if let monitors = prev!["Monitors"] as? [[String: AnyObject]] {
+                for monitor in monitors {
+                    if let monitorSpaces = monitor["Spaces"] as? [[String: AnyObject]] {
+                        for space in monitorSpaces {
+                            if !newSpaces.contains(space["uuid"] as! String) {
+                                removed.append(space["uuid"] as! String)
+                            }
+                        }
+                    }
+                }
+            }
+
+            let customNames = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist)
+            if (customNames != nil) {
+                if var renamed = customNames!["spaces_renaming"] as? [String: String] {
+                    for removedUUID in removed {
+                        if renamed[removedUUID] != nil {
+                            renamed.removeValue(forKey: removedUUID)
+                        }
+                    }
+                    customNames!["spaces_renaming"] = renamed
+                }
+                customNames!.write(toFile: Utils.customNamesPlist, atomically: true)
+            }
+        }
+
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
         if (nameChangeWindow.isVisible) {

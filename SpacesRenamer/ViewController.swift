@@ -13,8 +13,9 @@ class ViewController: NSViewController {
 
     var desktops: [String: NSTextField] = [String: NSTextField]()
     var constraints: [NSLayoutConstraint] = []
-    var snippets: [DesktopSnippet] = []
     var viewsToRemove: [NSView] = []
+
+    var monitorPairings: [[NSScrollView: [DesktopSnippet]]] = []
 
     let widthInDesktops = 6
 
@@ -27,8 +28,12 @@ class ViewController: NSViewController {
     func teardownViews() {
         NSLayoutConstraint.deactivate(constraints)
 
-        for view in snippets {
-            view.removeFromSuperview()
+        for pairings in monitorPairings {
+            for (_, snippets) in pairings {
+                for snippet in snippets {
+                    snippet.removeFromSuperview()
+                }
+            }
         }
 
         for view in viewsToRemove {
@@ -36,7 +41,7 @@ class ViewController: NSViewController {
         }
 
         constraints = []
-        snippets = []
+        monitorPairings = []
         desktops = [String: NSTextField]()
         viewsToRemove = []
     }
@@ -88,6 +93,7 @@ class ViewController: NSViewController {
 
             // Create a scrollview for the monitors
             let monitorScrollView = NSScrollView()
+            monitorPairings.append([monitorScrollView: []])
             monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
             monitorScrollView.verticalScrollElasticity = .none
             monitorScrollView.drawsBackground = false
@@ -136,7 +142,7 @@ class ViewController: NSViewController {
                 snippet.label.stringValue = "\(i)"
                 snippet.textField.delegate = self
                 snippetView.addSubview(snippet)
-                snippets.append(snippet)
+                monitorPairings[monitorPairings.count - 1][monitorScrollView]!.append(snippet)
 
                 desktops[uuid] = snippet.textField
 
@@ -166,6 +172,7 @@ class ViewController: NSViewController {
 
             // Set the scrollView to be the snippetView (and centered)
             monitorScrollView.contentView = CenteredClipView()
+            monitorScrollView.contentView.drawsBackground = false
             monitorScrollView.documentView = snippetView
 
             // Make sure they're the same height
@@ -174,7 +181,16 @@ class ViewController: NSViewController {
             self.view.addConstraint(equalHeight)
 
             // Set the scrollView to be the width of 6.5 monitors max, or just the normal width
-            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(min(Double(widthInDesktops) + 0.5, Double(max(2, allSpaces.count))) * 140.0 + 10.0))
+            let widthConstraint = NSLayoutConstraint(item: monitorScrollView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(
+                min(
+                    Double(widthInDesktops) + 0.5,
+                    Double(
+                        max(
+                            maxSpacesPerMonitor == 1 ? 2 : 1,
+                            allSpaces.count
+                    ))
+                ) * 140.0 + 10.0
+            ))
             constraints.append(widthConstraint)
             self.view.addConstraints([widthConstraint])
 
@@ -188,7 +204,6 @@ class ViewController: NSViewController {
                 self.view.addConstraints([horizontalLayout])
             }
         }
-
 
         // Move the update button to the bottom
         let verticalConstraint = NSLayoutConstraint(item: updateButton, attribute: .top, relatedBy: .equal, toItem: prev!, attribute: .bottom, multiplier: 1.0, constant: 10)
@@ -213,23 +228,35 @@ class ViewController: NSViewController {
                 textField.stringValue = newName as! String
             }
         }
-
-        selectCurrent()
-    }
-
-    func selectCurrent() {
-        for snippet in snippets {
-            if snippet.isCurrent {
-                snippet.textField.becomeFirstResponder()
-                break
-            }
-        }
     }
 
     override func viewWillAppear() {
         super.viewWillAppear()
 
         refreshViews()
+    }
+
+    func selectCurrent() {
+        var set = false
+        for pairing in monitorPairings {
+            for (monitor, snippets) in pairing {
+                for snippet in snippets {
+                    if snippet.isCurrent {
+                        monitor.scrollToView(view: snippet)
+                        if (!set) {
+                            snippet.textField.becomeFirstResponder()
+                            set = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+
+        selectCurrent()
     }
 
     @IBAction func quitMenuApp(_ sender: Any) {
