@@ -13,10 +13,9 @@ class ViewController: NSViewController {
 
     var desktops: [String: NSTextField] = [String: NSTextField]()
     var constraints: [NSLayoutConstraint] = []
-    var snippets: [DesktopSnippet] = []
     var viewsToRemove: [NSView] = []
 
-    var scrollView: NSScrollView?
+    var monitorPairings: [[NSScrollView: [DesktopSnippet]]] = []
 
     let widthInDesktops = 6
 
@@ -29,8 +28,12 @@ class ViewController: NSViewController {
     func teardownViews() {
         NSLayoutConstraint.deactivate(constraints)
 
-        for view in snippets {
-            view.removeFromSuperview()
+        for pairings in monitorPairings {
+            for (_, snippets) in pairings {
+                for snippet in snippets {
+                    snippet.removeFromSuperview()
+                }
+            }
         }
 
         for view in viewsToRemove {
@@ -38,7 +41,7 @@ class ViewController: NSViewController {
         }
 
         constraints = []
-        snippets = []
+        monitorPairings = []
         desktops = [String: NSTextField]()
         viewsToRemove = []
     }
@@ -90,7 +93,7 @@ class ViewController: NSViewController {
 
             // Create a scrollview for the monitors
             let monitorScrollView = NSScrollView()
-            scrollView = monitorScrollView
+            monitorPairings.append([monitorScrollView: []])
             monitorScrollView.translatesAutoresizingMaskIntoConstraints = false
             monitorScrollView.verticalScrollElasticity = .none
             monitorScrollView.drawsBackground = false
@@ -139,7 +142,7 @@ class ViewController: NSViewController {
                 snippet.label.stringValue = "\(i)"
                 snippet.textField.delegate = self
                 snippetView.addSubview(snippet)
-                snippets.append(snippet)
+                monitorPairings[monitorPairings.count - 1][monitorScrollView]!.append(snippet)
 
                 desktops[uuid] = snippet.textField
 
@@ -216,17 +219,6 @@ class ViewController: NSViewController {
                 textField.stringValue = newName as! String
             }
         }
-
-        selectCurrent()
-    }
-
-    func selectCurrent() {
-        for snippet in snippets {
-            if snippet.isCurrent {
-                snippet.textField.becomeFirstResponder()
-                break
-            }
-        }
     }
 
     override func viewWillAppear() {
@@ -235,20 +227,27 @@ class ViewController: NSViewController {
         refreshViews()
     }
 
+    func selectCurrent() {
+        var set = false
+        for pairing in monitorPairings {
+            for (monitor, snippets) in pairing {
+                for snippet in snippets {
+                    if snippet.isCurrent {
+                        monitor.scrollToView(view: snippet)
+                        if (!set) {
+                            snippet.textField.becomeFirstResponder()
+                            set = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override func viewDidAppear() {
         super.viewDidAppear()
 
-        for snippet in snippets {
-            print(snippet.frame)
-            if snippet.isCurrent {
-                scrollView!.scrollToView(view: snippet)
-                break
-            }
-//            if snippet.isCurrent {
-//                snippet.textField.becomeFirstResponder()
-//                break
-//            }
-        }
+        selectCurrent()
     }
 
     @IBAction func quitMenuApp(_ sender: Any) {

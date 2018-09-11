@@ -74,6 +74,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         spacesDict.setValue(info, forKey: "Monitors")
         spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
+        print("Updating")
+
         if (nameChangeWindow.isVisible) {
             nameChangeWindow.refresh()
         }
