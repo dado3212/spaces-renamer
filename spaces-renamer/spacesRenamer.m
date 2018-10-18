@@ -32,6 +32,7 @@ static void setTextLayer(CALayer *view, NSString *newString) {
         ((CATextLayer *)view).string = newString;
         assign(view, &OVERRIDDEN_STRING, newString);
         assign(view, &FRAME, [NSValue valueWithRect:view.frame]);
+        // NSLog(@"hackingdartmouth - frame: %@", view.frame);
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
@@ -96,16 +97,27 @@ static NSMutableArray *getNamesFromPlist() {
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setBounds:(CGRect)arg1 {
+    CGRect containerRect = CGRectMake(0, 0, 67, 22); // originalContainer sizing
+    containerRect.size.width += 30;
+
+    CGRect backgroundRect = containerRect;
+    backgroundRect.origin.x = 30;
+    backgroundRect.size.width += 20;
+
+    CGRect textRect = containerRect;
+    textRect.size.height -= 5;
 
     id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
     if ([overridden isEqualToString:@"text"]) {
         // ZKOrig(void, NSRectToCGRect([objc_getAssociatedObject(self, &FRAME) rectValue]));
         objc_removeAssociatedObjects(self);
-        // ZKOrig(void, CGRectMake(0, 0, 67, 17));
-        ZKOrig(void, arg1);
+        NSLog(@"hackingdartmouth - original string: %@", NSStringFromRect(arg1));
+        ZKOrig(void, textRect);
+        // ZKOrig(void, arg1);
         return;
     } else if ([overridden isEqualToString:@"background"]) {
-        ZKOrig(void, CGRectMake(30, 0, 88, 22));
+        NSLog(@"hackingdartmouth - original background: %@", NSStringFromRect(arg1));
+        ZKOrig(void, backgroundRect);
         return;
     }
 
@@ -118,16 +130,48 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
         // This is the part of the background and the text when scrolling
         assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
         assign(self.sublayers[1], &OVERRIDDEN_FRAME, @"text");
+        NSLog(@"hackingdartmouth - original container: %@", NSStringFromRect(arg1));
+        return ZKOrig(void, containerRect);
     }
 
     ZKOrig(void, arg1);
 }
 @end
 
+ZKSwizzleInterface(_SRECSBSpringboard, ECSBSpringboard, NSObject);
+@implementation _SRECSBSpringboard
+- (void)layout {
+    NSLog(@"hackingdartmouth - layout");
+    ZKOrig(void);
+}
+@end
+
+ZKSwizzleInterface(_SRNSObject, NSObject, NSObject);
+@implementation _SRNSObject
+- (id)init {
+    id a = ZKOrig(id);
+    if ([NSStringFromClass([self class]) containsString:@"SpacesBarWindowController"]) {
+        NSLog(@"hackingdartmouth - initialized: %@, %@", self, [a modalEventLayer]);
+        // return nil;
+
+    }
+    return a;
+}
+@end
+
+ZKSwizzleInterface(_SRSwiftObject, SwiftObject, NSObject);
+@implementation _SRSwiftObject
+- (id)init {
+    NSLog(@"hackingdartmouth - SwiftObject: %@", self);
+    return ZKOrig(id);
+}
+@end
+
 ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 @implementation _SRECTextLayer
 - (void)setBounds:(CGRect)arg1 {
-    ZKOrig(void, arg1);
+    // ZKOrig(void, arg1);
+    ZKOrig(void, CGRectMake(0, 0, 180, 17));
 
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
@@ -166,10 +210,13 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _SRECMaterialLayer
 
 - (void)setBounds:(CGRect)arg1 {
+//    ZKOrig(void, CGRectMake(0, 0, 0, 0));
+//    return;
     ZKOrig(void, arg1);
 
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
+        NSLog(@"hackingdartmouth - sublayers: %@", self.sublayers[3].sublayers);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
