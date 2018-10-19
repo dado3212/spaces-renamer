@@ -36,6 +36,11 @@ static void refreshDockView(CALayer *dockView) {
                 [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
             }
         }
+
+        for (int i = 0; i < expandedViews.count; i++) {
+            [expandedViews[i].sublayers[0] setFrame:expandedViews[i].sublayers[0].frame];
+            [expandedViews[i].sublayers[0].sublayers[0] setFrame:expandedViews[i].sublayers[0].sublayers[0].frame];
+        }
     }
 }
 
@@ -51,7 +56,8 @@ static NSString *whatAmI(CALayer *view, NSString *prefix) {
                                 ]];
     }
     if (children.length == 0) {
-        return [NSString stringWithFormat:@"%@%@ - %@, %@", prefix, view,                                 objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
+        return [NSString stringWithFormat:@"%@%@ - %@, %@, %@", prefix, view,                                 objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
+                objc_getAssociatedObject(view, &OVERRIDDEN_WIDTH),
                 objc_getAssociatedObject(view, &OFFSET)];
     } else {
         return [NSString stringWithFormat:@"%@%@\n%@", prefix, view, [children substringToIndex:[children length]-1]];
@@ -62,9 +68,9 @@ static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static void setOffset(CALayer *view, int offset) {
+static void setOffset(CALayer *view, double offset) {
     if (view.sublayers.count == 0) {
-        assign(view, &OFFSET, [NSNumber numberWithInt:offset]);
+        assign(view, &OFFSET, [NSNumber numberWithDouble:offset]);
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
@@ -90,6 +96,8 @@ static void setTextLayer(CALayer *view, NSString *newString, double width) {
     }
 }
 
+// Gets the ECTextLayer child from a starting view
+// Good for when you don't care whether it's selected or not
 static CATextLayer *getTextLayer(CALayer *view) {
     CATextLayer *layer = nil;
     if (view.class == NSClassFromString(@"ECTextLayer")) {
@@ -106,6 +114,8 @@ static CATextLayer *getTextLayer(CALayer *view) {
     return layer;
 }
 
+// Gets the text area, and renders how large it would be with the new dimensions
+// Uses this for calculating how far they should be offset by
 static double getTextSize(CALayer *view, NSString *string) {
     double textSize = -1;
     CATextLayer *textLayer = getTextLayer(view);
@@ -181,52 +191,27 @@ static NSMutableArray *getNamesFromPlist() {
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setFrame:(CGRect)arg1 {
-    if ([objc_getAssociatedObject(self, &OVERRIDDEN_FRAME) isEqualToString:@"background"]) {
-        id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
-        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-            arg1.size.width = [possibleWidth doubleValue] + 20;
-        }
-        return ZKOrig(void, arg1);
+    id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
+        arg1.size.width = [possibleWidth doubleValue] + 20;
     }
 
-    if (
-        self.sublayers.count == 1 &&
-        self.sublayers[0].class == NSClassFromString(@"ECTextLayer")
-    ) {
-        id possibleWidth = objc_getAssociatedObject(self.sublayers[0], &OVERRIDDEN_WIDTH);
+    int textIndex = self.sublayers.lastObject.class == NSClassFromString(@"ECTextLayer")
+        ? (int)self.sublayers.count - 1
+        : -1;
+
+    if (textIndex != -1) {
+        id possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
         if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
             arg1.size.width = [possibleWidth doubleValue];
         }
 
-        id possibleOffset = objc_getAssociatedObject(self.sublayers[0], &OFFSET);
+        id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
         id didMove = objc_getAssociatedObject(self, &MOVED);
         if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
-            arg1.origin.x += [possibleOffset intValue];
+            arg1.origin.x += [possibleOffset doubleValue];
             assign(self, &MOVED, [NSNumber numberWithBool:YES]);
         }
-        return ZKOrig(void, arg1);
-    } else if (
-       self.sublayers.count == 2 &&
-       self.sublayers[0].class == NSClassFromString(@"CALayer") &&
-       self.sublayers[0].cornerRadius == 5.0 &&
-       self.sublayers[1].class == NSClassFromString(@"ECTextLayer")
-    ) {
-        // This is the part of the background and the text when scrolling
-        assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
-        assign(self.sublayers[0], &OFFSET, objc_getAssociatedObject(self.sublayers[1], &OFFSET));
-
-        id possibleWidth = objc_getAssociatedObject(self.sublayers[1], &OVERRIDDEN_WIDTH);
-        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-            arg1.size.width = [possibleWidth doubleValue];
-        }
-
-        id possibleOffset = objc_getAssociatedObject(self.sublayers[1], &OFFSET);
-        id didMove = objc_getAssociatedObject(self, &MOVED);
-        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
-            arg1.origin.x += [possibleOffset intValue];
-            assign(self, &MOVED, [NSNumber numberWithBool:YES]);
-        }
-        return ZKOrig(void, arg1);
     }
 
     return ZKOrig(void, arg1);
@@ -284,7 +269,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
-        int numMonitors = MAX(unexpandedViews.count, expandedViews.count);
+        int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
         // Get which of the spaces in the current dock is selected
         int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
@@ -315,21 +300,28 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
         monitorIndex = monitorIndex % names.count;
 
-        int offset = 0;
+        double unexpandedOffset = 0;
+        double expandedOffset = 0;
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
             if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
                 if (i < expandedViews.count) {
-                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"], -1);
+                    double textSize = getTextSize(expandedViews[i], names[monitorIndex][i][@"name"]);
+                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"], textSize);
+                    setOffset(expandedViews[i], (getTextLayer(expandedViews[i]).bounds.size.width - textSize)/2);
+                    expandedOffset += (textSize - getTextLayer(expandedViews[i]).bounds.size.width);
                 }
                 if (i < unexpandedViews.count) {
                     double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
                     setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
-                    setOffset(unexpandedViews[i], offset);
-                    offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
+                    setOffset(unexpandedViews[i], unexpandedOffset);
+                    unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                 }
             } else {
+                if (i < expandedViews.count) {
+                    setOffset(expandedViews[i], 0);
+                }
                 if (i < unexpandedViews.count) {
-                    setOffset(unexpandedViews[i], offset);
+                    setOffset(unexpandedViews[i], unexpandedOffset);
                 }
             }
         }
