@@ -35,6 +35,7 @@ static void refreshDockView() {
             [unexpandedViews[i] setNeedsLayout];
             for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
                 [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
+                [unexpandedViews[i].sublayers[j] setBounds:unexpandedViews[i].sublayers[j].bounds];
                 [unexpandedViews[i].sublayers[j] setNeedsLayout];
             }
         }
@@ -63,17 +64,25 @@ static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static void setTextLayer(CALayer *view, NSString *newString, int offset) {
+static void setOffset(CALayer *view, int offset) {
     if (view.class == NSClassFromString(@"ECTextLayer")) {
-        ((CATextLayer *)view).string = newString;
-        assign(view, &OVERRIDDEN_STRING, newString);
         assign(view, &OFFSET, [NSNumber numberWithInt:offset]);
-        [view setFrame:view.frame];
-        [view setNeedsLayout];
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
-            setTextLayer(view.sublayers[i], newString, offset);
+            setOffset(view.sublayers[i], offset);
+        }
+    }
+}
+
+static void setTextLayer(CALayer *view, NSString *newString) {
+    if (view.class == NSClassFromString(@"ECTextLayer")) {
+        ((CATextLayer *)view).string = newString;
+        assign(view, &OVERRIDDEN_STRING, newString);
+    } else {
+        // The opacity is animated, but it's the same ONE, until you swipe off
+        for (int i = 0; i < view.sublayers.count; i++) {
+            setTextLayer(view.sublayers[i], newString);
         }
     }
 }
@@ -284,10 +293,18 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
             if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
                 if (i < expandedViews.count) {
-                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"], 0);
+                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
                 }
                 if (i < unexpandedViews.count) {
-                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"], offset);
+                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                    setOffset(unexpandedViews[i], offset);
+                    if ([names[monitorIndex][i][@"name"] length] != 0) {
+                        offset += (8.5 * [names[monitorIndex][i][@"name"] length] - 67);
+                    }
+                }
+            } else {
+                if (i < unexpandedViews.count) {
+                    setOffset(unexpandedViews[i], offset);
                     if ([names[monitorIndex][i][@"name"] length] != 0) {
                         offset += (8.5 * [names[monitorIndex][i][@"name"] length] - 67);
                     }
