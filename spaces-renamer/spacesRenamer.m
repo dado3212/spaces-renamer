@@ -31,11 +31,8 @@ static void refreshDockView(CALayer *dockView) {
 
         for (int i = 0; i < unexpandedViews.count; i++) {
             [unexpandedViews[i] setFrame:unexpandedViews[i].frame];
-            [unexpandedViews[i] setNeedsLayout];
             for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
-                [unexpandedViews[i].sublayers[j] setBounds:unexpandedViews[i].sublayers[j].bounds];
                 [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
-                [unexpandedViews[i].sublayers[j] setNeedsLayout];
             }
         }
     }
@@ -87,6 +84,32 @@ static void setTextLayer(CALayer *view, NSString *newString) {
             setTextLayer(view.sublayers[i], newString);
         }
     }
+}
+
+static double getTextSize(CALayer *view, NSString *string) {
+    double textSize = -1;
+    if (view.class == NSClassFromString(@"ECTextLayer")) {
+        CTFontRef _contentFont = ((CATextLayer *)view).font;
+        int strLength = (int)[string length];
+        CGGlyph glyphs[strLength];
+        unichar chars[strLength];
+        NSRange range = {0, strLength};
+        [string getCharacters:chars range:range];
+
+        bool rc = CTFontGetGlyphsForCharacters(_contentFont, chars, glyphs, strLength);
+        if (rc) {
+            textSize = CTFontGetAdvancesForGlyphs(_contentFont, kCTFontOrientationDefault, glyphs, NULL, strLength);
+        }
+    } else {
+        for (int i = 0; i < view.sublayers.count; i++) {
+            double tempTextSize = getTextSize(view.sublayers[i], string);
+            if (tempTextSize != -1) {
+                textSize = tempTextSize;
+                break;
+            }
+        }
+    }
+    return textSize;
 }
 
 // The highlighted space has 2 sublayers, while as a normal space only has 1
@@ -148,7 +171,7 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
     if ([objc_getAssociatedObject(self, &OVERRIDDEN_FRAME) isEqualToString:@"background"]) {
         id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = 8.5 * [possibleString length] + 20;
+            arg1.size.width = getTextSize(self.superlayer, possibleString) + 20;
         }
         return ZKOrig(void, arg1);
     }
@@ -159,8 +182,7 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
     ) {
         id possibleString = objc_getAssociatedObject(self.sublayers[0], &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = 8.5 * [possibleString length];
-            assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"text");
+            arg1.size.width = getTextSize(self.sublayers[0], possibleString);
         }
 
         id possibleOffset = objc_getAssociatedObject(self.sublayers[0], &OFFSET);
@@ -182,7 +204,7 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 
         id possibleString = objc_getAssociatedObject(self.sublayers[1], &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = 8.5 * [possibleString length];
+            arg1.size.width = getTextSize(self.sublayers[1], possibleString);
         }
 
         id possibleOffset = objc_getAssociatedObject(self.sublayers[1], &OFFSET);
@@ -211,7 +233,7 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 
     id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
     if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-        arg1.size.width = 8.5 * [possibleString length];
+        arg1.size.width = getTextSize(self, possibleString);
     }
 
     ZKOrig(void, arg1);
@@ -290,14 +312,18 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
                     setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
                     setOffset(unexpandedViews[i], offset);
                     if ([names[monitorIndex][i][@"name"] length] != 0) {
-                        offset += (8.5 * [names[monitorIndex][i][@"name"] length] - 67);
+                        double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                        double originalTextSize = getTextSize(unexpandedViews[i], @"Desktop 1");
+                        offset += (textSize - originalTextSize);
                     }
                 }
             } else {
                 if (i < unexpandedViews.count) {
                     setOffset(unexpandedViews[i], offset);
                     if ([names[monitorIndex][i][@"name"] length] != 0) {
-                        offset += (8.5 * [names[monitorIndex][i][@"name"] length] - 67);
+                        double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                        double originalTextSize = getTextSize(unexpandedViews[i], @"Desktop 1");
+                        offset += (textSize - originalTextSize);
                     }
                 }
             }
