@@ -13,6 +13,7 @@
 static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_FRAME;
 static char OFFSET;
+static char MOVED;
 
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
@@ -20,12 +21,10 @@ static char OFFSET;
 
 int monitorIndex = 0;
 
-__strong CALayer *dockView = nil;
-
 @interface ECMaterialLayer : CALayer
 @end
 
-static void refreshDockView() {
+static void refreshDockView(CALayer *dockView) {
     if (dockView != nil && dockView.superlayer.class == NSClassFromString(@"CALayer") && dockView.sublayers.count == 4) {
         NSArray<CALayer *> *unexpandedViews = dockView.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = dockView.sublayers[3].sublayers[1].sublayers;
@@ -54,7 +53,8 @@ static NSString *whatAmI(CALayer *view, NSString *prefix) {
                                 ]];
     }
     if (children.length == 0) {
-        return [NSString stringWithFormat:@"%@%@", prefix, view];
+        return [NSString stringWithFormat:@"%@%@ - %@, %@", prefix, view,                                 objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
+                objc_getAssociatedObject(view, &OFFSET)];
     } else {
         return [NSString stringWithFormat:@"%@%@\n%@", prefix, view, [children substringToIndex:[children length]-1]];
     }
@@ -65,7 +65,7 @@ static void assign(id a, void *key, id assigned) {
 }
 
 static void setOffset(CALayer *view, int offset) {
-    if (view.class == NSClassFromString(@"ECTextLayer")) {
+    if (view.sublayers.count == 0) {
         assign(view, &OFFSET, [NSNumber numberWithInt:offset]);
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
@@ -76,9 +76,11 @@ static void setOffset(CALayer *view, int offset) {
 }
 
 static void setTextLayer(CALayer *view, NSString *newString) {
-    if (view.class == NSClassFromString(@"ECTextLayer")) {
-        ((CATextLayer *)view).string = newString;
+    if (view.sublayers.count == 0) {
         assign(view, &OVERRIDDEN_STRING, newString);
+        if (view.class == NSClassFromString(@"ECTextLayer")) {
+            ((CATextLayer *)view).string = newString;
+        }
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
@@ -143,25 +145,10 @@ static NSMutableArray *getNamesFromPlist() {
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setFrame:(CGRect)arg1 {
-    id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
-    if ([overridden isEqualToString:@"text"]) {
-        NSLog(@"hackingdartmouth - overrriding for text frame");
+    if ([objc_getAssociatedObject(self, &OVERRIDDEN_FRAME) isEqualToString:@"background"]) {
         id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            NSLog(@"hackingdartmouth - overridden string!");
-            arg1.size.width = 8.5 * [possibleString length];
-        }
-
-        id possibleOffset = objc_getAssociatedObject(self, &OFFSET);
-        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
-            NSLog(@"hackingdartmouth - overridden offset!");
-            arg1.origin.x += [possibleOffset intValue];
-        }
-        return ZKOrig(void, arg1);
-    } else if ([overridden isEqualToString:@"background"]) {
-        id possibleOffset = objc_getAssociatedObject(self, &OFFSET);
-        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
-            arg1.origin.x += [possibleOffset intValue];
+            arg1.size.width = 8.5 * [possibleString length] + 20;
         }
         return ZKOrig(void, arg1);
     }
@@ -175,6 +162,13 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
             arg1.size.width = 8.5 * [possibleString length];
             assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"text");
         }
+
+        id possibleOffset = objc_getAssociatedObject(self.sublayers[0], &OFFSET);
+        id didMove = objc_getAssociatedObject(self, &MOVED);
+        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
+            arg1.origin.x += [possibleOffset intValue];
+            assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+        }
         return ZKOrig(void, arg1);
     } else if (
        self.sublayers.count == 2 &&
@@ -186,30 +180,26 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
         assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
         assign(self.sublayers[0], &OFFSET, objc_getAssociatedObject(self.sublayers[1], &OFFSET));
 
-        assign(self.sublayers[1], &OVERRIDDEN_FRAME, @"text");
-
         id possibleString = objc_getAssociatedObject(self.sublayers[1], &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
             arg1.size.width = 8.5 * [possibleString length];
         }
+
+        id possibleOffset = objc_getAssociatedObject(self.sublayers[1], &OFFSET);
+        id didMove = objc_getAssociatedObject(self, &MOVED);
+        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
+            arg1.origin.x += [possibleOffset intValue];
+            assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+        }
         return ZKOrig(void, arg1);
     }
 
-    ZKOrig(void, arg1);
+    return ZKOrig(void, arg1);
 }
 @end
 
 ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 @implementation _SRECTextLayer
-- (void)setBounds:(CGRect)arg1 {
-    id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-    if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-        // Make the text really big
-        arg1.size.width = 8.5 * [possibleString length] + 100;
-    }
-    ZKOrig(void, arg1);
-}
-
 - (void)setFrame:(CGRect)arg1 {
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
@@ -218,6 +208,11 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
                        forKeyPath:@"propertiesChanged"
                           options:NSKeyValueObservingOptionNew
                           context:nil];
+
+    id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
+    if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
+        arg1.size.width = 8.5 * [possibleString length];
+    }
 
     ZKOrig(void, arg1);
 }
@@ -251,10 +246,6 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 - (void)setFrame:(CGRect)arg1 {
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
-        dockView = self;
-        NSLog(@"hackingdartmouth - START OF FIXING VALUES");
-
-        // NSLog(@"hackingdartmouth - sublayers: %@", self.sublayers[3].sublayers);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
@@ -314,7 +305,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
         monitorIndex += 1;
 
-        refreshDockView();
+        refreshDockView(self);
     }
     ZKOrig(void, arg1);
 }
