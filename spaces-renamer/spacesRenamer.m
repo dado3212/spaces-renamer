@@ -120,17 +120,16 @@ static double getTextSize(CALayer *view, NSString *string) {
     double textSize = -1;
     CATextLayer *textLayer = getTextLayer(view);
     if (textLayer != nil) {
-        CTFontRef _contentFont = ((CATextLayer *)textLayer).font;
-        int strLength = (int)[string length];
-        CGGlyph glyphs[strLength];
-        unichar chars[strLength];
-        NSRange range = {0, strLength};
-        [string getCharacters:chars range:range];
-
-        bool rc = CTFontGetGlyphsForCharacters(_contentFont, chars, glyphs, strLength);
-        if (rc) {
-            textSize = CTFontGetAdvancesForGlyphs(_contentFont, kCTFontOrientationDefault, glyphs, NULL, strLength);
-        }
+        CFRange textRange = CFRangeMake(0, string.length);
+        CFMutableAttributedStringRef attributedString = CFAttributedStringCreateMutable(kCFAllocatorDefault, string.length);
+        CFAttributedStringReplaceString(attributedString, CFRangeMake(0, 0), (CFStringRef) string);
+        CFAttributedStringSetAttribute(attributedString, textRange, kCTFontAttributeName, ((CATextLayer *)textLayer).font);
+        CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attributedString);
+        CFRange fitRange;
+        CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, textRange, NULL, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), &fitRange);
+        CFRelease(framesetter);
+        CFRelease(attributedString);
+        return frameSize.width;
     }
     return textSize;
 }
