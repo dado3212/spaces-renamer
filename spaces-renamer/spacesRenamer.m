@@ -86,10 +86,27 @@ static void setTextLayer(CALayer *view, NSString *newString) {
     }
 }
 
+static CATextLayer *getTextLayer(CALayer *view) {
+    CATextLayer *layer = nil;
+    if (view.class == NSClassFromString(@"ECTextLayer")) {
+        layer = (CATextLayer *)view;
+    } else {
+        for (int i = 0; i < view.sublayers.count; i++) {
+            CATextLayer *tempLayer = getTextLayer(view.sublayers[i]);
+            if (tempLayer != nil) {
+                layer = tempLayer;
+                break;
+            }
+        }
+    }
+    return layer;
+}
+
 static double getTextSize(CALayer *view, NSString *string) {
     double textSize = -1;
-    if (view.class == NSClassFromString(@"ECTextLayer")) {
-        CTFontRef _contentFont = ((CATextLayer *)view).font;
+    CATextLayer *textLayer = getTextLayer(view);
+    if (textLayer != nil) {
+        CTFontRef _contentFont = ((CATextLayer *)textLayer).font;
         int strLength = (int)[string length];
         CGGlyph glyphs[strLength];
         unichar chars[strLength];
@@ -99,14 +116,6 @@ static double getTextSize(CALayer *view, NSString *string) {
         bool rc = CTFontGetGlyphsForCharacters(_contentFont, chars, glyphs, strLength);
         if (rc) {
             textSize = CTFontGetAdvancesForGlyphs(_contentFont, kCTFontOrientationDefault, glyphs, NULL, strLength);
-        }
-    } else {
-        for (int i = 0; i < view.sublayers.count; i++) {
-            double tempTextSize = getTextSize(view.sublayers[i], string);
-            if (tempTextSize != -1) {
-                textSize = tempTextSize;
-                break;
-            }
         }
     }
     return textSize;
@@ -313,8 +322,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
                     setOffset(unexpandedViews[i], offset);
                     if ([names[monitorIndex][i][@"name"] length] != 0) {
                         double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                        double originalTextSize = getTextSize(unexpandedViews[i], @"Desktop 1");
-                        offset += (textSize - originalTextSize);
+                        offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                     }
                 }
             } else {
@@ -322,8 +330,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
                     setOffset(unexpandedViews[i], offset);
                     if ([names[monitorIndex][i][@"name"] length] != 0) {
                         double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                        double originalTextSize = getTextSize(unexpandedViews[i], @"Desktop 1");
-                        offset += (textSize - originalTextSize);
+                        offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                     }
                 }
             }
