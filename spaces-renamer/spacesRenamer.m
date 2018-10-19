@@ -88,14 +88,28 @@ static CATextLayer *getTextLayer(CALayer *view) {
     return layer;
 }
 
-static void setOffset(CALayer *view, double offset) {
+static void setOffset(CALayer *view, double offset, bool append) {
     CATextLayer *textLayer = getTextLayer(view);
 
     if (textLayer != nil) {
         CALayer *parent = textLayer.superlayer;
-        assign(parent, &OFFSET, [NSNumber numberWithDouble:offset]);
+        if (append) {
+            id possibleOffset = objc_getAssociatedObject(parent, &OFFSET);
+            if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
+                assign(parent, &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
+            }
+        } else {
+            assign(parent, &OFFSET, [NSNumber numberWithDouble:offset]);
+        }
         for (int i = 0; i < parent.sublayers.count; i++) {
-            assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset]);
+            if (append) {
+                id possibleOffset = objc_getAssociatedObject(parent.sublayers[i], &OFFSET);
+                if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
+                    assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
+                }
+            } else {
+                assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset]);
+            }
         }
     }
 }
@@ -309,7 +323,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
             if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
                 if (i < expandedViews.count) {
                     double textSize = getTextSize(expandedViews[i], names[monitorIndex][i][@"name"]);
-                    setOffset(expandedViews[i], (getTextLayer(expandedViews[i]).bounds.size.width - textSize)/2);
+                    setOffset(expandedViews[i], (getTextLayer(expandedViews[i]).bounds.size.width - textSize)/2, false);
                     setTextLayerStringAndWidth(expandedViews[i], names[monitorIndex][i][@"name"], textSize);
 
                     NSLog(@"hackingdartmouth -\n %@", whatAmI(expandedViews[i], @""));
@@ -317,18 +331,25 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
                 if (i < unexpandedViews.count) {
                     double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
                     setTextLayerStringAndWidth(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
-                    setOffset(unexpandedViews[i], unexpandedOffset);
+                    setOffset(unexpandedViews[i], unexpandedOffset, false);
                     unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                 }
             } else {
                 if (i < expandedViews.count) {
-                    setOffset(expandedViews[i], 0);
+                    setOffset(expandedViews[i], 0, false);
                 }
                 if (i < unexpandedViews.count) {
-                    setOffset(unexpandedViews[i], unexpandedOffset);
+                    setOffset(unexpandedViews[i], unexpandedOffset, false);
                 }
             }
         }
+
+        for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+            if (i < unexpandedViews.count) {
+                setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
+            }
+        }
+        NSLog(@"hackingdartmouth - overall offset: %f", unexpandedOffset);
 
         monitorIndex += 1;
 
