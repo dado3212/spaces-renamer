@@ -60,40 +60,14 @@ static NSString *whatAmI(CALayer *view, NSString *prefix) {
                 objc_getAssociatedObject(view, &OVERRIDDEN_WIDTH),
                 objc_getAssociatedObject(view, &OFFSET)];
     } else {
-        return [NSString stringWithFormat:@"%@%@\n%@", prefix, view, [children substringToIndex:[children length]-1]];
+        return [NSString stringWithFormat:@"%@%@ - %@, %@, %@\n%@", prefix, view, objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
+                objc_getAssociatedObject(view, &OVERRIDDEN_WIDTH),
+                objc_getAssociatedObject(view, &OFFSET), [children substringToIndex:[children length]-1]];
     }
 }
 
 static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-static void setOffset(CALayer *view, double offset) {
-    if (view.sublayers.count == 0) {
-        assign(view, &OFFSET, [NSNumber numberWithDouble:offset]);
-    } else {
-        // The opacity is animated, but it's the same ONE, until you swipe off
-        for (int i = 0; i < view.sublayers.count; i++) {
-            setOffset(view.sublayers[i], offset);
-        }
-    }
-}
-
-static void setTextLayer(CALayer *view, NSString *newString, double width) {
-    if (view.sublayers.count == 0) {
-        assign(view, &OVERRIDDEN_STRING, newString);
-        if (width != -1) {
-            assign(view, &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
-        }
-        if (view.class == NSClassFromString(@"ECTextLayer")) {
-            ((CATextLayer *)view).string = newString;
-        }
-    } else {
-        // The opacity is animated, but it's the same ONE, until you swipe off
-        for (int i = 0; i < view.sublayers.count; i++) {
-            setTextLayer(view.sublayers[i], newString, width);
-        }
-    }
 }
 
 // Gets the ECTextLayer child from a starting view
@@ -112,6 +86,37 @@ static CATextLayer *getTextLayer(CALayer *view) {
         }
     }
     return layer;
+}
+
+static void setOffset(CALayer *view, double offset) {
+    CATextLayer *textLayer = getTextLayer(view);
+
+    if (textLayer != nil) {
+        CALayer *parent = textLayer.superlayer;
+        assign(parent, &OFFSET, [NSNumber numberWithDouble:offset]);
+        for (int i = 0; i < parent.sublayers.count; i++) {
+            assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset]);
+        }
+    }
+}
+
+static void setTextLayerStringAndWidth(CALayer *view, NSString *newString, double width) {
+    CATextLayer *textLayer = getTextLayer(view);
+
+    if (textLayer != nil) {
+        textLayer.string = newString;
+        CALayer *parent = textLayer.superlayer;
+        assign(parent, &OVERRIDDEN_STRING, newString);
+        if (width != -1) {
+            assign(parent, &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
+        }
+        for (int i = 0; i < parent.sublayers.count; i++) {
+            assign(parent.sublayers[i], &OVERRIDDEN_STRING, newString);
+            if (width != -1) {
+                assign(parent.sublayers[i], &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
+            }
+        }
+    }
 }
 
 // Gets the text area, and renders how large it would be with the new dimensions
@@ -300,18 +305,18 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         monitorIndex = monitorIndex % names.count;
 
         double unexpandedOffset = 0;
-        double expandedOffset = 0;
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
             if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
                 if (i < expandedViews.count) {
                     double textSize = getTextSize(expandedViews[i], names[monitorIndex][i][@"name"]);
-                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"], textSize);
                     setOffset(expandedViews[i], (getTextLayer(expandedViews[i]).bounds.size.width - textSize)/2);
-                    expandedOffset += (textSize - getTextLayer(expandedViews[i]).bounds.size.width);
+                    setTextLayerStringAndWidth(expandedViews[i], names[monitorIndex][i][@"name"], textSize);
+
+                    NSLog(@"hackingdartmouth -\n %@", whatAmI(expandedViews[i], @""));
                 }
                 if (i < unexpandedViews.count) {
                     double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
+                    setTextLayerStringAndWidth(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
                     setOffset(unexpandedViews[i], unexpandedOffset);
                     unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                 }
