@@ -12,6 +12,7 @@
 
 static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_FRAME;
+static char OVERRIDDEN_WIDTH;
 static char OFFSET;
 static char MOVED;
 
@@ -72,16 +73,19 @@ static void setOffset(CALayer *view, int offset) {
     }
 }
 
-static void setTextLayer(CALayer *view, NSString *newString) {
+static void setTextLayer(CALayer *view, NSString *newString, double width) {
     if (view.sublayers.count == 0) {
         assign(view, &OVERRIDDEN_STRING, newString);
+        if (width != -1) {
+            assign(view, &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
+        }
         if (view.class == NSClassFromString(@"ECTextLayer")) {
             ((CATextLayer *)view).string = newString;
         }
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
-            setTextLayer(view.sublayers[i], newString);
+            setTextLayer(view.sublayers[i], newString, width);
         }
     }
 }
@@ -178,9 +182,9 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setFrame:(CGRect)arg1 {
     if ([objc_getAssociatedObject(self, &OVERRIDDEN_FRAME) isEqualToString:@"background"]) {
-        id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-        if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = getTextSize(self.superlayer, possibleString) + 20;
+        id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+            arg1.size.width = [possibleWidth doubleValue] + 20;
         }
         return ZKOrig(void, arg1);
     }
@@ -189,9 +193,9 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
         self.sublayers.count == 1 &&
         self.sublayers[0].class == NSClassFromString(@"ECTextLayer")
     ) {
-        id possibleString = objc_getAssociatedObject(self.sublayers[0], &OVERRIDDEN_STRING);
-        if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = getTextSize(self.sublayers[0], possibleString);
+        id possibleWidth = objc_getAssociatedObject(self.sublayers[0], &OVERRIDDEN_WIDTH);
+        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+            arg1.size.width = [possibleWidth doubleValue];
         }
 
         id possibleOffset = objc_getAssociatedObject(self.sublayers[0], &OFFSET);
@@ -211,9 +215,9 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
         assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
         assign(self.sublayers[0], &OFFSET, objc_getAssociatedObject(self.sublayers[1], &OFFSET));
 
-        id possibleString = objc_getAssociatedObject(self.sublayers[1], &OVERRIDDEN_STRING);
-        if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = getTextSize(self.sublayers[1], possibleString);
+        id possibleWidth = objc_getAssociatedObject(self.sublayers[1], &OVERRIDDEN_WIDTH);
+        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+            arg1.size.width = [possibleWidth doubleValue];
         }
 
         id possibleOffset = objc_getAssociatedObject(self.sublayers[1], &OFFSET);
@@ -240,9 +244,9 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
                           options:NSKeyValueObservingOptionNew
                           context:nil];
 
-    id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-    if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-        arg1.size.width = getTextSize(self, possibleString);
+    id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+        arg1.size.width = [possibleWidth doubleValue];
     }
 
     ZKOrig(void, arg1);
@@ -315,23 +319,17 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
             if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
                 if (i < expandedViews.count) {
-                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
+                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"], -1);
                 }
                 if (i < unexpandedViews.count) {
-                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                    double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
                     setOffset(unexpandedViews[i], offset);
-                    if ([names[monitorIndex][i][@"name"] length] != 0) {
-                        double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                        offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
-                    }
+                    offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                 }
             } else {
                 if (i < unexpandedViews.count) {
                     setOffset(unexpandedViews[i], offset);
-                    if ([names[monitorIndex][i][@"name"] length] != 0) {
-                        double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                        offset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
-                    }
                 }
             }
         }
