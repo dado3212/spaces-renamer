@@ -20,8 +20,26 @@ static char OFFSET;
 
 int monitorIndex = 0;
 
+__strong CALayer *dockView = nil;
+
 @interface ECMaterialLayer : CALayer
 @end
+
+static void refreshDockView() {
+    if (dockView != nil && dockView.superlayer.class == NSClassFromString(@"CALayer") && dockView.sublayers.count == 4) {
+        NSArray<CALayer *> *unexpandedViews = dockView.sublayers[3].sublayers[0].sublayers;
+        NSArray<CALayer *> *expandedViews = dockView.sublayers[3].sublayers[1].sublayers;
+
+        for (int i = 0; i < unexpandedViews.count; i++) {
+            [unexpandedViews[i] setFrame:unexpandedViews[i].frame];
+            [unexpandedViews[i] setNeedsLayout];
+            for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
+                [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
+                [unexpandedViews[i].sublayers[j] setNeedsLayout];
+            }
+        }
+    }
+}
 
 static NSString *whatAmI(CALayer *view, NSString *prefix) {
     NSMutableString *children = [[NSMutableString alloc] initWithString:@""];
@@ -50,6 +68,8 @@ static void setTextLayer(CALayer *view, NSString *newString, int offset) {
         ((CATextLayer *)view).string = newString;
         assign(view, &OVERRIDDEN_STRING, newString);
         assign(view, &OFFSET, [NSNumber numberWithInt:offset]);
+        [view setFrame:view.frame];
+        [view setNeedsLayout];
     } else {
         // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
@@ -113,32 +133,19 @@ static NSMutableArray *getNamesFromPlist() {
 
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
-- (void)setBounds:(CGRect)arg1 {
-    [self setNeedsLayout];
-    id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
-    if ([overridden isEqualToString:@"text"]) {
-        NSLog(@"hackingdartmouth - overrriding for text bounds");
-        id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-        if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
-            arg1.size.width = 8.5 * [possibleString length] + 100;
-        }
-        ZKOrig(void, arg1);
-        return;
-    }
-    ZKOrig(void, arg1);
-}
 - (void)setFrame:(CGRect)arg1 {
-    [self setNeedsLayout];
     id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
     if ([overridden isEqualToString:@"text"]) {
         NSLog(@"hackingdartmouth - overrriding for text frame");
         id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
         if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
+            NSLog(@"hackingdartmouth - overridden string!");
             arg1.size.width = 8.5 * [possibleString length];
         }
 
         id possibleOffset = objc_getAssociatedObject(self, &OFFSET);
         if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
+            NSLog(@"hackingdartmouth - overridden offset!");
             arg1.origin.x += [possibleOffset intValue];
         }
         return ZKOrig(void, arg1);
@@ -185,6 +192,15 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 
 ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 @implementation _SRECTextLayer
+- (void)setBounds:(CGRect)arg1 {
+    id possibleString = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
+    if (possibleString && [possibleString isKindOfClass:[NSString class]]) {
+        // Make the text really big
+        arg1.size.width = 8.5 * [possibleString length] + 100;
+    }
+    ZKOrig(void, arg1);
+}
+
 - (void)setFrame:(CGRect)arg1 {
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
@@ -195,7 +211,6 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
                           context:nil];
 
     ZKOrig(void, arg1);
-    [self setNeedsLayout];
 }
 
 -(void)dealloc {
@@ -209,7 +224,6 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
     id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
     if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
         self.string = overridden;
-        [self setNeedsLayout];
     }
 }
 
@@ -225,12 +239,12 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 
 ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _SRECMaterialLayer
-
 - (void)setFrame:(CGRect)arg1 {
-    ZKOrig(void, arg1);
-
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
+        dockView = self;
+        NSLog(@"hackingdartmouth - setting frame for ecmaterial layer");
+
         // NSLog(@"hackingdartmouth - sublayers: %@", self.sublayers[3].sublayers);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
@@ -282,8 +296,10 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
         }
 
         monitorIndex += 1;
+
+        refreshDockView();
     }
-    [self setNeedsLayout];
+    ZKOrig(void, arg1);
 }
 
 @end
