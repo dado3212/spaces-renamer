@@ -34,8 +34,8 @@ static void refreshDockView() {
             [unexpandedViews[i] setFrame:unexpandedViews[i].frame];
             [unexpandedViews[i] setNeedsLayout];
             for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
-                [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
                 [unexpandedViews[i].sublayers[j] setBounds:unexpandedViews[i].sublayers[j].bounds];
+                [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
                 [unexpandedViews[i].sublayers[j] setNeedsLayout];
             }
         }
@@ -89,12 +89,12 @@ static void setTextLayer(CALayer *view, NSString *newString) {
 
 // The highlighted space has 2 sublayers, while as a normal space only has 1
 static int getSelected(NSArray<CALayer *> *views) {
-    for (int i = 0; i < views.count; i++) {
-        if (views[i].sublayers.count > 1) {
-            return i;
-        }
-    }
-    return -1;
+    NSUInteger selectedIndex = [views indexOfObjectPassingTest:
+    ^(CALayer *layer, NSUInteger idx, BOOL *stop) {
+        return (BOOL)(layer.sublayers.count > 1);
+    }];
+
+    return selectedIndex == NSNotFound ? -1 : (int)selectedIndex;
 }
 
 /*
@@ -252,7 +252,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
         dockView = self;
-        NSLog(@"hackingdartmouth - setting frame for ecmaterial layer");
+        NSLog(@"hackingdartmouth - START OF FIXING VALUES");
 
         // NSLog(@"hackingdartmouth - sublayers: %@", self.sublayers[3].sublayers);
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
