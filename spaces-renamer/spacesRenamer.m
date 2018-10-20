@@ -11,8 +11,10 @@
 #import <QuartzCore/QuartzCore.h>
 
 static char OVERRIDDEN_STRING;
-static char OVERRIDDEN_FRAME;
-static char FRAME;
+static char OVERRIDDEN_WIDTH;
+static char OFFSET;
+static char MOVED;
+static char TYPE;
 
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
@@ -23,31 +25,131 @@ int monitorIndex = 0;
 @interface ECMaterialLayer : CALayer
 @end
 
+// Invokes setFrame on the modified children so that they don't change positions on swiping
+// between different spaces.  Called on the master parent ECMaterialLayer at the end of
+// the override calculations in setFrame
+static void refreshDockView(CALayer *dockView) {
+    if (dockView != nil && dockView.superlayer.class == NSClassFromString(@"CALayer") && dockView.sublayers.count == 4) {
+        NSArray<CALayer *> *unexpandedViews = dockView.sublayers[3].sublayers[0].sublayers;
+        NSArray<CALayer *> *expandedViews = dockView.sublayers[3].sublayers[1].sublayers;
+
+        for (int i = 0; i < unexpandedViews.count; i++) {
+            [unexpandedViews[i] setFrame:unexpandedViews[i].frame];
+            for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
+                [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
+            }
+        }
+
+        for (int i = 0; i < expandedViews.count; i++) {
+            [expandedViews[i].sublayers[0] setFrame:expandedViews[i].sublayers[0].frame];
+            [expandedViews[i].sublayers[0].sublayers[0] setFrame:expandedViews[i].sublayers[0].sublayers[0].frame];
+        }
+    }
+}
+
+// Helper method
 static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static void setTextLayer(CALayer *view, NSString *newString) {
+// Gets the ECTextLayer child from a starting view
+// Good for when you don't care whether it's selected or not
+static CATextLayer *getTextLayer(CALayer *view) {
+    CATextLayer *layer = nil;
     if (view.class == NSClassFromString(@"ECTextLayer")) {
-        ((CATextLayer *)view).string = newString;
-        assign(view, &OVERRIDDEN_STRING, newString);
-        assign(view, &FRAME, [NSValue valueWithRect:view.frame]);
+        layer = (CATextLayer *)view;
     } else {
-        // The opacity is animated, but it's the same ONE, until you swipe off
         for (int i = 0; i < view.sublayers.count; i++) {
-            setTextLayer(view.sublayers[i], newString);
+            CATextLayer *tempLayer = getTextLayer(view.sublayers[i]);
+            if (tempLayer != nil) {
+                layer = tempLayer;
+                break;
+            }
+        }
+    }
+    return layer;
+}
+
+// Given a view, sets the OFFSET variable for the text layer's parent, and siblings
+// if 'modify' is TRUE, it will add the OFFSET variables, otherwise it will overwrite it
+static void setOffset(CALayer *view, double offset, bool modify) {
+    CATextLayer *textLayer = getTextLayer(view);
+
+    if (textLayer != nil) {
+        CALayer *parent = textLayer.superlayer;
+        if (modify) {
+            id possibleOffset = objc_getAssociatedObject(parent, &OFFSET);
+            if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
+                assign(parent, &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
+            }
+        } else {
+            assign(parent, &OFFSET, [NSNumber numberWithDouble:offset]);
+        }
+        for (int i = 0; i < parent.sublayers.count; i++) {
+            if (modify) {
+                id possibleOffset = objc_getAssociatedObject(parent.sublayers[i], &OFFSET);
+                if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
+                    assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
+                }
+            } else {
+                assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset]);
+            }
         }
     }
 }
 
-// The highlighted space has 2 sublayers, while as a normal space only has 1
-static int getSelected(NSArray<CALayer *> *views) {
-    for (int i = 0; i < views.count; i++) {
-        if (views[i].sublayers.count > 1) {
-            return i;
+// Finds the text layer, and sets the overridden string and width properties
+// to the text layer, its parent, and its siblings.
+// Additionally sets the type for determining centering behavior
+static void overrideTextLayer(CALayer *view, NSString *newString, double width, NSString *type) {
+    CATextLayer *textLayer = getTextLayer(view);
+
+    if (textLayer != nil) {
+        textLayer.string = newString;
+        CALayer *parent = textLayer.superlayer;
+        assign(parent, &OVERRIDDEN_STRING, newString);
+        assign(parent, &TYPE, type);
+        if (width != -1) {
+            assign(parent, &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
+        }
+        for (int i = 0; i < parent.sublayers.count; i++) {
+            assign(parent.sublayers[i], &OVERRIDDEN_STRING, newString);
+            assign(parent, &TYPE, type);
+            if (width != -1) {
+                assign(parent.sublayers[i], &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
+            }
         }
     }
-    return -1;
+}
+
+// Gets the text area, and renders how large it would be with the new dimensions
+// Uses this for calculating how far they should be offset by
+static double getTextSize(CALayer *view, NSString *string) {
+    double textSize = -1;
+    CATextLayer *textLayer = getTextLayer(view);
+    if (textLayer != nil) {
+        CFRange textRange = CFRangeMake(0, string.length);
+        CFMutableAttributedStringRef attributedString = CFAttributedStringCreateMutable(kCFAllocatorDefault, string.length);
+        CFAttributedStringReplaceString(attributedString, CFRangeMake(0, 0), (CFStringRef) string);
+        CFAttributedStringSetAttribute(attributedString, textRange, kCTFontAttributeName, ((CATextLayer *)textLayer).font);
+        CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attributedString);
+        CFRange fitRange;
+        CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, textRange, NULL, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), &fitRange);
+        CFRelease(framesetter);
+        CFRelease(attributedString);
+        return frameSize.width;
+    }
+    return textSize;
+}
+
+// The highlighted space has 2 sublayers, while as a normal space only has 1
+static int getSelected(NSArray<CALayer *> *views) {
+    NSUInteger selectedIndex = [views indexOfObjectPassingTest:
+    ^(CALayer *layer, NSUInteger idx, BOOL *stop) {
+        return (BOOL)(layer.sublayers.count > 1);
+    }];
+
+    return selectedIndex == NSNotFound ? -1 : (int)selectedIndex;
 }
 
 /*
@@ -97,38 +199,49 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setBounds:(CGRect)arg1 {
 
-    id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_FRAME);
-    if ([overridden isEqualToString:@"text"]) {
-        // ZKOrig(void, NSRectToCGRect([objc_getAssociatedObject(self, &FRAME) rectValue]));
-        objc_removeAssociatedObjects(self);
-        // ZKOrig(void, CGRectMake(0, 0, 67, 17));
-        ZKOrig(void, arg1);
-        return;
-    } else if ([overridden isEqualToString:@"background"]) {
-        ZKOrig(void, CGRectMake(30, 0, 88, 22));
-        return;
+    return ZKOrig(void, arg1);
+}
+- (void)setFrame:(CGRect)arg1 {
+    id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
+        arg1.size.width = [possibleWidth doubleValue] + 20;
     }
 
-    if (
-        self.sublayers.count == 2 &&
-        self.sublayers[0].class == NSClassFromString(@"CALayer") &&
-        self.sublayers[0].cornerRadius == 5.0 &&
-        self.sublayers[1].class == NSClassFromString(@"ECTextLayer")
-    ) {
-        // This is the part of the background and the text when scrolling
-        assign(self.sublayers[0], &OVERRIDDEN_FRAME, @"background");
-        assign(self.sublayers[1], &OVERRIDDEN_FRAME, @"text");
+    int textIndex = self.sublayers.lastObject.class == NSClassFromString(@"ECTextLayer")
+        ? (int)self.sublayers.count - 1
+        : -1;
+
+    if (textIndex != -1) {
+        id possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
+        if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+            arg1.size.width = [possibleWidth doubleValue];
+        }
+
+        id possibleType = objc_getAssociatedObject(self, &TYPE);
+        if (possibleType && [possibleType isEqualToString:@"expanded"]) {
+            // Always just center in the parent view
+            arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
+        } else {
+            id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
+            id didMove = objc_getAssociatedObject(self, &MOVED);
+            // Only change the offsets once
+            if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
+                arg1.origin.x += [possibleOffset doubleValue];
+
+                assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+            }
+        }
+
+
     }
 
-    ZKOrig(void, arg1);
+    return ZKOrig(void, arg1);
 }
 @end
 
 ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 @implementation _SRECTextLayer
-- (void)setBounds:(CGRect)arg1 {
-    ZKOrig(void, arg1);
-
+- (void)setFrame:(CGRect)arg1 {
     @try {
         [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
     } @catch(id anException) {}
@@ -136,6 +249,13 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
                        forKeyPath:@"propertiesChanged"
                           options:NSKeyValueObservingOptionNew
                           context:nil];
+
+    id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+        arg1.size.width = [possibleWidth doubleValue];
+    }
+
+    ZKOrig(void, arg1);
 }
 
 -(void)dealloc {
@@ -164,16 +284,13 @@ ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
 
 ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _SRECMaterialLayer
-
-- (void)setBounds:(CGRect)arg1 {
-    ZKOrig(void, arg1);
-
+- (void)setFrame:(CGRect)arg1 {
     // Almost surely the desktop switcher
     if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
         NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
         NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
 
-        int numMonitors = MAX(unexpandedViews.count, expandedViews.count);
+        int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
         // Get which of the spaces in the current dock is selected
         int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
@@ -204,19 +321,44 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
         monitorIndex = monitorIndex % names.count;
 
+        double unexpandedOffset = 0;
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
-            if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
+            NSString *name = names[monitorIndex][i][@"name"];
+            // It's overridden
+            if (name != nil && ![name isEqualToString:@""]) {
+                // Expanded
                 if (i < expandedViews.count) {
-                    setTextLayer(expandedViews[i], names[monitorIndex][i][@"name"]);
+                    double textSize = getTextSize(expandedViews[i], name);
+                    // Don't have the expanded view string overlap other ones
+                    overrideTextLayer(expandedViews[i], name, MIN(textSize, expandedViews[i].frame.size.width), @"expanded");
                 }
+                // Unexpanded
                 if (i < unexpandedViews.count) {
-                    setTextLayer(unexpandedViews[i], names[monitorIndex][i][@"name"]);
+                    double textSize = getTextSize(unexpandedViews[i], name);
+                    overrideTextLayer(unexpandedViews[i], name, textSize, @"unexpanded");
+                    setOffset(unexpandedViews[i], unexpandedOffset, false);
+                    unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
+                }
+            } else {
+                if (i < unexpandedViews.count) {
+                    setOffset(unexpandedViews[i], unexpandedOffset, false);
                 }
             }
         }
 
+        // Make sure that it's centered in the bar when unexpanded
+        for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+            if (i < unexpandedViews.count) {
+                setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
+            }
+        }
+
         monitorIndex += 1;
+
+        // So that it doesn't change sizes on switching spaces
+        refreshDockView(self);
     }
+    ZKOrig(void, arg1);
 }
 
 @end

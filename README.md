@@ -6,17 +6,17 @@
 Spaces Renamer is a combination of an application and SIMBL plugin to allow you to rename your spaces.
 
 <p align="center">
-  <img src="smallView2.jpg" height="45" ><br>
+  <img src="smallView.jpg" height="45" ><br>
   <i>The compressed view after pressing F3</i>
 </p>
 
 <p align="center">
-  <img src="largeView2.jpg" height="80" ><br>
+  <img src="largeView.jpg" height="80" ><br>
   <i>The expanded view after hovering</i>
 </p>
 
 <p align="center">
-  <img src="renameView2.jpg" height="100" ><br>
+  <img src="renameView.jpg" height="100" ><br>
   <i>The interface for renaming the spaces</i>
 </p>
 

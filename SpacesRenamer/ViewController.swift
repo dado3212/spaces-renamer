@@ -141,6 +141,9 @@ class ViewController: NSViewController {
 
                 snippet.label.stringValue = "\(i)"
                 snippet.textField.delegate = self
+                if (monitorPairings[monitorPairings.count - 1][monitorScrollView]!.count > 0) {
+                    monitorPairings[monitorPairings.count - 1][monitorScrollView]!.last?.textField.nextKeyView = snippet.textField
+                }
                 snippetView.addSubview(snippet)
                 monitorPairings[monitorPairings.count - 1][monitorScrollView]!.append(snippet)
 
@@ -160,6 +163,9 @@ class ViewController: NSViewController {
                 constraints.append(horizontalConstraint!)
                 snippetView.addConstraints([verticalConstraint, horizontalConstraint!])
                 prev = snippet
+            }
+            if (monitorPairings[monitorPairings.count - 1][monitorScrollView]!.count > 0) {
+                monitorPairings[monitorPairings.count - 1][monitorScrollView]!.last?.textField.nextKeyView = monitorPairings[monitorPairings.count - 1][monitorScrollView]!.first?.textField
             }
 
             // Attach the bottom right snippet to the bottom right of the snippet view
@@ -186,7 +192,7 @@ class ViewController: NSViewController {
                     Double(widthInDesktops) + 0.5,
                     Double(
                         max(
-                            maxSpacesPerMonitor == 1 ? 2 : 1,
+                            maxSpacesPerMonitor == 1 ? 2 : 1, // minimum width of two spaces so the buttons render correctly
                             allSpaces.count
                     ))
                 ) * 140.0 + 10.0
