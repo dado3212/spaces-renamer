@@ -11,10 +11,10 @@
 #import <QuartzCore/QuartzCore.h>
 
 static char OVERRIDDEN_STRING;
-static char OVERRIDDEN_FRAME;
 static char OVERRIDDEN_WIDTH;
 static char OFFSET;
 static char MOVED;
+static char TYPE;
 
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
@@ -25,6 +25,9 @@ int monitorIndex = 0;
 @interface ECMaterialLayer : CALayer
 @end
 
+// Invokes setFrame on the modified children so that they don't change positions on swiping
+// between different spaces.  Called on the master parent ECMaterialLayer at the end of
+// the override calculations in setFrame
 static void refreshDockView(CALayer *dockView) {
     if (dockView != nil && dockView.superlayer.class == NSClassFromString(@"CALayer") && dockView.sublayers.count == 4) {
         NSArray<CALayer *> *unexpandedViews = dockView.sublayers[3].sublayers[0].sublayers;
@@ -44,6 +47,7 @@ static void refreshDockView(CALayer *dockView) {
     }
 }
 
+// Debugging function for printing
 static NSString *whatAmI(CALayer *view, NSString *prefix) {
     NSMutableString *children = [[NSMutableString alloc] initWithString:@""];
     for (int i = 0; i < view.sublayers.count; i++) {
@@ -66,6 +70,7 @@ static NSString *whatAmI(CALayer *view, NSString *prefix) {
     }
 }
 
+// Helper method
 static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
@@ -88,12 +93,14 @@ static CATextLayer *getTextLayer(CALayer *view) {
     return layer;
 }
 
-static void setOffset(CALayer *view, double offset, bool append) {
+// Given a view, sets the OFFSET variable for the text layer's parent, and siblings
+// if 'modify' is TRUE, it will add the OFFSET variables, otherwise it will overwrite it
+static void setOffset(CALayer *view, double offset, bool modify) {
     CATextLayer *textLayer = getTextLayer(view);
 
     if (textLayer != nil) {
         CALayer *parent = textLayer.superlayer;
-        if (append) {
+        if (modify) {
             id possibleOffset = objc_getAssociatedObject(parent, &OFFSET);
             if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
                 assign(parent, &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
@@ -102,7 +109,7 @@ static void setOffset(CALayer *view, double offset, bool append) {
             assign(parent, &OFFSET, [NSNumber numberWithDouble:offset]);
         }
         for (int i = 0; i < parent.sublayers.count; i++) {
-            if (append) {
+            if (modify) {
                 id possibleOffset = objc_getAssociatedObject(parent.sublayers[i], &OFFSET);
                 if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]]) {
                     assign(parent.sublayers[i], &OFFSET, [NSNumber numberWithDouble:offset + [possibleOffset doubleValue]]);
@@ -114,18 +121,23 @@ static void setOffset(CALayer *view, double offset, bool append) {
     }
 }
 
-static void setTextLayerStringAndWidth(CALayer *view, NSString *newString, double width) {
+// Finds the text layer, and sets the overridden string and width properties
+// to the text layer, its parent, and its siblings.
+// Additionally sets the type for determining centering behavior
+static void overrideTextLayer(CALayer *view, NSString *newString, double width, NSString *type) {
     CATextLayer *textLayer = getTextLayer(view);
 
     if (textLayer != nil) {
         textLayer.string = newString;
         CALayer *parent = textLayer.superlayer;
         assign(parent, &OVERRIDDEN_STRING, newString);
+        assign(parent, &TYPE, type);
         if (width != -1) {
             assign(parent, &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
         }
         for (int i = 0; i < parent.sublayers.count; i++) {
             assign(parent.sublayers[i], &OVERRIDDEN_STRING, newString);
+            assign(parent, &TYPE, type);
             if (width != -1) {
                 assign(parent.sublayers[i], &OVERRIDDEN_WIDTH, [NSNumber numberWithDouble:width]);
             }
@@ -208,6 +220,10 @@ static NSMutableArray *getNamesFromPlist() {
 
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
+- (void)setBounds:(CGRect)arg1 {
+
+    return ZKOrig(void, arg1);
+}
 - (void)setFrame:(CGRect)arg1 {
     id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
     if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
@@ -224,12 +240,22 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
             arg1.size.width = [possibleWidth doubleValue];
         }
 
-        id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
-        id didMove = objc_getAssociatedObject(self, &MOVED);
-        if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
-            arg1.origin.x += [possibleOffset doubleValue];
-            assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+        id possibleType = objc_getAssociatedObject(self, &TYPE);
+        if (possibleType && [possibleType isEqualToString:@"expanded"]) {
+            // Always just center in the parent view
+            arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
+        } else {
+            id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
+            id didMove = objc_getAssociatedObject(self, &MOVED);
+            // Only change the offsets once
+            if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
+                arg1.origin.x += [possibleOffset doubleValue];
+
+                assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+            }
         }
+
+
     }
 
     return ZKOrig(void, arg1);
@@ -320,39 +346,39 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
         double unexpandedOffset = 0;
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
-            if (names[monitorIndex][i][@"name"] != nil && ![names[monitorIndex][i][@"name"] isEqualToString:@""]) {
+            NSString *name = names[monitorIndex][i][@"name"];
+            // It's overridden
+            if (name != nil && ![name isEqualToString:@""]) {
+                // Expanded
                 if (i < expandedViews.count) {
-                    double textSize = getTextSize(expandedViews[i], names[monitorIndex][i][@"name"]);
-                    setOffset(expandedViews[i], (getTextLayer(expandedViews[i]).bounds.size.width - textSize)/2, false);
-                    setTextLayerStringAndWidth(expandedViews[i], names[monitorIndex][i][@"name"], textSize);
-
-                    NSLog(@"hackingdartmouth -\n %@", whatAmI(expandedViews[i], @""));
+                    double textSize = getTextSize(expandedViews[i], name);
+                    // Don't have the expanded view string overlap other ones
+                    overrideTextLayer(expandedViews[i], name, MIN(textSize, expandedViews[i].frame.size.width), @"expanded");
                 }
+                // Unexpanded
                 if (i < unexpandedViews.count) {
-                    double textSize = getTextSize(unexpandedViews[i], names[monitorIndex][i][@"name"]);
-                    setTextLayerStringAndWidth(unexpandedViews[i], names[monitorIndex][i][@"name"], textSize);
+                    double textSize = getTextSize(unexpandedViews[i], name);
+                    overrideTextLayer(unexpandedViews[i], name, textSize, @"unexpanded");
                     setOffset(unexpandedViews[i], unexpandedOffset, false);
                     unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
                 }
             } else {
-                if (i < expandedViews.count) {
-                    setOffset(expandedViews[i], 0, false);
-                }
                 if (i < unexpandedViews.count) {
                     setOffset(unexpandedViews[i], unexpandedOffset, false);
                 }
             }
         }
 
+        // Make sure that it's centered in the bar when unexpanded
         for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
             if (i < unexpandedViews.count) {
                 setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
             }
         }
-        NSLog(@"hackingdartmouth - overall offset: %f", unexpandedOffset);
 
         monitorIndex += 1;
 
+        // So that it doesn't change sizes on switching spaces
         refreshDockView(self);
     }
     ZKOrig(void, arg1);
