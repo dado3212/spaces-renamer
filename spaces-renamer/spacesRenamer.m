@@ -47,29 +47,6 @@ static void refreshDockView(CALayer *dockView) {
     }
 }
 
-// Debugging function for printing
-static NSString *whatAmI(CALayer *view, NSString *prefix) {
-    NSMutableString *children = [[NSMutableString alloc] initWithString:@""];
-    for (int i = 0; i < view.sublayers.count; i++) {
-        [children appendString:[
-                                NSString stringWithFormat:@"%@\n",
-                                whatAmI(
-                                        view.sublayers[i],
-                                        [NSString stringWithFormat:@"%@\t", prefix]
-                                    )
-                                ]];
-    }
-    if (children.length == 0) {
-        return [NSString stringWithFormat:@"%@%@ - %@, %@, %@", prefix, view,                                 objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
-                objc_getAssociatedObject(view, &OVERRIDDEN_WIDTH),
-                objc_getAssociatedObject(view, &OFFSET)];
-    } else {
-        return [NSString stringWithFormat:@"%@%@ - %@, %@, %@\n%@", prefix, view, objc_getAssociatedObject(view, &OVERRIDDEN_STRING),
-                objc_getAssociatedObject(view, &OVERRIDDEN_WIDTH),
-                objc_getAssociatedObject(view, &OFFSET), [children substringToIndex:[children length]-1]];
-    }
-}
-
 // Helper method
 static void assign(id a, void *key, id assigned) {
     objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
