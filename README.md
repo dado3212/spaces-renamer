@@ -36,3 +36,4 @@ This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming sp
 5. Open `spaces-renamer.bundle` with `mySIMBL.app`, or simply drag and drop it in to install it.
 6. Run `killall -9 Dock` in Terminal to restart the Dock application.
 7. Run the application 'SpacesRenamer'.  Accept the option to move it to /Applications.  It should be automatically added to your Login Items, but you can check to confirm by going to "System Preferences" > "Users & Groups" > "Login Items" and adding it manually if necessary.
+8. Open the 'Spaces Renamer' icon in the top bar and click 'Update Names' (doesn't matter what's in there).  Otherwise the top bar may not appear!
