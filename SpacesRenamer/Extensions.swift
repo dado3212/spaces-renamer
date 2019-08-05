@@ -23,3 +23,26 @@ extension NSScrollView {
         }
     }
 }
+
+// Helper extension for 10.10 support
+extension NSTextField {
+  convenience init(labelWithStringCustom string: String) {
+    if #available(macOS 10.12, *) {
+      self.init(labelWithString: string)
+    } else {
+      self.init()
+      self.isEditable = false
+      self.isSelectable = false
+      self.textColor = .labelColor
+      self.backgroundColor = .controlColor
+      self.drawsBackground = false
+      self.isBezeled = false
+      self.alignment = .natural
+      self.font = NSFont.systemFont(ofSize: NSFont.systemFontSize(for: self.controlSize))
+      self.lineBreakMode = .byClipping
+      self.cell?.isScrollable = true
+      self.cell?.wraps = false
+      self.stringValue = string
+    }
+  }
+}

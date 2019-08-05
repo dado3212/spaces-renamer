@@ -68,7 +68,7 @@ class ViewController: NSViewController {
 
             // If there is more than one monitor, make a label for it, and use it as the 'above' marker
             if (allMonitors.count > 1) {
-                let monitorLabel = NSTextField(labelWithString: "Monitor \(j)")
+                let monitorLabel = NSTextField(labelWithStringCustom: "Monitor \(j)")
                 monitorLabel.font = NSFont(name: "HelveticaNeue-Bold", size: 14)
                 monitorLabel.translatesAutoresizingMaskIntoConstraints = false
 
