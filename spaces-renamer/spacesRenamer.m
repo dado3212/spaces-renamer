@@ -25,25 +25,14 @@ int monitorIndex = 0;
 @interface ECMaterialLayer : CALayer
 @end
 
-// Invokes setFrame on the modified children so that they don't change positions on swiping
-// between different spaces.  Called on the master parent ECMaterialLayer at the end of
-// the override calculations in setFrame
-static void refreshDockView(CALayer *dockView) {
-  if (dockView != nil && dockView.superlayer.class == NSClassFromString(@"CALayer") && dockView.sublayers.count == 4) {
-    NSArray<CALayer *> *unexpandedViews = dockView.sublayers[3].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = dockView.sublayers[3].sublayers[1].sublayers;
-
-    for (int i = 0; i < unexpandedViews.count; i++) {
-      [unexpandedViews[i] setFrame:unexpandedViews[i].frame];
-      for (int j = 0; j < unexpandedViews[i].sublayers.count; j++) {
-        [unexpandedViews[i].sublayers[j] setFrame:unexpandedViews[i].sublayers[j].frame];
-      }
-    }
-
-    for (int i = 0; i < expandedViews.count; i++) {
-      [expandedViews[i].sublayers[0] setFrame:expandedViews[i].sublayers[0].frame];
-      [expandedViews[i].sublayers[0].sublayers[0] setFrame:expandedViews[i].sublayers[0].sublayers[0].frame];
-    }
+// Recursively invokes setFrame on the modified children so that they don't change positions on
+// swiping between different spaces.  Called on the master parent ECMaterialLayer at the end of
+// the override calculations in setFrame.  Also forces redraws, which makes the resizing work.
+// This is a hack.
+static void refreshFrames(CALayer *frame) {
+  for (int i = 0; i < frame.sublayers.count; i++) {
+    [frame.sublayers[i] setFrame:frame.sublayers[i].frame];
+    refreshFrames(frame.sublayers[i]);
   }
 }
 
@@ -286,9 +275,9 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 @implementation _SRECMaterialLayer
 - (void)setFrame:(CGRect)arg1 {
   // Almost surely the desktop switcher
-  if (self.superlayer.class == NSClassFromString(@"CALayer") && self.sublayers.count == 4) {
-    NSArray<CALayer *> *unexpandedViews = self.sublayers[3].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = self.sublayers[3].sublayers[1].sublayers;
+  if ([self probablyDesktopSwitcher:arg1]) {
+    NSArray<CALayer *> *unexpandedViews = self.sublayers[self.sublayers.count - 1].sublayers[0].sublayers;
+    NSArray<CALayer *> *expandedViews = self.sublayers[self.sublayers.count - 1].sublayers[1].sublayers;
 
     int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
@@ -322,7 +311,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     monitorIndex = monitorIndex % names.count;
 
     double unexpandedOffset = 0;
-    for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+    for (int i = 0; i < ((NSArray *)names[monitorIndex]).count; i++) {
       NSString *name = names[monitorIndex][i][@"name"];
       // It's overridden
       if (name != nil && ![name isEqualToString:@""]) {
@@ -356,9 +345,37 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     monitorIndex += 1;
 
     // So that it doesn't change sizes on switching spaces
-    refreshDockView(self);
+    refreshFrames(self);
   }
   ZKOrig(void, arg1);
+}
+
+// (40 height unexpanded, 146 expanded), if it's relevant later
+- (BOOL)probablyDesktopSwitcher:(CGRect)rect {
+  // Must start at origin
+  if (rect.origin.x != 0) {
+    return false;
+  }
+  // Has two sublayers
+  if (self.sublayers.count < 2) {
+    return false;
+  }
+  // Is a child of CALayer
+  if (self.superlayer.class != NSClassFromString(@"CALayer")) {
+    return false;
+  }
+
+  // Is the width of the full screen (one of them)
+  NSArray *const screenArray = [NSScreen screens];
+  for (int i = 0; i < screenArray.count; i++) {
+    NSScreen *const screen = [screenArray objectAtIndex:i];
+    if (screen.visibleFrame.size.width == rect.size.width) {
+      return true;
+    }
+  }
+
+  // Default to NO
+  return false;
 }
 
 @end
