@@ -66,10 +66,10 @@
 #define ZKHookIvar(OBJECT, TYPE, NAME) (*(TYPE *)ZKIvarPointer(OBJECT, NAME))
 #else
 #define ZKHookIvar(OBJECT, TYPE, NAME) \
-    _Pragma("clang diagnostic push") \
-    _Pragma("clang diagnostic ignored \"-Wignored-attributes\"") \
-    (*(__unsafe_unretained TYPE *)ZKIvarPointer(OBJECT, NAME)) \
-    _Pragma("clang diagnostic pop")
+_Pragma("clang diagnostic push") \
+_Pragma("clang diagnostic ignored \"-Wignored-attributes\"") \
+(*(__unsafe_unretained TYPE *)ZKIvarPointer(OBJECT, NAME)) \
+_Pragma("clang diagnostic pop")
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,22 +82,22 @@
 #define ZKSuper(TYPE, ...) ((TYPE (*)(id, SEL WRAP_LIST(__VA_ARGS__)))(ZKSuperImplementation(self, _cmd, __PRETTY_FUNCTION__)))(self, _cmd, ##__VA_ARGS__)
 
 #define _ZKSwizzleInterfaceConditionally(CLASS_NAME, TARGET_CLASS, SUPERCLASS, GROUP, IMMEDIATELY) \
-    @interface _$ ## CLASS_NAME : SUPERCLASS @end\
-    @implementation _$ ## CLASS_NAME\
-    + (void)initialize {}\
-    @end\
-    @interface CLASS_NAME : _$ ## CLASS_NAME @end\
-    @implementation CLASS_NAME (ZKSWIZZLE)\
-    + (void)load {\
-        if (IMMEDIATELY) {\
-            [self _ZK_unconditionallySwizzle];\
-        } else {\
-            _$ZKRegisterInterface(self, #GROUP);\
-        }\
-    }\
-    + (void)_ZK_unconditionallySwizzle {\
-        ZKSwizzle(CLASS_NAME, TARGET_CLASS);\
-    }\
+@interface _$ ## CLASS_NAME : SUPERCLASS @end\
+@implementation _$ ## CLASS_NAME\
++ (void)initialize {}\
+@end\
+@interface CLASS_NAME : _$ ## CLASS_NAME @end\
+@implementation CLASS_NAME (ZKSWIZZLE)\
++ (void)load {\
+if (IMMEDIATELY) {\
+[self _ZK_unconditionallySwizzle];\
+} else {\
+_$ZKRegisterInterface(self, #GROUP);\
+}\
+}\
++ (void)_ZK_unconditionallySwizzle {\
+ZKSwizzle(CLASS_NAME, TARGET_CLASS);\
+}\
 @end
 
 // Bootstraps your swizzling class so that it requires no setup
@@ -105,11 +105,11 @@
 // If you override +load you must call ZKSwizzle(CLASS_NAME, TARGET_CLASS)
 // yourself, otherwise the swizzling would not take place
 #define ZKSwizzleInterface(CLASS_NAME, TARGET_CLASS, SUPERCLASS) \
-    _ZKSwizzleInterfaceConditionally(CLASS_NAME, TARGET_CLASS, SUPERCLASS, ZK_UNGROUPED, YES)
+_ZKSwizzleInterfaceConditionally(CLASS_NAME, TARGET_CLASS, SUPERCLASS, ZK_UNGROUPED, YES)
 
 // Same as ZKSwizzleInterface, except
 #define ZKSwizzleInterfaceGroup(CLASS_NAME, TARGET_CLASS, SUPER_CLASS, GROUP) \
-    _ZKSwizzleInterfaceConditionally(CLASS_NAME, TARGET_CLASS, SUPER_CLASS, GROUP, NO)
+_ZKSwizzleInterfaceConditionally(CLASS_NAME, TARGET_CLASS, SUPER_CLASS, GROUP, NO)
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Sugar Macros (For general use)
@@ -121,10 +121,10 @@
 #define GEN_CLASS(TARGET) _GEN_CLASS(TARGET, __LINE__)
 
 #define hook_2(TARGET, GROUP) \
-    ZKSwizzleInterfaceGroup(GEN_CLASS(TARGET), TARGET, NSObject, GROUP) @implementation GEN_CLASS(TARGET)
+ZKSwizzleInterfaceGroup(GEN_CLASS(TARGET), TARGET, NSObject, GROUP) @implementation GEN_CLASS(TARGET)
 
 #define hook_1(TARGET) \
-    ZKSwizzleInterface(GEN_CLASS(TARGET), TARGET, NSObject) @implementation GEN_CLASS(TARGET)
+ZKSwizzleInterface(GEN_CLASS(TARGET), TARGET, NSObject) @implementation GEN_CLASS(TARGET)
 
 #define endhook @end
 
