@@ -11,6 +11,8 @@ import Cocoa
 class ViewController: NSViewController {
   @IBOutlet var updateButton: NSButton!
 
+  private var appearanceChangeObservation: NSKeyValueObservation?
+
   var desktops: [String: NSTextField] = [String: NSTextField]()
   var constraints: [NSLayoutConstraint] = []
   var viewsToRemove: [NSView] = []
@@ -21,6 +23,10 @@ class ViewController: NSViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+
+    appearanceChangeObservation = view.observe(\.effectiveAppearance) { [weak self]  _, _  in
+      self?.refreshViews()
+    }
 
     setupViews()
   }
@@ -140,6 +146,7 @@ class ViewController: NSViewController {
         }
 
         snippet.label.stringValue = "\(i)"
+        snippet.label.textColor = .highlightColor
         snippet.textField.delegate = self
         if (monitorPairings[monitorPairings.count - 1][monitorScrollView]!.count > 0) {
           monitorPairings[monitorPairings.count - 1][monitorScrollView]!.last?.textField.nextKeyView = snippet.textField
