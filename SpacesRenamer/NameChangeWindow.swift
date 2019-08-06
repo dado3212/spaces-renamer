@@ -15,7 +15,6 @@ class NameChangeWindow: NSWindow {
     self.title = "Spaces Renamer"
     self.isOpaque = false
     self.isMovable = false
-    self.backgroundColor = NSColor(calibratedHue: 0, saturation: 0.0, brightness: 100, alpha: 0.95)
     // To make it auto-hide on F3
     self.collectionBehavior = [.transient, .ignoresCycle, .canJoinAllSpaces]
     self.level = .modalPanel

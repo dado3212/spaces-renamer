@@ -197,6 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
       nameChangeWindow.makeKeyAndOrderFront(nil)
       nameChangeWindow.selectCurrent()
+      nameChangeWindow.backgroundColor = .windowBackgroundColor
       NSApp.activate(ignoringOtherApps: true)
     }
   }
