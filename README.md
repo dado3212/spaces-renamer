@@ -34,7 +34,7 @@ This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming sp
     <ul><li>If it's not compatible, you can download the <a href="https://github.com/w0lfschild/mySIMBL/releases/latest">latest mySIMBL version</a>.</li></ul>
   </li>
   <li>
-    Make sure that it's installed, including disabling SIP (use the command `csrutil disable` in Recovery mode by <a href="https://www.imore.com/how-turn-system-integrity-protection-macos">following this tutorial</a>)).  There are additional commands for macOS Catalina, with details under the 'System' tab of MacForge.  After it's installed you can partially re-enable SIP using `csrutil enable --without debug --without fs`. If you fully enable SIP, Spaces Renamer won't work.
+    Make sure that it's installed, including disabling SIP (use the command <code>csrutil disable</code> in Recovery mode by <a href="https://www.imore.com/how-turn-system-integrity-protection-macos">following this tutorial</a>)).  There are additional commands for macOS Catalina, with details under the 'System' tab of MacForge.  After it's installed you can partially re-enable SIP using <code>csrutil enable --without debug --without fs</code>. If you fully enable SIP, Spaces Renamer won't work.
   </li>
   <li>
     Download <a href="https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip">Spaces Renamer</a>.
