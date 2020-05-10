@@ -288,6 +288,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     NSMutableArray* names = getNamesFromPlist();
 
     if (names.count == 0) {
+      ZKOrig(void, arg1);
       return;
     }
 
