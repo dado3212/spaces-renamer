@@ -13,7 +13,7 @@
 static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_WIDTH;
 static char OFFSET;
-static char MOVED;
+static char NEW_X;
 static char TYPE;
 
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
@@ -212,12 +212,12 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
       arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
     } else {
       id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
-      id didMove = objc_getAssociatedObject(self, &MOVED);
+      id newX = objc_getAssociatedObject(self, &NEW_X);
       // Only change the offsets once
-      if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
+      if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (newX == nil || [newX doubleValue] != arg1.origin.x)) {
         arg1.origin.x += [possibleOffset doubleValue];
 
-        assign(self, &MOVED, [NSNumber numberWithBool:YES]);
+        assign(self, &NEW_X, @(arg1.origin.x));
       }
     }
 
