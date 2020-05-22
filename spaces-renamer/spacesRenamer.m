@@ -13,7 +13,7 @@
 static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_WIDTH;
 static char OFFSET;
-static char MOVED;
+static char NEW_X;
 static char TYPE;
 
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
@@ -186,42 +186,35 @@ static NSMutableArray *getNamesFromPlist() {
 
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
-- (void)setBounds:(CGRect)arg1 {
-
-  return ZKOrig(void, arg1);
-}
 - (void)setFrame:(CGRect)arg1 {
   id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
   if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
     arg1.size.width = [possibleWidth doubleValue] + 20;
   }
+  
+  id possibleType = objc_getAssociatedObject(self, &TYPE);
+  if (possibleType == nil) {
+    return ZKOrig(void, arg1);
+  }
 
-  int textIndex = self.sublayers.lastObject.class == NSClassFromString(@"ECTextLayer")
-  ? (int)self.sublayers.count - 1
-  : -1;
+  int textIndex = (int)self.sublayers.count - 1;
+  possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
+  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+    arg1.size.width = [possibleWidth doubleValue];
+  }
 
-  if (textIndex != -1) {
-    id possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
-    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-      arg1.size.width = [possibleWidth doubleValue];
+  if ([possibleType isEqualToString:@"expanded"]) {
+    // Always just center in the parent view
+    arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
+  } else if ([possibleType isEqualToString:@"unexpanded"]) {
+    id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
+    id newX = objc_getAssociatedObject(self, &NEW_X);
+    // Only change the offsets once
+    if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (newX == nil || [newX doubleValue] != arg1.origin.x)) {
+      arg1.origin.x += [possibleOffset doubleValue];
+
+      assign(self, &NEW_X, @(arg1.origin.x));
     }
-
-    id possibleType = objc_getAssociatedObject(self, &TYPE);
-    if (possibleType && [possibleType isEqualToString:@"expanded"]) {
-      // Always just center in the parent view
-      arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
-    } else {
-      id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
-      id didMove = objc_getAssociatedObject(self, &MOVED);
-      // Only change the offsets once
-      if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (!didMove || ![didMove boolValue])) {
-        arg1.origin.x += [possibleOffset doubleValue];
-
-        assign(self, &MOVED, [NSNumber numberWithBool:YES]);
-      }
-    }
-
-
   }
 
   return ZKOrig(void, arg1);
