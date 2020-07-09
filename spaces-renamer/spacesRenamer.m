@@ -36,6 +36,14 @@ static void refreshFrames(CALayer *frame) {
   }
 }
 
+static void refreshFramesSur(CALayer *frame, CALayer* exception) {
+  for (CALayer *layer in frame.sublayers) {
+    if (![layer isEqualTo:exception])
+        [layer setFrame:layer.frame];
+    refreshFramesSur(layer, exception);
+  }
+}
+
 // Helper method
 static void assign(id a, void *key, id assigned) {
   objc_setAssociatedObject(a, key, assigned, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -186,10 +194,6 @@ static NSMutableArray *getNamesFromPlist() {
 
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
-- (void)setBounds:(CGRect)arg1 {
-
-  return ZKOrig(void, arg1);
-}
 - (void)setFrame:(CGRect)arg1 {
   id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
   if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
@@ -274,8 +278,19 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 - (void)setFrame:(CGRect)arg1 {
   // Almost surely the desktop switcher
   if ([self probablyDesktopSwitcher:arg1]) {
-    NSArray<CALayer *> *unexpandedViews = self.sublayers[self.sublayers.count - 1].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = self.sublayers[self.sublayers.count - 1].sublayers[1].sublayers;
+    CALayer *rootLayer = self;
+    Boolean bigSurOrNewer = false;
+    NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
+    if (macOS.majorVersion >= 11 || macOS.minorVersion >= 16) bigSurOrNewer = true;
+    if (bigSurOrNewer) rootLayer = self.superlayer;
+      
+    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[0].sublayers;
+    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[1].sublayers;
+      
+    if (bigSurOrNewer) {
+        unexpandedViews = rootLayer.sublayers[2].sublayers[0].sublayers;
+        expandedViews = rootLayer.sublayers[2].sublayers[1].sublayers;
+    }
 
     int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
@@ -344,7 +359,10 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     monitorIndex += 1;
 
     // So that it doesn't change sizes on switching spaces
-    refreshFrames(self);
+    if (!bigSurOrNewer)
+        refreshFrames(rootLayer);
+    else
+        refreshFramesSur(rootLayer, self);
   }
   ZKOrig(void, arg1);
 }
