@@ -121,22 +121,27 @@ static void overrideTextLayer(CALayer *view, NSString *newString, double width, 
 
 // Gets the text area, and renders how large it would be with the new dimensions
 // Uses this for calculating how far they should be offset by
+static double getTextSizeHelper(CATextLayer *textLayer, NSString *string) {
+  CFRange textRange = CFRangeMake(0, string.length);
+  CFMutableAttributedStringRef attributedString = CFAttributedStringCreateMutable(kCFAllocatorDefault, string.length);
+  CFAttributedStringReplaceString(attributedString, CFRangeMake(0, 0), (CFStringRef) string);
+  CFAttributedStringSetAttribute(attributedString, textRange, kCTFontAttributeName, ((CATextLayer *)textLayer).font);
+  CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attributedString);
+  CFRange fitRange;
+  CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, textRange, NULL, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), &fitRange);
+  CFRelease(framesetter);
+  CFRelease(attributedString);
+  return frameSize.width;
+}
+
 static double getTextSize(CALayer *view, NSString *string) {
-  double textSize = -1;
   CATextLayer *textLayer = getTextLayer(view);
   if (textLayer != nil) {
-    CFRange textRange = CFRangeMake(0, string.length);
-    CFMutableAttributedStringRef attributedString = CFAttributedStringCreateMutable(kCFAllocatorDefault, string.length);
-    CFAttributedStringReplaceString(attributedString, CFRangeMake(0, 0), (CFStringRef) string);
-    CFAttributedStringSetAttribute(attributedString, textRange, kCTFontAttributeName, ((CATextLayer *)textLayer).font);
-    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString(attributedString);
-    CFRange fitRange;
-    CGSize frameSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, textRange, NULL, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), &fitRange);
-    CFRelease(framesetter);
-    CFRelease(attributedString);
-    return frameSize.width;
+    // Works around bug where CTFramesetterSuggestFrameSizeWithConstraints returns 0 for
+    // strings entirely composed of whitespace
+    return getTextSizeHelper(textLayer, [string stringByAppendingString:@".."]) - getTextSizeHelper(textLayer, @".");
   }
-  return textSize;
+  return -1;
 }
 
 // The highlighted space has 2 sublayers, while as a normal space only has 1
