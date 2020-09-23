@@ -195,6 +195,7 @@ static NSMutableArray *getNamesFromPlist() {
 ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
 @implementation _SRCALayer
 - (void)setFrame:(CGRect)arg1 {
+  CGRect orig = arg1;
   id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
   if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
     arg1.size.width = [possibleWidth doubleValue] + 20;
@@ -224,6 +225,9 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
         assign(self, &NEW_X, @(arg1.origin.x));
       }
     }
+  }
+  if (arg1.size.width == 0.0 && orig.size.width != 0.0) {
+    return ZKOrig(void, orig);
   }
 
   return ZKOrig(void, arg1);
