@@ -19,7 +19,8 @@ class ViewController: NSViewController {
 
   var monitorPairings: [[NSScrollView: [DesktopSnippet]]] = []
 
-  let widthInDesktops = 6
+  var widthInDesktops = 6
+  let desktopWidth = 140.0
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -63,6 +64,14 @@ class ViewController: NSViewController {
 
     // Get the # of spaces in the maximum monitor
     let maxSpacesPerMonitor = allMonitors.reduce(Int.min, { max($0, (($1 as? NSDictionary)?.value(forKey: "Spaces") as! NSArray).count) })
+    
+    
+    guard let mainScreen = NSScreen.main else {
+      fatalError("Bugged")
+    }
+    // Maximize the number of desktops
+    let screenWidth = Double(mainScreen.visibleFrame.width)
+    widthInDesktops = Int(screenWidth / desktopWidth) - 1
 
     // For each monitor
     for j in 1...allMonitors.count {
@@ -202,7 +211,7 @@ class ViewController: NSViewController {
               maxSpacesPerMonitor == 1 ? 2 : 1, // minimum width of two spaces so the buttons render correctly
               allSpaces.count
           ))
-          ) * 140.0 + 10.0
+          ) * desktopWidth + 10.0
       ))
       constraints.append(widthConstraint)
       self.view.addConstraints([widthConstraint])
