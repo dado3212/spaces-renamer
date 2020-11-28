@@ -6,7 +6,7 @@
 //  Copyright 2017 Alex Beals.
 //
 
-@import AppKit;
+@import Foundation;
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -19,6 +19,15 @@ static char TYPE;
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
+
+// Maximum online or active displays.
+//
+// SpacesRenamer uses the core graphics API to get online/active
+// displays by calling CGGetActiveDisplayList() and CGGetOnlineDisplayList(),
+// this definition is the count that will be used when calling those functions.
+//
+// If you have more than 12 monitors, this tweak can't help you with organization, good luck.
+#define kMaxDisplays 12
 
 int monitorIndex = 0;
 
@@ -397,16 +406,19 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     return false;
   }
 
+  // Get all of the monitors
+  CGDirectDisplayID displayArray[kMaxDisplays];
+  uint32_t displayCount;
+  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
+
   // Is the width of the full screen (one of them)
-  NSArray *const screenArray = [NSScreen screens];
-  for (int i = 0; i < screenArray.count; i++) {
-    NSScreen *const screen = [screenArray objectAtIndex:i];
-    if (screen.visibleFrame.size.width == rect.size.width) {
+  for (int i = 0; i < displayCount; i++) {
+    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
       return true;
     }
   }
 
-  // Default to NO
+  // Default to false
   return false;
 }
 
