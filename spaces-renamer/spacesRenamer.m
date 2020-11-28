@@ -169,7 +169,7 @@ static int getSelected(NSArray<CALayer *> *views) {
  2. Load the listOfSpacesPlist to get the current list of spaces
  3. Crosslist and return the custom names for each plist, and whether it's selected
  */
-static NSMutableArray *getNamesFromPlist() {
+static NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *getNamesFromPlist() {
   NSDictionary *dictOfNames = [NSDictionary dictionaryWithContentsOfFile:customNamesPlist];
   if (!dictOfNames) {
     return [NSMutableArray arrayWithCapacity:0];
@@ -321,7 +321,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
 
     // Get all of the names
-    NSMutableArray* names = getNamesFromPlist();
+    NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *names = getNamesFromPlist();
 
     if (names.count == 0) {
       ZKOrig(void, arg1);
@@ -332,7 +332,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
     for (int i = 0; i < names.count; i++) {
       if (
-          ((NSArray *)names[i]).count == numMonitors && // Same number of monitors
+          names[i].count == numMonitors && // Same number of monitors
           [names[i][selected][@"selected"] boolValue] // Same index is selected
           ) {
         [possibleMonitors addObject:[NSNumber numberWithInt:i]];
