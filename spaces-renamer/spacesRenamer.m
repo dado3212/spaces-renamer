@@ -6,7 +6,7 @@
 //  Copyright 2017 Alex Beals.
 //
 
-@import AppKit;
+@import Foundation;
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -19,6 +19,15 @@ static char TYPE;
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
+
+// Maximum online or active displays.
+//
+// SpacesRenamer uses the core graphics API to get online/active
+// displays by calling CGGetActiveDisplayList() and CGGetOnlineDisplayList(),
+// this definition is the count that will be used when calling those functions.
+//
+// If you have more than 12 monitors, this tweak can't help you with organization, good luck.
+#define kMaxDisplays 12
 
 int monitorIndex = 0;
 
@@ -38,8 +47,9 @@ static void refreshFrames(CALayer *frame) {
 
 static void refreshFramesSur(CALayer *frame, CALayer* exception) {
   for (CALayer *layer in frame.sublayers) {
-    if (![layer isEqualTo:exception])
-        [layer setFrame:layer.frame];
+    if (![layer isEqualTo:exception]) {
+      [layer setFrame:layer.frame];
+    }
     refreshFramesSur(layer, exception);
   }
 }
@@ -148,8 +158,8 @@ static double getTextSize(CALayer *view, NSString *string) {
 static int getSelected(NSArray<CALayer *> *views) {
   NSUInteger selectedIndex = [views indexOfObjectPassingTest:
                               ^(CALayer *layer, NSUInteger idx, BOOL *stop) {
-                                return (BOOL)(layer.sublayers.count > 1);
-                              }];
+    return (BOOL)(layer.sublayers.count > 1);
+  }];
 
   return selectedIndex == NSNotFound ? -1 : (int)selectedIndex;
 }
@@ -159,7 +169,7 @@ static int getSelected(NSArray<CALayer *> *views) {
  2. Load the listOfSpacesPlist to get the current list of spaces
  3. Crosslist and return the custom names for each plist, and whether it's selected
  */
-static NSMutableArray *getNamesFromPlist() {
+static NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *getNamesFromPlist() {
   NSDictionary *dictOfNames = [NSDictionary dictionaryWithContentsOfFile:customNamesPlist];
   if (!dictOfNames) {
     return [NSMutableArray arrayWithCapacity:0];
@@ -287,18 +297,22 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 - (void)setFrame:(CGRect)arg1 {
   // Almost surely the desktop switcher
   if ([self probablyDesktopSwitcher:arg1]) {
-    CALayer *rootLayer = self;
-    Boolean bigSurOrNewer = false;
     NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
-    if (macOS.majorVersion >= 11 || macOS.minorVersion >= 16) bigSurOrNewer = true;
-    if (bigSurOrNewer) rootLayer = self.superlayer;
-      
+    bool bigSurOrNewer = (macOS.majorVersion >= 11 || macOS.minorVersion >= 16);
+
+    CALayer *rootLayer;
+    if (bigSurOrNewer) {
+      rootLayer = self.superlayer;
+    } else {
+      rootLayer = self;
+    }
+
     NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[0].sublayers;
     NSArray<CALayer *> *expandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[1].sublayers;
-      
+
     if (bigSurOrNewer) {
-        unexpandedViews = rootLayer.sublayers[2].sublayers[0].sublayers;
-        expandedViews = rootLayer.sublayers[2].sublayers[1].sublayers;
+      unexpandedViews = rootLayer.sublayers[2].sublayers[0].sublayers;
+      expandedViews = rootLayer.sublayers[2].sublayers[1].sublayers;
     }
 
     int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
@@ -307,7 +321,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
 
     // Get all of the names
-    NSMutableArray* names = getNamesFromPlist();
+    NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *names = getNamesFromPlist();
 
     if (names.count == 0) {
       ZKOrig(void, arg1);
@@ -318,7 +332,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
     for (int i = 0; i < names.count; i++) {
       if (
-          ((NSArray *)names[i]).count == numMonitors && // Same number of monitors
+          names[i].count == numMonitors && // Same number of monitors
           [names[i][selected][@"selected"] boolValue] // Same index is selected
           ) {
         [possibleMonitors addObject:[NSNumber numberWithInt:i]];
@@ -368,10 +382,11 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     monitorIndex += 1;
 
     // So that it doesn't change sizes on switching spaces
-    if (!bigSurOrNewer)
-        refreshFrames(rootLayer);
-    else
-        refreshFramesSur(rootLayer, self);
+    if (!bigSurOrNewer) {
+      refreshFrames(rootLayer);
+    } else {
+      refreshFramesSur(rootLayer, self);
+    }
   }
   ZKOrig(void, arg1);
 }
@@ -391,16 +406,19 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     return false;
   }
 
+  // Get all of the monitors
+  CGDirectDisplayID displayArray[kMaxDisplays];
+  uint32_t displayCount;
+  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
+
   // Is the width of the full screen (one of them)
-  NSArray *const screenArray = [NSScreen screens];
-  for (int i = 0; i < screenArray.count; i++) {
-    NSScreen *const screen = [screenArray objectAtIndex:i];
-    if (screen.visibleFrame.size.width == rect.size.width) {
+  for (int i = 0; i < displayCount; i++) {
+    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
       return true;
     }
   }
 
-  // Default to NO
+  // Default to false
   return false;
 }
 
