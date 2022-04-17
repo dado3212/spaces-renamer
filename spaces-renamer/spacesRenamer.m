@@ -397,10 +397,6 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
   if (rect.origin.x != 0) {
     return false;
   }
-  // Has two sublayers
-  if (self.sublayers.count < 2) {
-    return false;
-  }
   // Is a child of CALayer
   if (self.superlayer.class != NSClassFromString(@"CALayer")) {
     return false;
@@ -421,5 +417,19 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
   // Default to false
   return false;
 }
+
+// ===============
+// DEBUG FUNCTIONS
+// ===============
+//- (void)printLayer:(CALayer *)layer {
+//  [self recursivePrint:layer withPrefix:@""];
+//}
+//
+//- (void)recursivePrint:(CALayer *)layer withPrefix:(NSString *)prefix {
+//  NSLog(@"spaces-renamer: %@%@", prefix, layer);
+//  for (int i = 0; i < layer.sublayers.count; i++) {
+//    [self recursivePrint:layer.sublayers[i] withPrefix:[NSString stringWithFormat:@"  %@", prefix]];
+//  }
+//}
 
 @end
