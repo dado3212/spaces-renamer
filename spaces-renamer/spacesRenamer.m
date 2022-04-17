@@ -306,14 +306,8 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     } else {
       rootLayer = self;
     }
-
-    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[self.sublayers.count - 1].sublayers[1].sublayers;
-
-    if (bigSurOrNewer) {
-      unexpandedViews = rootLayer.sublayers[2].sublayers[0].sublayers;
-      expandedViews = rootLayer.sublayers[2].sublayers[1].sublayers;
-    }
+    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[0].sublayers;
+    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[1].sublayers;
 
     int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
