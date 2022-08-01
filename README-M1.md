@@ -76,3 +76,16 @@ brew --version
 cd MacForge/MacForge
 pod install
 ```
+
+```
+arch -x86_64 pod install
+# Can delete Pods_com_macenhance_MacForge_Injector from MacForge.injector build dependencies
+```
+
+Remove MacForge application and Empty Trash. Run the following
+```
+sudo launchctl unload /Library/LaunchDaemons/com.macenhance.MacForge.Injector.plist
+sudo rm -rf "/Library/Application Support/MacEnhance"
+sudo rm /Library/LaunchDaemons/com.macenhance.MacForge.Injector.plist
+sudo rm /Library/PrivilegedHelperTools/com.macenhance.MacForge.Injector
+```
