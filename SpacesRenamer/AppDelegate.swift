@@ -22,16 +22,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   let conn = _CGSDefaultConnection()
 
   fileprivate func configureObservers() {
-    let bundle = Bundle(path: "/Users/abeals/Git/spaces-renamer/spaces-renamer.bundle")
-    NSLog("hackingdartmouth - \(String(describing: bundle?.executableArchitectures))")
-    let app = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock")[0]
-    NSLog("hackingdarmtouth - \(app.executableArchitecture)")
-    if (bundle!.executableArchitectures?.contains(NSNumber(value: app.executableArchitecture)) ?? false) {
-      NSLog("hackingdartmouth - contains")
-    } else {
-      NSLog("hackingdartmouth - does not")
-    }
-
     workspace = NSWorkspace.shared
     workspace?.notificationCenter.addObserver(
       self,

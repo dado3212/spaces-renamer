@@ -63,3 +63,16 @@ As of 7/31/22 asked https://discord.com/channels/608740492561219617/804044537432
 > as the Beta compatible build from the pinned task, but the error logs are citing "no matching executable architecture found for...". That error message is only in the master branch for MacForge, it's deleted in the @jslegendre  fix-beta branch. Does the MacForge.1.2.0B1.zip file have the most up-to-date MacForgeHelper or am I somehow installing it wrong?
 
 > I tried building the branch locally, but was hitting ld: framework not found Pods_com_macenhance_MacForge_Injector. First time going through the Brew/CocoaPods install setup on an M1 though, so I may have done something wrong.
+
+---
+
+```
+git clone https://github.com/MacEnhance/MacForge.git --recursive
+pod --version
+> 1.11.3
+brew --version
+> Homebrew 3.5.6
+> Homebrew/homebrew-core (git revision 03fbf3a604d; last commit 2022-08-01)
+cd MacForge/MacForge
+pod install
+```
