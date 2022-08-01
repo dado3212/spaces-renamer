@@ -207,223 +207,223 @@ static NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *getNamesFromPlis
   return newNames;
 }
 
-ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
-@implementation _SRCALayer
-- (void)setFrame:(CGRect)arg1 {
-  CGRect orig = arg1;
-  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
-  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
-    arg1.size.width = [possibleWidth doubleValue] + 20;
-  }
-
-  int textIndex = self.sublayers.lastObject.class == NSClassFromString(@"ECTextLayer")
-  ? (int)self.sublayers.count - 1
-  : -1;
-
-  if (textIndex != -1) {
-    id possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
-    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-      arg1.size.width = [possibleWidth doubleValue];
-    }
-
-    id possibleType = objc_getAssociatedObject(self, &TYPE);
-    if (possibleType && [possibleType isEqualToString:@"expanded"]) {
-      // Always just center in the parent view
-      arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
-    } else {
-      id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
-      id newX = objc_getAssociatedObject(self, &NEW_X);
-      // Only change the offsets once
-      if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (newX == nil || [newX doubleValue] != arg1.origin.x)) {
-        arg1.origin.x += [possibleOffset doubleValue];
-
-        assign(self, &NEW_X, @(arg1.origin.x));
-      }
-    }
-  }
-  if (arg1.size.width == 0.0 && orig.size.width != 0.0) {
-    return ZKOrig(void, orig);
-  }
-
-  return ZKOrig(void, arg1);
-}
-@end
-
-ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
-@implementation _SRECTextLayer
-- (void)setFrame:(CGRect)arg1 {
-  @try {
-    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-  } @catch(id anException) {}
-  [self addObserver:self
-         forKeyPath:@"propertiesChanged"
-            options:NSKeyValueObservingOptionNew
-            context:nil];
-
-  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
-  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-    arg1.size.width = [possibleWidth doubleValue];
-  }
-
-  ZKOrig(void, arg1);
-}
-
--(void)dealloc {
-  @try {
-    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-  } @catch(id anException) {}
-  ZKOrig(void);
-}
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-  id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-  if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
-    self.string = overridden;
-  }
-}
-
-- (id)propertiesChanged {
-  return nil;
-}
-
-+(NSSet *)keyPathsForValuesAffectingPropertiesChanged {
-  return [NSSet setWithObjects:@"string", nil];
-}
-
-@end
-
-ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
-@implementation _SRECMaterialLayer
-- (void)setFrame:(CGRect)arg1 {
-  // Almost surely the desktop switcher
-  if ([self probablyDesktopSwitcher:arg1]) {
-    NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
-    bool bigSurOrNewer = (macOS.majorVersion >= 11 || macOS.minorVersion >= 16);
-
-    CALayer *rootLayer;
-    if (bigSurOrNewer) {
-      rootLayer = self.superlayer;
-    } else {
-      rootLayer = self;
-    }
-    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[1].sublayers;
-
-    int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
-
-    // Get which of the spaces in the current dock is selected
-    int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
-
-    // Get all of the names
-    NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *names = getNamesFromPlist();
-
-    if (names.count == 0) {
-      ZKOrig(void, arg1);
-      return;
-    }
-
-    // Take a best guess at which monitor it is
-    NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
-    for (int i = 0; i < names.count; i++) {
-      if (
-          names[i].count == numMonitors && // Same number of monitors
-          [names[i][selected][@"selected"] boolValue] // Same index is selected
-          ) {
-        [possibleMonitors addObject:[NSNumber numberWithInt:i]];
-      }
-    }
-    // If only one monitor, good to go
-    // If more than one monitor, then just go with the same cycling as it appears to have been last time it was good to go
-    if (possibleMonitors.count == 1) {
-      monitorIndex = [possibleMonitors[0] intValue];
-    }
-    [possibleMonitors release];
-
-    monitorIndex = monitorIndex % names.count;
-
-    double unexpandedOffset = 0;
-    for (int i = 0; i < ((NSArray *)names[monitorIndex]).count; i++) {
-      NSString *name = names[monitorIndex][i][@"name"];
-      // It's overridden
-      if (name != nil && ![name isEqualToString:@""]) {
-        // Expanded
-        if (i < expandedViews.count) {
-          double textSize = getTextSize(expandedViews[i], name);
-          // Don't have the expanded view string overlap other ones
-          overrideTextLayer(expandedViews[i], name, MIN(textSize, expandedViews[i].frame.size.width), @"expanded");
-        }
-        // Unexpanded
-        if (i < unexpandedViews.count) {
-          double textSize = getTextSize(unexpandedViews[i], name);
-          overrideTextLayer(unexpandedViews[i], name, textSize, @"unexpanded");
-          setOffset(unexpandedViews[i], unexpandedOffset, false);
-          unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
-        }
-      } else {
-        if (i < unexpandedViews.count) {
-          setOffset(unexpandedViews[i], unexpandedOffset, false);
-        }
-      }
-    }
-
-    // Make sure that it's centered in the bar when unexpanded
-    for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
-      if (i < unexpandedViews.count) {
-        setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
-      }
-    }
-
-    monitorIndex += 1;
-
-    // So that it doesn't change sizes on switching spaces
-    if (!bigSurOrNewer) {
-      refreshFrames(rootLayer);
-    } else {
-      refreshFramesSur(rootLayer, self);
-    }
-  }
-  ZKOrig(void, arg1);
-}
-
-// (40 height unexpanded, 146 expanded), if it's relevant later
-- (BOOL)probablyDesktopSwitcher:(CGRect)rect {
-  // Must start at origin
-  if (rect.origin.x != 0) {
-    return false;
-  }
-  // Is a child of CALayer
-  if (self.superlayer.class != NSClassFromString(@"CALayer")) {
-    return false;
-  }
-
-  // Get all of the monitors
-  CGDirectDisplayID displayArray[kMaxDisplays];
-  uint32_t displayCount;
-  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
-
-  // Is the width of the full screen (one of them)
-  for (int i = 0; i < displayCount; i++) {
-    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
-      return true;
-    }
-  }
-
-  // Default to false
-  return false;
-}
-
-// ===============
-// DEBUG FUNCTIONS
-// ===============
-//- (void)printLayer:(CALayer *)layer {
-//  [self recursivePrint:layer withPrefix:@""];
+//ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
+//@implementation _SRCALayer
+//- (void)setFrame:(CGRect)arg1 {
+//  CGRect orig = arg1;
+//  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+//  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]] && self.class == NSClassFromString(@"CALayer")) {
+//    arg1.size.width = [possibleWidth doubleValue] + 20;
+//  }
+//
+//  int textIndex = self.sublayers.lastObject.class == NSClassFromString(@"ECTextLayer")
+//  ? (int)self.sublayers.count - 1
+//  : -1;
+//
+//  if (textIndex != -1) {
+//    id possibleWidth = objc_getAssociatedObject(self.sublayers[textIndex], &OVERRIDDEN_WIDTH);
+//    if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+//      arg1.size.width = [possibleWidth doubleValue];
+//    }
+//
+//    id possibleType = objc_getAssociatedObject(self, &TYPE);
+//    if (possibleType && [possibleType isEqualToString:@"expanded"]) {
+//      // Always just center in the parent view
+//      arg1.origin.x = self.superlayer.frame.size.width / 2 - arg1.size.width / 2;
+//    } else {
+//      id possibleOffset = objc_getAssociatedObject(self.sublayers[textIndex], &OFFSET);
+//      id newX = objc_getAssociatedObject(self, &NEW_X);
+//      // Only change the offsets once
+//      if (possibleOffset && [possibleOffset isKindOfClass:[NSNumber class]] && (newX == nil || [newX doubleValue] != arg1.origin.x)) {
+//        arg1.origin.x += [possibleOffset doubleValue];
+//
+//        assign(self, &NEW_X, @(arg1.origin.x));
+//      }
+//    }
+//  }
+//  if (arg1.size.width == 0.0 && orig.size.width != 0.0) {
+//    return ZKOrig(void, orig);
+//  }
+//
+//  return ZKOrig(void, arg1);
+//}
+//@end
+//
+//ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
+//@implementation _SRECTextLayer
+//- (void)setFrame:(CGRect)arg1 {
+//  @try {
+//    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
+//  } @catch(id anException) {}
+//  [self addObserver:self
+//         forKeyPath:@"propertiesChanged"
+//            options:NSKeyValueObservingOptionNew
+//            context:nil];
+//
+//  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+//  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+//    arg1.size.width = [possibleWidth doubleValue];
+//  }
+//
+//  ZKOrig(void, arg1);
 //}
 //
-//- (void)recursivePrint:(CALayer *)layer withPrefix:(NSString *)prefix {
-//  NSLog(@"spaces-renamer: %@%@", prefix, layer);
-//  for (int i = 0; i < layer.sublayers.count; i++) {
-//    [self recursivePrint:layer.sublayers[i] withPrefix:[NSString stringWithFormat:@"  %@", prefix]];
+//-(void)dealloc {
+//  @try {
+//    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
+//  } @catch(id anException) {}
+//  ZKOrig(void);
+//}
+//
+//-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+//  id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
+//  if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
+//    self.string = overridden;
 //  }
 //}
-
-@end
+//
+//- (id)propertiesChanged {
+//  return nil;
+//}
+//
+//+(NSSet *)keyPathsForValuesAffectingPropertiesChanged {
+//  return [NSSet setWithObjects:@"string", nil];
+//}
+//
+//@end
+//
+//ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
+//@implementation _SRECMaterialLayer
+//- (void)setFrame:(CGRect)arg1 {
+//  // Almost surely the desktop switcher
+//  if ([self probablyDesktopSwitcher:arg1]) {
+//    NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
+//    bool bigSurOrNewer = (macOS.majorVersion >= 11 || macOS.minorVersion >= 16);
+//
+//    CALayer *rootLayer;
+//    if (bigSurOrNewer) {
+//      rootLayer = self.superlayer;
+//    } else {
+//      rootLayer = self;
+//    }
+//    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[0].sublayers;
+//    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[1].sublayers;
+//
+//    int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
+//
+//    // Get which of the spaces in the current dock is selected
+//    int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
+//
+//    // Get all of the names
+//    NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *names = getNamesFromPlist();
+//
+//    if (names.count == 0) {
+//      ZKOrig(void, arg1);
+//      return;
+//    }
+//
+//    // Take a best guess at which monitor it is
+//    NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
+//    for (int i = 0; i < names.count; i++) {
+//      if (
+//          names[i].count == numMonitors && // Same number of monitors
+//          [names[i][selected][@"selected"] boolValue] // Same index is selected
+//          ) {
+//        [possibleMonitors addObject:[NSNumber numberWithInt:i]];
+//      }
+//    }
+//    // If only one monitor, good to go
+//    // If more than one monitor, then just go with the same cycling as it appears to have been last time it was good to go
+//    if (possibleMonitors.count == 1) {
+//      monitorIndex = [possibleMonitors[0] intValue];
+//    }
+//    [possibleMonitors release];
+//
+//    monitorIndex = monitorIndex % names.count;
+//
+//    double unexpandedOffset = 0;
+//    for (int i = 0; i < ((NSArray *)names[monitorIndex]).count; i++) {
+//      NSString *name = names[monitorIndex][i][@"name"];
+//      // It's overridden
+//      if (name != nil && ![name isEqualToString:@""]) {
+//        // Expanded
+//        if (i < expandedViews.count) {
+//          double textSize = getTextSize(expandedViews[i], name);
+//          // Don't have the expanded view string overlap other ones
+//          overrideTextLayer(expandedViews[i], name, MIN(textSize, expandedViews[i].frame.size.width), @"expanded");
+//        }
+//        // Unexpanded
+//        if (i < unexpandedViews.count) {
+//          double textSize = getTextSize(unexpandedViews[i], name);
+//          overrideTextLayer(unexpandedViews[i], name, textSize, @"unexpanded");
+//          setOffset(unexpandedViews[i], unexpandedOffset, false);
+//          unexpandedOffset += (textSize - getTextLayer(unexpandedViews[i]).bounds.size.width);
+//        }
+//      } else {
+//        if (i < unexpandedViews.count) {
+//          setOffset(unexpandedViews[i], unexpandedOffset, false);
+//        }
+//      }
+//    }
+//
+//    // Make sure that it's centered in the bar when unexpanded
+//    for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+//      if (i < unexpandedViews.count) {
+//        setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
+//      }
+//    }
+//
+//    monitorIndex += 1;
+//
+//    // So that it doesn't change sizes on switching spaces
+//    if (!bigSurOrNewer) {
+//      refreshFrames(rootLayer);
+//    } else {
+//      refreshFramesSur(rootLayer, self);
+//    }
+//  }
+//  ZKOrig(void, arg1);
+//}
+//
+//// (40 height unexpanded, 146 expanded), if it's relevant later
+//- (BOOL)probablyDesktopSwitcher:(CGRect)rect {
+//  // Must start at origin
+//  if (rect.origin.x != 0) {
+//    return false;
+//  }
+//  // Is a child of CALayer
+//  if (self.superlayer.class != NSClassFromString(@"CALayer")) {
+//    return false;
+//  }
+//
+//  // Get all of the monitors
+//  CGDirectDisplayID displayArray[kMaxDisplays];
+//  uint32_t displayCount;
+//  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
+//
+//  // Is the width of the full screen (one of them)
+//  for (int i = 0; i < displayCount; i++) {
+//    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
+//      return true;
+//    }
+//  }
+//
+//  // Default to false
+//  return false;
+//}
+//
+//// ===============
+//// DEBUG FUNCTIONS
+//// ===============
+////- (void)printLayer:(CALayer *)layer {
+////  [self recursivePrint:layer withPrefix:@""];
+////}
+////
+////- (void)recursivePrint:(CALayer *)layer withPrefix:(NSString *)prefix {
+////  NSLog(@"spaces-renamer: %@%@", prefix, layer);
+////  for (int i = 0; i < layer.sublayers.count; i++) {
+////    [self recursivePrint:layer.sublayers[i] withPrefix:[NSString stringWithFormat:@"  %@", prefix]];
+////  }
+////}
+//
+//@end

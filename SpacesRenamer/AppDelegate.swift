@@ -8,7 +8,6 @@
 
 import Cocoa
 import Foundation
-import LetsMove
 
 @NSApplicationMain
 @objc
@@ -23,6 +22,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   let conn = _CGSDefaultConnection()
 
   fileprivate func configureObservers() {
+    let bundle = Bundle(path: "/Users/abeals/Git/spaces-renamer/spaces-renamer.bundle")
+    NSLog("hackingdartmouth - \(String(describing: bundle?.executableArchitectures))")
+    let app = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock")[0]
+    NSLog("hackingdarmtouth - \(app.executableArchitecture)")
+    if (bundle!.executableArchitectures?.contains(NSNumber(value: app.executableArchitecture)) ?? false) {
+      NSLog("hackingdartmouth - contains")
+    } else {
+      NSLog("hackingdartmouth - does not")
+    }
+
     workspace = NSWorkspace.shared
     workspace?.notificationCenter.addObserver(
       self,
@@ -128,7 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // Move it to the /Applications folder, and add it as a login item
-    PFMoveToApplicationsFolderIfNecessary()
+//    PFMoveToApplicationsFolderIfNecessary()
     Utils.addPathToLoginItemsIfNecessary(path: Bundle.main.bundlePath, name: "SpacesRenamer")
 
     // Listen for left click (without Command)

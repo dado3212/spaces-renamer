@@ -19,9 +19,6 @@
 		A85FC62C2144D437002B4E08 /* CenteredClipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85FC62B2144D437002B4E08 /* CenteredClipView.swift */; };
 		A85FC6312144F1AE002B4E08 /* RemoveFromLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */; };
 		A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC62F2144F068002B4E08 /* AddToLogin.scpt */; };
-		A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
-		A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
-		A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC643214511EA002B4E08 /* GetLoginItems.scpt */; };
 		A85FC64621477819002B4E08 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85FC64521477819002B4E08 /* Extensions.swift */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
@@ -35,7 +32,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -61,7 +57,6 @@
 		A85FC62B2144D437002B4E08 /* CenteredClipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenteredClipView.swift; sourceTree = "<group>"; };
 		A85FC62F2144F068002B4E08 /* AddToLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = AddToLogin.scpt; sourceTree = "<group>"; };
 		A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RemoveFromLogin.scpt; sourceTree = "<group>"; };
-		A85FC63A214503E0002B4E08 /* LetsMove.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LetsMove.framework; path = SpacesRenamer/LetsMove.framework; sourceTree = "<group>"; };
 		A85FC643214511EA002B4E08 /* GetLoginItems.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = GetLoginItems.scpt; sourceTree = "<group>"; };
 		A85FC64521477819002B4E08 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
@@ -81,7 +76,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +89,6 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				A80DDE2A1FBCE4D600794F8F /* SpacesRenamer */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
-				A85FC63621450391002B4E08 /* Frameworks */,
 			);
 			name = ColorfulSidebar;
 			sourceTree = "<group>";
@@ -149,14 +142,6 @@
 				A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */,
 			);
 			path = SpacesRenamer;
-			sourceTree = "<group>";
-		};
-		A85FC63621450391002B4E08 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A85FC63A214503E0002B4E08 /* LetsMove.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,7 +234,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */,
-				A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */,
 				A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */,
 				A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */,
 				A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */,
@@ -323,10 +307,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-				);
+				ARCHS = arm64;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = /;
@@ -338,7 +319,6 @@
 				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "/Library/Application Support/MacEnhance/Plugins";
 				MARKETING_VERSION = 1.10.3;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alexbeals.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
@@ -349,10 +329,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-				);
+				ARCHS = arm64;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
@@ -362,7 +339,6 @@
 				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "/Library/Application Support/MacEnhance/Plugins";
 				MARKETING_VERSION = 1.10.3;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alexbeals.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
@@ -395,7 +371,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -425,7 +400,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
-				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -478,7 +452,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = 1.10.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -531,7 +504,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MARKETING_VERSION = 1.10.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = SpacesRenamer/SpacesRenamerBridge.h;
