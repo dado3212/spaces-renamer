@@ -3,6 +3,9 @@
   <p align="center">Spaces Renamer</p>
 </h1>
 
+> [!CAUTION]
+> Currently broken on MacOS Sonoma 14.4.
+
 Spaces Renamer is a combination of an application and SIMBL plugin to allow you to rename your spaces.
 
 <p align="center">
