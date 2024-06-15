@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="/SpacesRenamer/Assets.xcassets/AppIcon.appiconset/Icon-1.png?raw=true" height="300" alt=""/>
+  <img src="/SpacesRenamer/Assets.xcassets/AppIcon.appiconset/Icon-1.png?raw=true" width="20%" alt=""/>
   <p align="center">Spaces Renamer</p>
 </h1>
 
