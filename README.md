@@ -93,6 +93,11 @@ sudo rm /Library/PrivilegedHelperTools/com.macenhance.MacForge.Injector
 sudo rm -rf ~/Library/Containers/com.alexbeals.spacesrenamer
 ```
 
+### Debugging Common Issues
+
+**MacForge is automatically downgrading**  
+If you are running into issues where MacForge is downgrading, try uninstall MacForge by deleting the app and emptying Trash, running the `surge.sh` file, restarting your computer, and then installing MacForge again. Make sure when you install you disable automatic upgrading and checks.
+
 --- 
 
 Donations [are always appreciated](https://www.paypal.com/paypalme2/AlexBeals), but in no way expected.
