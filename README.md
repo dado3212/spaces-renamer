@@ -96,7 +96,10 @@ sudo rm -rf ~/Library/Containers/com.alexbeals.spacesrenamer
 ### Debugging Common Issues
 
 **MacForge is automatically downgrading**  
-If you are running into issues where MacForge is downgrading, try uninstall MacForge by deleting the app and emptying Trash, running the `surge.sh` file, restarting your computer, and then installing MacForge again. Make sure when you install you disable automatic upgrading and checks.
+If you are running into issues where MacForge is downgrading, try uninstall MacForge by deleting the app and emptying Trash, running the `purge.sh` file, restarting your computer, and then installing MacForge again. Make sure when you install you disable automatic upgrading and checks.
+
+**I can't see the icon in the menu bar**
+Make sure the SpacesRenamer app is actually running (you can check it in Activity Monitor). If it is, it's likely that you just have a lot of icons. See [this comment](https://github.com/dado3212/spaces-renamer/issues/94#issuecomment-2126843231) for some recommendations on how to rearrange your icons to have it be visible.
 
 --- 
 
