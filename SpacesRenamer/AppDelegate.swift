@@ -102,6 +102,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
 
       let customNames = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist)
+      let oldCustomNames = customNames
       if (customNames != nil) {
         if var renamed = customNames!["spaces_renaming"] as? [String: String] {
           for removedUUID in removed {
@@ -111,15 +112,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
           }
           customNames!["spaces_renaming"] = renamed
         }
-        customNames!.write(toFile: Utils.customNamesPlist, atomically: true)
+        if (oldCustomNames != customNames) {
+          customNames!.write(toFile: Utils.customNamesPlist, atomically: true)
+        }
       }
     }
 
-    spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+    // Only update the file/window if it's changed
+    if (spacesDict != prev) {
+      spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
-    DispatchQueue.main.async {
-      if (self.nameChangeWindow.isVisible) {
-        self.nameChangeWindow.refresh()
+      DispatchQueue.main.async {
+        if (self.nameChangeWindow.isVisible) {
+          self.nameChangeWindow.refresh()
+        }
       }
     }
   }
