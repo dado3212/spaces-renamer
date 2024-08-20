@@ -117,8 +117,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
 
-    if (nameChangeWindow.isVisible) {
-      nameChangeWindow.refresh()
+    DispatchQueue.main.async {
+      if (self.nameChangeWindow.isVisible) {
+        self.nameChangeWindow.refresh()
+      }
     }
   }
 
