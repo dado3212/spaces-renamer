@@ -7,6 +7,7 @@
 //
 
 @import Foundation;
+@import CoreText;
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
 
