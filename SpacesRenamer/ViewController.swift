@@ -25,6 +25,7 @@ class ViewController: NSViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    // Handles dark mode changes
     appearanceChangeObservation = view.observe(\.effectiveAppearance) { [weak self]  _, _  in
       self?.refreshViews()
     }
