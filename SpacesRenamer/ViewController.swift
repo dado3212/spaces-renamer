@@ -12,6 +12,9 @@ class ViewController: NSViewController {
   @IBOutlet var updateButton: NSButton!
 
   private var appearanceChangeObservation: NSKeyValueObservation?
+  
+  // Doesn't do some of the setup logic if it's not going to affect layout
+  var isPopover = false
 
   var desktops: [String: NSTextField] = [String: NSTextField]()
   var constraints: [NSLayoutConstraint] = []
@@ -238,6 +241,10 @@ class ViewController: NSViewController {
   func refreshViews() {
     teardownViews()
     setupViews()
+    
+    if (isPopover) {
+      return
+    }
 
     var currentMapping = NSMutableDictionary()
     if let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist),
@@ -251,6 +258,9 @@ class ViewController: NSViewController {
         textField.stringValue = newName as! String
       }
     }
+    
+    // Select the current space
+    selectCurrent()
   }
 
   override func viewWillAppear() {
@@ -275,13 +285,7 @@ class ViewController: NSViewController {
       }
     }
   }
-
-  override func viewDidAppear() {
-    super.viewDidAppear()
-
-    selectCurrent()
-  }
-
+  
   @IBAction func quitMenuApp(_ sender: Any) {
     NSApp.terminate(nil)
   }
@@ -324,12 +328,13 @@ extension ViewController: NSTextFieldDelegate {
 }
 
 extension ViewController {
-  static func freshController() -> ViewController {
+  static func freshController(isPopover: Bool) -> ViewController {
     let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
     let identifier = NSStoryboard.SceneIdentifier(rawValue: "Popup")
     guard let viewcontroller = storyboard.instantiateController(withIdentifier: identifier) as? ViewController else {
       fatalError("Bugged")
     }
+    viewcontroller.isPopover = isPopover
     return viewcontroller
   }
 }

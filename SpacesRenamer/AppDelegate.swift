@@ -156,8 +156,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       print("Not really sure.")
     }
 
-    nameChangeWindow.contentViewController = ViewController.freshController()
-    hiddenPopover.contentViewController = ViewController.freshController()
+    nameChangeWindow.contentViewController = ViewController.freshController(isPopover: false)
+    hiddenPopover.contentViewController = ViewController.freshController(isPopover: true)
     hiddenPopover.animates = false
 
     eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
