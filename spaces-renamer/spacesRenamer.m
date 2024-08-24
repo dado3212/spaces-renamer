@@ -10,6 +10,7 @@
 @import CoreText;
 #import "ZKSwizzle.h"
 #import <QuartzCore/QuartzCore.h>
+#import <Cocoa/Cocoa.h>
 
 static char OVERRIDDEN_STRING;
 static char OVERRIDDEN_WIDTH;
@@ -20,6 +21,14 @@ static char TYPE;
 #define customNamesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.plist" stringByExpandingTildeInPath]
 #define listOfSpacesPlist [@"~/Library/Containers/com.alexbeals.spacesrenamer/com.alexbeals.spacesrenamer.currentspaces.plist" stringByExpandingTildeInPath]
 #define spacesPath [@"~/Library/Preferences/com.apple.spaces.plist" stringByExpandingTildeInPath]
+
+@interface Monitor : NSObject
+@property (nonatomic, strong) NSString *displayUUID;
+@property (nonatomic, strong) NSMutableArray<NSMutableDictionary *> *spaces;
+@end
+
+@implementation Monitor
+@end
 
 // Maximum online or active displays.
 //
@@ -170,7 +179,7 @@ static int getSelected(NSArray<CALayer *> *views) {
  2. Load the listOfSpacesPlist to get the current list of spaces
  3. Crosslist and return the custom names for each plist, and whether it's selected
  */
-static NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *getNamesFromPlist() {
+static NSMutableArray<Monitor *> *getNamesFromPlist() {
   NSDictionary *dictOfNames = [NSDictionary dictionaryWithContentsOfFile:customNamesPlist];
   if (!dictOfNames) {
     return [NSMutableArray arrayWithCapacity:0];
@@ -187,22 +196,25 @@ static NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *getNamesFromPlis
   for (int i = 0; i < listOfMonitors.count; i++) {
     NSArray *listOfSpaces = [listOfMonitors[i] valueForKeyPath:@"Spaces"];
     NSString *selected = [listOfMonitors[i] valueForKeyPath:@"Current Space.uuid"];
+    Monitor *monitor = [[Monitor alloc] init];
+    monitor.displayUUID = [listOfMonitors[i] valueForKeyPath:@"Display Identifier"];
 
-    NSMutableArray *monitorNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
+    NSMutableArray *spaceNames = [NSMutableArray arrayWithCapacity:listOfSpaces.count];
     for (int j = 0; j < listOfSpaces.count; j++) {
       NSString *uuid = listOfSpaces[j][@"uuid"];
       id name = [dict objectForKey:uuid];
       NSMutableDictionary *screenDict = [NSMutableDictionary dictionary];
       screenDict[@"selected"] = @([uuid isEqualToString:selected]);
-      monitorNames[j] = screenDict;
+      spaceNames[j] = screenDict;
       if (name != nil) {
         screenDict[@"name"] = name;
       } else {
         screenDict[@"name"] = @"";
       }
-      monitorNames[j] = screenDict;
+      spaceNames[j] = screenDict;
     }
-    newNames[i] = monitorNames;
+    monitor.spaces = spaceNames;
+    newNames[i] = monitor;
   }
 
   return newNames;
@@ -316,7 +328,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     int selected = getSelected((!unexpandedViews || !unexpandedViews.count) ? expandedViews : unexpandedViews);
 
     // Get all of the names
-    NSMutableArray<NSMutableArray<NSMutableDictionary *> *> *names = getNamesFromPlist();
+    NSMutableArray<Monitor *> *names = getNamesFromPlist();
 
     if (names.count == 0) {
       ZKOrig(void, arg1);
@@ -327,24 +339,35 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     NSMutableArray *possibleMonitors = [[NSMutableArray alloc] init];
     for (int i = 0; i < names.count; i++) {
       if (
-          names[i].count == numMonitors && // Same number of monitors
-          [names[i][selected][@"selected"] boolValue] // Same index is selected
+          names[i].spaces.count == numMonitors && // Same number of monitors
+          [names[i].spaces[selected][@"selected"] boolValue] // Same index is selected
           ) {
         [possibleMonitors addObject:[NSNumber numberWithInt:i]];
       }
     }
     // If only one monitor, good to go
-    // If more than one monitor, then just go with the same cycling as it appears to have been last time it was good to go
+    // If more than one monitor, but the sizes are different we can usually identify it
+    // Otherwise just go with the same cycling as it appears to have been last time it was good to go
     if (possibleMonitors.count == 1) {
       monitorIndex = [possibleMonitors[0] intValue];
+    } else {
+      // If the size of the bar only matches one of the monitors, then use that one
+      NSString *displayUUID = [self getDisplayUUID:arg1];
+      if (displayUUID != nil) {
+        for (int i = 0; i < names.count; i++) {
+          if ([names[i].displayUUID isEqualToString:displayUUID]) {
+            monitorIndex = i;
+          }
+        }
+      }
     }
     [possibleMonitors release];
 
     monitorIndex = monitorIndex % names.count;
 
     double unexpandedOffset = 0;
-    for (int i = 0; i < ((NSArray *)names[monitorIndex]).count; i++) {
-      NSString *name = names[monitorIndex][i][@"name"];
+    for (int i = 0; i < names[monitorIndex].spaces.count; i++) {
+      NSString *name = names[monitorIndex].spaces[i][@"name"];
       // It's overridden
       if (name != nil && ![name isEqualToString:@""]) {
         // Expanded
@@ -368,7 +391,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     }
 
     // Make sure that it's centered in the bar when unexpanded
-    for (int i = 0; i < ((NSArray*)names[monitorIndex]).count; i++) {
+    for (int i = 0; i < names[monitorIndex].spaces.count; i++) {
       if (i < unexpandedViews.count) {
         setOffset(unexpandedViews[i], -unexpandedOffset/2, true);
       }
@@ -411,6 +434,37 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
   // Default to false
   return false;
+}
+
+// This checks the same monitors we already fetched in
+// probablyDesktopSwitcher, but this is only fallback code if both
+// screens have the same number of spaces and the same ones selected
+// which is unlikely. Therefore it's better to eat that rare double
+// cost than fetch the UUID when it's not needed.
+- (NSString *)getDisplayUUID:(CGRect)rect {
+  // Get all of the monitors
+  CGDirectDisplayID displayArray[kMaxDisplays];
+  uint32_t displayCount;
+  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
+
+  // This is only evaluated after probablyDesktopSwitcher is truthy
+  // so one of them is guaranteed to match. We only want ONE to match
+  // to feel confident using this signal though. So if we've already
+  // matched we just return nil
+  CGDirectDisplayID matchingScreen = 0;
+  for (int i = 0; i < displayCount; i++) {
+    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
+      if (matchingScreen != 0) {
+        return nil;
+      } else {
+        matchingScreen = displayArray[i];
+      }
+    }
+  }
+  // Go from the CGDirectDisplayID to the Display Identifier using private APIs
+  CFUUIDRef screenUuid = CGDisplayCreateUUIDFromDisplayID(matchingScreen);
+  CFStringRef uuid = CFUUIDCreateString(nil, screenUuid);
+  return (__bridge NSString *)uuid;
 }
 
 // ===============
