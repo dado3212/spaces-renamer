@@ -156,6 +156,7 @@ class ViewController: NSViewController {
         if (uuid == currentSpace) {
           snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected"))
           snippet.isCurrent = true
+          snippet.monitorID = (allSpaces[i-1] as! [AnyHashable: Any])["ManagedSpaceID"] as! Int
         }
 
         snippet.label.stringValue = "\(i)"
@@ -270,15 +271,42 @@ class ViewController: NSViewController {
   }
 
   func selectCurrent() {
+    var currentID = 0
+    let cgsMainConnectionId = CGSMainConnectionID()
+    if let mainScreen = NSScreen.main,
+      let uuid = mainScreen.uuid() {
+      currentID = Int(CGSManagedDisplayGetCurrentSpace(cgsMainConnectionId, uuid))
+    }
+    
+    // Select the current ID if we know it
     var set = false
-    for pairing in monitorPairings {
-      for (monitor, snippets) in pairing {
-        for snippet in snippets {
-          if snippet.isCurrent {
-            monitor.scrollToView(view: snippet)
-            if (!set) {
-              snippet.textField.becomeFirstResponder()
-              set = true
+    if (currentID != 0) {
+      for pairing in monitorPairings {
+        for (monitor, snippets) in pairing {
+          for snippet in snippets {
+            if snippet.monitorID == currentID {
+              monitor.scrollToView(view: snippet)
+              if (!set) {
+                snippet.textField.becomeFirstResponder()
+                set = true
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Fall back to whatever the current monitor is
+    if (!set) {
+      for pairing in monitorPairings {
+        for (monitor, snippets) in pairing {
+          for snippet in snippets {
+            if snippet.isCurrent {
+              monitor.scrollToView(view: snippet)
+              if (!set) {
+                snippet.textField.becomeFirstResponder()
+                set = true
+              }
             }
           }
         }

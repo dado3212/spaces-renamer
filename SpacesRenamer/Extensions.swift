@@ -24,6 +24,18 @@ extension NSScrollView {
   }
 }
 
+extension NSScreen {
+  func uuid() -> CFString? {
+    // can be nil, so be careful
+    if let screenNumber = deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")],
+       let screenUuid = CGDisplayCreateUUIDFromDisplayID(screenNumber as! UInt32),
+       let uuid = CFUUIDCreateString(nil, screenUuid.takeRetainedValue()) {
+        return uuid
+    }
+    return nil
+  }
+}
+
 // Helper extension for 10.10 support
 extension NSTextField {
   convenience init(labelWithStringCustom string: String) {
