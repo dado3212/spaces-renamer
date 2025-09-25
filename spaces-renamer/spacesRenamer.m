@@ -41,9 +41,6 @@ static char TYPE;
 
 int monitorIndex = 0;
 
-@interface ECMaterialLayer : CALayer
-@end
-
 // Recursively invokes setFrame on the modified children so that they don't change positions on
 // swiping between different spaces.  Called on the master parent ECMaterialLayer at the end of
 // the override calculations in setFrame.  Also forces redraws, which makes the resizing work.
@@ -254,74 +251,21 @@ ZKSwizzleInterface(_SRCALayer, CALayer, CALayer);
       }
     }
   }
-  if (arg1.size.width == 0.0 && orig.size.width != 0.0) {
-    return ZKOrig(void, orig);
-  }
 
-  return ZKOrig(void, arg1);
-}
-@end
-
-ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
-@implementation _SRECTextLayer
-- (void)setFrame:(CGRect)arg1 {
-  @try {
-    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-  } @catch(id anException) {}
-  [self addObserver:self
-         forKeyPath:@"propertiesChanged"
-            options:NSKeyValueObservingOptionNew
-            context:nil];
-
-  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
-  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
-    arg1.size.width = [possibleWidth doubleValue];
-  }
-
-  ZKOrig(void, arg1);
-}
-
--(void)dealloc {
-  @try {
-    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
-  } @catch(id anException) {}
-  ZKOrig(void);
-}
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-  id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
-  if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
-    self.string = overridden;
-  }
-}
-
-- (id)propertiesChanged {
-  return nil;
-}
-
-+(NSSet *)keyPathsForValuesAffectingPropertiesChanged {
-  return [NSSet setWithObjects:@"string", nil];
-}
-
-@end
-
-ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
-@implementation _SRECMaterialLayer
-- (void)setFrame:(CGRect)arg1 {
-  // Almost surely the desktop switcher
-  if ([self probablyDesktopSwitcher:arg1]) {
+  // Name is enough to determine that it's the SpacesBar, and it is also the root layer
+  if ([self.name isEqual:@"SpacesListLayoutController"]) {
+    //    os_log(OS_LOG_DEFAULT, "%{public}@", self.description);
     NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
     bool bigSurOrNewer = (macOS.majorVersion >= 11 || macOS.minorVersion >= 16);
 
-    CALayer *rootLayer;
-    if (bigSurOrNewer) {
-      rootLayer = self.superlayer;
-    } else {
-      rootLayer = self;
-    }
-    NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[0].sublayers;
-    NSArray<CALayer *> *expandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[1].sublayers;
+    NSArray<CALayer *> *unexpandedViews = self.sublayers[0].sublayers;
+    NSArray<CALayer *> *expandedViews = self.sublayers[1].sublayers;
 
+    // Wait for ECTextLayers to be initialized
+    if (!(expandedViews || unexpandedViews)) {
+      ZKOrig(void, arg1);
+      return;
+    }
     int numMonitors = MAX((int)unexpandedViews.count, (int)expandedViews.count);
 
     // Get which of the spaces in the current dock is selected
@@ -401,39 +345,13 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 
     // So that it doesn't change sizes on switching spaces
     if (!bigSurOrNewer) {
-      refreshFrames(rootLayer);
+      refreshFrames(self);
     } else {
-      refreshFramesSur(rootLayer, self);
-    }
-  }
-  ZKOrig(void, arg1);
-}
-
-// (40 height unexpanded, 146 expanded), if it's relevant later
-- (BOOL)probablyDesktopSwitcher:(CGRect)rect {
-  // Must start at origin
-  if (rect.origin.x != 0) {
-    return false;
-  }
-  // Is a child of CALayer
-  if (self.superlayer.class != NSClassFromString(@"CALayer")) {
-    return false;
-  }
-
-  // Get all of the monitors
-  CGDirectDisplayID displayArray[kMaxDisplays];
-  uint32_t displayCount;
-  CGGetActiveDisplayList(kMaxDisplays, displayArray, &displayCount);
-
-  // Is the width of the full screen (one of them)
-  for (int i = 0; i < displayCount; i++) {
-    if (CGDisplayPixelsWide(displayArray[i]) == rect.size.width) {
-      return true;
+      refreshFramesSur(self, self);
     }
   }
 
-  // Default to false
-  return false;
+  return ZKOrig(void, arg1);
 }
 
 // This checks the same monitors we already fetched in
@@ -465,6 +383,50 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
   CFUUIDRef screenUuid = CGDisplayCreateUUIDFromDisplayID(matchingScreen);
   CFStringRef uuid = CFUUIDCreateString(nil, screenUuid);
   return (__bridge NSString *)uuid;
+}
+@end
+
+ZKSwizzleInterface(_SRECTextLayer, ECTextLayer, CATextLayer);
+@implementation _SRECTextLayer
+- (void)setFrame:(CGRect)arg1 {
+  //  os_log(OS_LOG_DEFAULT, "[ECTextLayer setFrame:] string=%{public}@", self.string);
+  @try {
+    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
+  } @catch (id anException) {
+  }
+  [self addObserver:self forKeyPath:@"propertiesChanged" options:NSKeyValueObservingOptionNew context:nil];
+
+  id possibleWidth = objc_getAssociatedObject(self, &OVERRIDDEN_WIDTH);
+  if (possibleWidth && [possibleWidth isKindOfClass:[NSNumber class]]) {
+    arg1.size.width = [possibleWidth doubleValue];
+  }
+  ZKOrig(void, arg1);
+}
+
+- (void)dealloc {
+  @try {
+    [self removeObserver:self forKeyPath:@"propertiesChanged" context:nil];
+  } @catch (id anException) {
+  }
+  ZKOrig(void);
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+  id overridden = objc_getAssociatedObject(self, &OVERRIDDEN_STRING);
+  if ([overridden isKindOfClass:[NSString class]] && ![self.string isEqualToString:overridden]) {
+    self.string = overridden;
+  }
+}
+
+- (id)propertiesChanged {
+  return nil;
+}
+
++ (NSSet *)keyPathsForValuesAffectingPropertiesChanged {
+  return [NSSet setWithObjects:@"string", nil];
 }
 
 // ===============
