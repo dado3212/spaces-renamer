@@ -30,12 +30,29 @@ class NameChangeWindow: NSWindow {
     self.standardWindowButton(.zoomButton)?.isHidden = true
   }
 
+  // The field editor is the shared NSTextView that provides editing for every
+  // text field in the window. Disabling these per-input-services features
+  // suppresses the XPC handshake to com.apple.TextInputUI on every focus —
+  // none of these (spelling, dash/quote substitution, text replacement) are
+  // useful for our short space names.
+  override func fieldEditor(_ createFlag: Bool, for object: Any?) -> NSText? {
+    let editor = super.fieldEditor(createFlag, for: object)
+    if let textView = editor as? NSTextView {
+      textView.isAutomaticSpellingCorrectionEnabled = false
+      textView.isAutomaticQuoteSubstitutionEnabled = false
+      textView.isAutomaticDashSubstitutionEnabled = false
+      textView.isAutomaticTextReplacementEnabled = false
+    }
+    return editor
+  }
+
   // Close self on 'esc'
   override func keyDown(with event: NSEvent) {
     if (event.keyCode == Utils.escapeKey) {
       if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
         appDelegate.closeNameChangeWindow(sender: nil)
       }
+      return
     }
     super.keyDown(with: event)
   }

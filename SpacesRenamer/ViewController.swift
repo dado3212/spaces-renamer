@@ -28,9 +28,14 @@ class ViewController: NSViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    // Handles dark mode changes
-    appearanceChangeObservation = view.observe(\.effectiveAppearance) { [weak self]  _, _  in
-      self?.refreshViews()
+    // Handles dark mode changes. Dispatched async because the observer can fire
+    // mid-layout (adding subviews during setupViews can re-evaluate appearance),
+    // and refreshViews tears down + rebuilds the layout — doing that synchronously
+    // inside an in-progress layout pass triggers _NSDetectedLayoutRecursion.
+    appearanceChangeObservation = view.observe(\.effectiveAppearance) { [weak self] _, _ in
+      DispatchQueue.main.async {
+        self?.refreshViews()
+      }
     }
 
     setupViews()
@@ -87,7 +92,7 @@ class ViewController: NSViewController {
 
       // If there is more than one monitor, make a label for it, and use it as the 'above' marker
       if (allMonitors.count > 1) {
-        let monitorLabel = NSTextField(labelWithStringCustom: "Monitor \(j)")
+        let monitorLabel = NSTextField(labelWithString: "Monitor \(j)")
         monitorLabel.font = NSFont(name: "HelveticaNeue-Bold", size: 14)
         monitorLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -154,7 +159,7 @@ class ViewController: NSViewController {
 
         let snippet = DesktopSnippet.instanceFromNib()
         if (uuid == currentSpace) {
-          snippet.monitorImage.image = NSImage(named: NSImage.Name("MonitorSelected"))
+          snippet.monitorImage.image = NSImage(named: "MonitorSelected")
           snippet.isCurrent = true
           snippet.monitorID = (allSpaces[i-1] as! [AnyHashable: Any])["ManagedSpaceID"] as! Int
         }
@@ -281,7 +286,7 @@ class ViewController: NSViewController {
     // Select the current ID if we know it
     var set = false
     if (currentID != 0) {
-      for pairing in monitorPairings {
+      outer: for pairing in monitorPairings {
         for (monitor, snippets) in pairing {
           for snippet in snippets {
             if snippet.monitorID == currentID {
@@ -289,16 +294,17 @@ class ViewController: NSViewController {
               if (!set) {
                 snippet.textField.becomeFirstResponder()
                 set = true
+                break outer
               }
             }
           }
         }
       }
     }
-    
+
     // Fall back to whatever the current monitor is
     if (!set) {
-      for pairing in monitorPairings {
+      outer: for pairing in monitorPairings {
         for (monitor, snippets) in pairing {
           for snippet in snippets {
             if snippet.isCurrent {
@@ -306,6 +312,7 @@ class ViewController: NSViewController {
               if (!set) {
                 snippet.textField.becomeFirstResponder()
                 set = true
+                break outer
               }
             }
           }
@@ -357,9 +364,8 @@ extension ViewController: NSTextFieldDelegate {
 
 extension ViewController {
   static func freshController(isPopover: Bool) -> ViewController {
-    let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
-    let identifier = NSStoryboard.SceneIdentifier(rawValue: "Popup")
-    guard let viewcontroller = storyboard.instantiateController(withIdentifier: identifier) as? ViewController else {
+    let storyboard = NSStoryboard(name: "Main", bundle: nil)
+    guard let viewcontroller = storyboard.instantiateController(withIdentifier: "Popup") as? ViewController else {
       fatalError("Bugged")
     }
     viewcontroller.isPopover = isPopover
