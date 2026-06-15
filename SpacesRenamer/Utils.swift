@@ -6,66 +6,35 @@
 //  Copyright © 2018 Alex Beals. All rights reserved.
 
 import Foundation
+import ServiceManagement
 
 class Utils {
   static let libraryPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
   static let customNamesPlist = Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)/com.alexbeals.spacesrenamer.plist")
   static let listOfSpacesPlist = Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)/com.alexbeals.spacesrenamer.currentspaces.plist")
   static let spacesPath = Utils.libraryPath.appending("/Preferences/com.apple.spaces.plist")
-  
+
   static let escapeKey: UInt16 = 0x35
-  
-  static func addPathToLoginItems(_ path: String) {
-    let scriptPath = Bundle.main.path(forResource: "AddToLogin", ofType: "scpt")
-    
-    if (scriptPath != nil) {
-      let process = Process()
-      process.launchPath = "/usr/bin/osascript"
-      process.arguments = [scriptPath!, path]
-      process.launch()
-      process.waitUntilExit()
+
+  private static let hasRegisteredLoginItemKey = "hasRegisteredLoginItem"
+
+  // Register the app as a login item once. If the user later disables it
+  // manually we leave it alone — the one-shot key prevents re-enabling it.
+  static func registerLoginItemIfNeeded() {
+    let defaults = UserDefaults.standard
+    if defaults.bool(forKey: hasRegisteredLoginItemKey) {
+      return
     }
-  }
-  
-  static func addPathToLoginItemsIfNecessary(path: String, name: String) {
-    let scriptPath = Bundle.main.path(forResource: "GetLoginItems", ofType: "scpt")
-    
-    if (scriptPath != nil) {
-      let process = Process()
-      process.launchPath = "/usr/bin/osascript"
-      process.arguments = [scriptPath!, path]
-      
-      let outpipe = Pipe()
-      process.standardOutput = outpipe
-      
-      process.launch()
-      
-      var output : [String] = []
-      
-      let outdata = outpipe.fileHandleForReading.readDataToEndOfFile()
-      if var string = String(data: outdata, encoding: .utf8) {
-        string = string.trimmingCharacters(in: .newlines)
-        output = string.components(separatedBy: "\n")
-      }
-      
-      process.waitUntilExit()
-      
-      let loginItems = output[0].components(separatedBy: ", ")
-      if !loginItems.contains(name) {
-        addPathToLoginItems(path)
+
+    let service = SMAppService.mainApp
+    if service.status != .enabled {
+      do {
+        try service.register()
+      } catch {
+        NSLog("Failed to register login item: \(error)")
+        return
       }
     }
-  }
-  
-  static func removeAppFromLoginItems() {
-    let scriptPath = Bundle.main.path(forResource: "RemoveFromLogin", ofType: "scpt")
-    
-    if (scriptPath != nil) {
-      let process = Process()
-      process.launchPath = "/usr/bin/osascript"
-      process.arguments = [scriptPath!, "SpacesRenamer"]
-      process.launch()
-      process.waitUntilExit()
-    }
+    defaults.set(true, forKey: hasRegisteredLoginItemKey)
   }
 }

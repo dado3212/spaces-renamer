@@ -8,7 +8,6 @@
 
 import Cocoa
 import Foundation
-import LetsMove
 
 @NSApplicationMain
 @objc
@@ -132,12 +131,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     if let button = statusItem.button {
-      button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
+      button.image = NSImage(named: "StatusBarIcon")
     }
 
-    // Move it to the /Applications folder, and add it as a login item
-    PFMoveToApplicationsFolderIfNecessary()
-    Utils.addPathToLoginItemsIfNecessary(path: Bundle.main.bundlePath, name: "SpacesRenamer")
+    Utils.registerLoginItemIfNeeded()
 
     // Listen for left click (without Command)
     NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
@@ -153,7 +150,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     do {
       try FileManager.default.createDirectory(atPath: Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)"), withIntermediateDirectories: true, attributes: nil)
     } catch {
-      print("Not really sure.")
+      NSLog("Failed to create container directory: \(error)")
     }
 
     nameChangeWindow.contentViewController = ViewController.freshController(isPopover: false)

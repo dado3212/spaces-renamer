@@ -17,30 +17,10 @@
 		A80DDE441FBE2ECA00794F8F /* DesktopSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80DDE431FBE2ECA00794F8F /* DesktopSnippet.swift */; };
 		A81F4EFC2070AEED00660338 /* NameChangeWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */; };
 		A85FC62C2144D437002B4E08 /* CenteredClipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85FC62B2144D437002B4E08 /* CenteredClipView.swift */; };
-		A85FC6312144F1AE002B4E08 /* RemoveFromLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */; };
-		A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC62F2144F068002B4E08 /* AddToLogin.scpt */; };
-		A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
-		A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; };
-		A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A85FC63A214503E0002B4E08 /* LetsMove.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */ = {isa = PBXBuildFile; fileRef = A85FC643214511EA002B4E08 /* GetLoginItems.scpt */; };
 		A85FC64621477819002B4E08 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85FC64521477819002B4E08 /* Extensions.swift */; };
 		C398D84715BD8B0700543187 /* spacesRenamer.m in Sources */ = {isa = PBXBuildFile; fileRef = C398D84615BD8B0700543187 /* spacesRenamer.m */; };
 		FBAE21EE1CFCCA4F007E5A8E /* ZKSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = FBAE21ED1CFCCA4F007E5A8E /* ZKSwizzle.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		A85FC6422145044A002B4E08 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				A85FC64121450449002B4E08 /* LetsMove.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8D5B49B6048680CD000E48DA /* spaces-renamer.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "spaces-renamer.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,10 +39,6 @@
 		A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpacesRenamerBridge.h; sourceTree = "<group>"; };
 		A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameChangeWindow.swift; sourceTree = "<group>"; };
 		A85FC62B2144D437002B4E08 /* CenteredClipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenteredClipView.swift; sourceTree = "<group>"; };
-		A85FC62F2144F068002B4E08 /* AddToLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = AddToLogin.scpt; sourceTree = "<group>"; };
-		A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RemoveFromLogin.scpt; sourceTree = "<group>"; };
-		A85FC63A214503E0002B4E08 /* LetsMove.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LetsMove.framework; path = SpacesRenamer/LetsMove.framework; sourceTree = "<group>"; };
-		A85FC643214511EA002B4E08 /* GetLoginItems.scpt */ = {isa = PBXFileReference; lastKnownFileType = text; path = GetLoginItems.scpt; sourceTree = "<group>"; };
 		A85FC64521477819002B4E08 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		C398D84615BD8B0700543187 /* spacesRenamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = spacesRenamer.m; path = "spaces-renamer/spacesRenamer.m"; sourceTree = "<group>"; };
 		FBAE21EC1CFCCA4F007E5A8E /* ZKSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZKSwizzle.h; path = "spaces-renamer/ZKSwizzle.h"; sourceTree = "<group>"; };
@@ -81,7 +57,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A85FC64021450449002B4E08 /* LetsMove.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +70,6 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				A80DDE2A1FBCE4D600794F8F /* SpacesRenamer */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
-				A85FC63621450391002B4E08 /* Frameworks */,
 			);
 			name = ColorfulSidebar;
 			sourceTree = "<group>";
@@ -131,9 +105,6 @@
 			isa = PBXGroup;
 			children = (
 				A80DDE2B1FBCE4D600794F8F /* AppDelegate.swift */,
-				A85FC62F2144F068002B4E08 /* AddToLogin.scpt */,
-				A85FC6302144F1AE002B4E08 /* RemoveFromLogin.scpt */,
-				A85FC643214511EA002B4E08 /* GetLoginItems.scpt */,
 				A81F4EFB2070AEED00660338 /* NameChangeWindow.swift */,
 				A81F4EFA206C012500660338 /* SpacesRenamerBridge.h */,
 				A85FC62B2144D437002B4E08 /* CenteredClipView.swift */,
@@ -149,14 +120,6 @@
 				A80DDE351FBCE4D600794F8F /* SpacesRenamer.entitlements */,
 			);
 			path = SpacesRenamer;
-			sourceTree = "<group>";
-		};
-		A85FC63621450391002B4E08 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A85FC63A214503E0002B4E08 /* LetsMove.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -188,7 +151,6 @@
 				A80DDE251FBCE4D500794F8F /* Sources */,
 				A80DDE261FBCE4D500794F8F /* Frameworks */,
 				A80DDE271FBCE4D500794F8F /* Resources */,
-				A85FC6422145044A002B4E08 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -205,14 +167,12 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0900;
-				LastUpgradeCheck = 0810;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = cvz.;
 				TargetAttributes = {
 					A80DDE281FBCE4D500794F8F = {
 						CreatedOnToolsVersion = 9.0;
-						DevelopmentTeam = K2WR3HLA57;
-						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -248,13 +208,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A85FC644214511EA002B4E08 /* GetLoginItems.scpt in Resources */,
-				A85FC63C214503F3002B4E08 /* LetsMove.framework in Resources */,
-				A85FC6322144F4C9002B4E08 /* AddToLogin.scpt in Resources */,
 				A80DDE301FBCE4D600794F8F /* Assets.xcassets in Resources */,
 				A80DDE421FBE2D9C00794F8F /* DesktopSnippet.xib in Resources */,
 				A80DDE331FBCE4D600794F8F /* Main.storyboard in Resources */,
-				A85FC6312144F1AE002B4E08 /* RemoveFromLogin.scpt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,21 +279,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-				);
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = NO;
 				DSTROOT = /;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "/Library/Application Support/MacEnhance/Plugins";
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alexbeals.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
@@ -348,19 +298,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-				);
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = NO;
 				DSTROOT = /;
-				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/spaces-renamer/Info.plist";
 				INSTALL_PATH = "/Library/Application Support/MacEnhance/Plugins";
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.alexbeals.spaces-renamer";
 				PRODUCT_NAME = "spaces-renamer";
 				WRAPPER_EXTENSION = bundle;
@@ -392,7 +337,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx;
@@ -422,7 +367,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
 				SDKROOT = macosx;
@@ -433,7 +378,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -453,16 +397,12 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = SpacesRenamer/SpacesRenamer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = K2WR3HLA57;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/SpacesRenamer",
-				);
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -473,15 +413,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = SpacesRenamer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 1.11.1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = SpacesRenamer/SpacesRenamerBridge.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -489,7 +429,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -509,30 +448,26 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = SpacesRenamer/SpacesRenamer.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = K2WR3HLA57;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/SpacesRenamer",
-				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = SpacesRenamer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 1.11.1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.alexbeals.SpacesRenamer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = SpacesRenamer/SpacesRenamerBridge.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

@@ -39,7 +39,11 @@ static char TYPE;
 // If you have more than 12 monitors, this tweak can't help you with organization, good luck.
 #define kMaxDisplays 12
 
-int monitorIndex = 0;
+// Persists across calls inside the swizzled setFrame: as a heuristic for cycling
+// through identical-shape monitors when the per-call signals can't disambiguate
+// them. `static` so it doesn't leak as a global symbol; access is single-threaded
+// in practice (Dock's main thread invokes setFrame:).
+static int monitorIndex = 0;
 
 @interface ECMaterialLayer : CALayer
 @end
@@ -48,13 +52,6 @@ int monitorIndex = 0;
 // swiping between different spaces.  Called on the master parent ECMaterialLayer at the end of
 // the override calculations in setFrame.  Also forces redraws, which makes the resizing work.
 // This is a hack.
-static void refreshFrames(CALayer *frame) {
-  for (int i = 0; i < frame.sublayers.count; i++) {
-    [frame.sublayers[i] setFrame:frame.sublayers[i].frame];
-    refreshFrames(frame.sublayers[i]);
-  }
-}
-
 static void refreshFramesSur(CALayer *frame, CALayer* exception) {
   for (CALayer *layer in frame.sublayers) {
     if (![layer isEqualTo:exception]) {
@@ -310,15 +307,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
 - (void)setFrame:(CGRect)arg1 {
   // Almost surely the desktop switcher
   if ([self probablyDesktopSwitcher:arg1]) {
-    NSOperatingSystemVersion macOS = NSProcessInfo.processInfo.operatingSystemVersion;
-    bool bigSurOrNewer = (macOS.majorVersion >= 11 || macOS.minorVersion >= 16);
-
-    CALayer *rootLayer;
-    if (bigSurOrNewer) {
-      rootLayer = self.superlayer;
-    } else {
-      rootLayer = self;
-    }
+    CALayer *rootLayer = self.superlayer;
     NSArray<CALayer *> *unexpandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[0].sublayers;
     NSArray<CALayer *> *expandedViews = rootLayer.sublayers[rootLayer.sublayers.count - 1].sublayers[1].sublayers;
 
@@ -400,11 +389,7 @@ ZKSwizzleInterface(_SRECMaterialLayer, ECMaterialLayer, CALayer);
     monitorIndex += 1;
 
     // So that it doesn't change sizes on switching spaces
-    if (!bigSurOrNewer) {
-      refreshFrames(rootLayer);
-    } else {
-      refreshFramesSur(rootLayer, self);
-    }
+    refreshFramesSur(rootLayer, self);
   }
   ZKOrig(void, arg1);
 }
