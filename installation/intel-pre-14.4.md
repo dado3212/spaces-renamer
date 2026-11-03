@@ -3,7 +3,7 @@
 [← Back to README](../README.md)
 
 > [!TIP]
-> If this doesn't work for you, try the [macOS 14.4+ instructions](macos-14.4-plus.md) instead, which use a newer MacForge and also work on Intel Macs.
+> If this doesn't work for you, try the [macOS 14.4 to 15.5 instructions](macos-14.4-to-15.5.md) instead, which use a newer MacForge and also work on Intel Macs.
 
 1. Download [MacForge](https://www.macenhance.com/macforge?macforge://github.com/w0lfschild/macplugins/raw/master/com.alexbeals.SpacesRenamer), the newest incarnation of mySIMBL.
    - If it's not compatible, you can download the [latest mySIMBL version](https://github.com/w0lfschild/mySIMBL/releases/latest).

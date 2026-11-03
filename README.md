@@ -35,7 +35,8 @@ Pick the instructions that match your Mac (check Apple menu > About This Mac for
 | | Intel | Apple Silicon (M1-M6+) |
 |---|---|---|
 | **macOS 14.3 or earlier** | [Instructions](installation/intel-pre-14.4.md) | [Instructions](installation/apple-silicon-pre-14.4.md) |
-| **macOS 14.4 or later** | [Instructions](installation/macos-14.4-plus.md) | [Instructions](installation/macos-14.4-plus.md) |
+| **macOS 14.4 to 15.5** | [Instructions](installation/macos-14.4-to-15.5.md) | [Instructions](installation/macos-14.4-to-15.5.md) |
+| **macOS 15.6 to 26** | Unsupported | [Instructions](installation/apple-silicon-15.6-to-26.md) |
 
 ## Uninstall
 
