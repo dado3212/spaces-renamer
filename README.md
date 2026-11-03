@@ -28,56 +28,14 @@ I want to be able to rename my spaces.  While TotalSpaces has this functionality
 ### The Solution
 This is a SIMBL plugin and an application.  The SIMBL plugin handles renaming spaces from a saved plist.  The application adds an icon to the status bar that allows you to rename the spaces and update the plist.
 
-## Installation:
-> [!WARNING]  
-> This will not work for M1/M2/Apple Silicon Macs, and may not work for macOS 14.4+. Please scroll down to separate install instructions.
+## Installation
 
-<ol>
-  <li>Download <a href="https://www.macenhance.com/macforge?macforge://github.com/w0lfschild/macplugins/raw/master/com.alexbeals.SpacesRenamer">MacForge</a>, the newest incarnation of mySIMBL.
-    <ul><li>If it's not compatible, you can download the <a href="https://github.com/w0lfschild/mySIMBL/releases/latest">latest mySIMBL version</a>.</li></ul>
-  </li>
-  <li>
-    Make sure that it's installed, including disabling SIP (use the command <code>csrutil disable</code> in Recovery mode by <a href="https://www.imore.com/how-turn-system-integrity-protection-macos">following this tutorial</a>).  There are additional commands for macOS Catalina, with details under the 'System' tab of MacForge.  After it's installed you can partially re-enable SIP using <code>csrutil enable --without debug --without fs</code>. If you fully enable SIP, Spaces Renamer won't work.
-  </li>
-  <li>
-    Download <a href="https://github.com/dado3212/spaces-renamer/raw/master/build/spaces-renamer.zip">Spaces Renamer</a>.
-  </li>
-  <li>
-    Unzip the downloaded .zip file.
-  </li>
-  <li>
-    Open <code>spaces-renamer.bundle</code> with <code>MacForge.app</code>, or simply drag and drop it in to install it.
-  </li>
-  <li>
-    Run <code>killall -9 Dock</code> in Terminal to restart the Dock application.
-  </li>
-  <li>
-    Run the application 'SpacesRenamer'.  Accept the option to move it to /Applications.  It should be automatically added to your Login Items, but you can check to confirm by going to "System Preferences" > "Users & Groups" > "Login Items" and adding it manually if necessary.
-  </li>
-  <li>
-    Open the 'Spaces Renamer' icon in the top bar and click 'Update Names' (doesn't matter what's in there).  Otherwise the top bar may not appear!
-  </li>
-  </ol>
+Pick the instructions that match your Mac (check Apple menu > About This Mac for the chip and macOS version):
 
-## Installation (M1/M2/Apple Silicon)
-
-> [!NOTE]  
-> While this has been stable for months, it relies on a beta version of MacForge, so there may be compatibility issues with other plugins.
-
-1. Fully uninstall any current versions of MacForge. This means making sure that MacForgeHelper is quit, the application is deleted, and the Trash is emptied.
-2. Run some commands to clean up some of the lingering folders. **❗️THIS WILL DELETE ANY INSTALLED PLUGINS❗️**.
-```
-sudo launchctl unload /Library/LaunchDaemons/com.macenhance.MacForge.Injector.plist
-sudo rm -rf "/Library/Application Support/MacEnhance"
-sudo rm /Library/LaunchDaemons/com.macenhance.MacForge.Injector.plist
-sudo rm /Library/PrivilegedHelperTools/com.macenhance.MacForge.Injector
-```
-3. Download this zip file ([spaces-renamer.zip](https://github.com/user-attachments/files/16735430/spaces-renamer.zip)). It contains the SpacesRenamer app, spaces-renamer.bundle (1.11.1), and MacForge (an unofficial 1.2.0 Beta 2). **If you're on version macOS 14.4+** you should use [spaces-renamer.zip](https://github.com/user-attachments/files/20972723/spaces-renamer.zip)
- instead, which has MacForge 1.2.2 (4) and should work. You can also try this on non-M1/M2/Apple Silicon Macs.
-4. Open SpacesRenamer.  Accept the option to move it to /Applications.  It should be automatically added to your Login Items, but you can check to confirm by going to "System Preferences" > "Users & Groups" > "Login Items" and adding it manually if necessary.
-5. Open MacForge, which will copy itself to /Applications. Go through all the install instructions and permssions around `csrutil` by disabling SIP (use the command <code>csrutil disable</code> in Recovery mode by <a href="https://www.imore.com/how-turn-system-integrity-protection-macos">following this tutorial</a>).  There are additional commands for macOS Catalina, with details under the 'System' tab of MacForge.  After it's installed you can partially re-enable SIP using <code>csrutil enable --without debug --without fs --without nvram --without kext</code> (thanks to @serkanozkul <a href="https://github.com/dado3212/spaces-renamer/issues/75#issuecomment-1493355618">here</a>). If you fully enable SIP, Spaces Renamer won't work.
-6. Copy the `spaces-renamer.bundle` version to `/Library/Application Support/MacEnhance/Plugins` and run `killall -9 Dock`.
-7. Open the 'Spaces Renamer' icon in the top bar and click 'Update Names' (doesn't matter what's in there).  Otherwise the top bar may not appear!
+| | Intel | Apple Silicon (M1-M6+) |
+|---|---|---|
+| **macOS 14.3 or earlier** | [Instructions](installation/intel-pre-14.4.md) | [Instructions](installation/apple-silicon-pre-14.4.md) |
+| **macOS 14.4 or later** | [Instructions](installation/macos-14.4-plus.md) | [Instructions](installation/macos-14.4-plus.md) |
 
 ## Uninstall
 
