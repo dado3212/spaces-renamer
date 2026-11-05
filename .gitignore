@@ -3,3 +3,4 @@
 .DS_Store
 build/*
 !build/spaces-renamer.zip
+!build/SpacesRenamer-unsigned.zip
