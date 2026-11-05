@@ -37,9 +37,9 @@ Pick the instructions that match your Mac (check Apple menu > About This Mac for
 | **macOS 14.3 or earlier** | [Instructions](installation/intel-pre-14.4.md) | [Instructions](installation/apple-silicon-pre-14.4.md) |
 | **macOS 14.4 to 15.5** | [Instructions](installation/macos-14.4-to-15.5.md) | [Instructions](installation/macos-14.4-to-15.5.md) |
 | **macOS 15.6 to 26** | Unsupported | [Instructions](installation/apple-silicon-15.6-to-26.md) |
-| **macOS 27** | Unsupported | [Instructions](installation/apple-silicon-27.md) |
+| **macOS 27 or later** | Unsupported | [Instructions](installation/apple-silicon-27.md) |
 
-Spaces Renamer 2.0 requires macOS 27 or later. Earlier versions of macOS use Spaces Renamer 1.12 and MacForge.
+[Spaces Renamer 2.0.0](https://github.com/dado3212/spaces-renamer/releases/tag/v2.0.0) requires macOS 27 or later. Earlier versions of macOS use [Spaces Renamer 1.12](https://github.com/dado3212/spaces-renamer/releases/tag/v1.12.0) and MacForge.
 
 ## Uninstall
 
