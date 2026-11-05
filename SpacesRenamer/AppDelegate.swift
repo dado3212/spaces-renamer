@@ -8,14 +8,12 @@
 
 import Cocoa
 import Foundation
-import LetsMove
 
 @NSApplicationMain
 @objc
 class AppDelegate: NSObject, NSApplicationDelegate {
   let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
-  var nameChangeWindow: NameChangeWindow = NameChangeWindow()
-  let hiddenPopover = NSPopover()
+  let popover = NSPopover()
   var eventMonitor: EventMonitor?
 
   var workspace: NSWorkspace?
@@ -71,60 +69,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func updateActiveSpaces() {
     let info = CGSCopyManagedDisplaySpaces(conn) as! [NSDictionary]
 
-    let spacesDict = NSMutableDictionary()
-    spacesDict.setValue(info, forKey: "Monitors")
-
-    let prev = NSDictionary(contentsOfFile: Utils.listOfSpacesPlist)
-
-    // Gracefully clear any removed named desktops
-    if (prev != nil) {
-      var newSpaces: [String] = []
-
-      var removed: [String] = []
-
-      for monitor in info {
-        if let monitorSpaces = monitor["Spaces"] as? [[String: AnyObject]] {
-          for space in monitorSpaces {
-            newSpaces.append(space["uuid"] as! String)
-          }
-        }
-      }
-      if let monitors = prev!["Monitors"] as? [[String: AnyObject]] {
-        for monitor in monitors {
-          if let monitorSpaces = monitor["Spaces"] as? [[String: AnyObject]] {
-            for space in monitorSpaces {
-              if !newSpaces.contains(space["uuid"] as! String) {
-                removed.append(space["uuid"] as! String)
-              }
-            }
-          }
-        }
-      }
-
-      let customNames = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist)
-      let oldCustomNames = customNames
-      if (customNames != nil) {
-        if var renamed = customNames!["spaces_renaming"] as? [String: String] {
-          for removedUUID in removed {
-            if renamed[removedUUID] != nil {
-              renamed.removeValue(forKey: removedUUID)
-            }
-          }
-          customNames!["spaces_renaming"] = renamed
-        }
-        if (oldCustomNames != customNames) {
-          customNames!.write(toFile: Utils.customNamesPlist, atomically: true)
-        }
-      }
-    }
-
-    // Only update the file/window if it's changed
-    if (spacesDict != prev) {
-      spacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+    // Only update the layout/window if it's changed
+    if (info as NSArray) != (Utils.monitors as NSArray) {
+      Utils.monitors = info
 
       DispatchQueue.main.async {
-        if (self.nameChangeWindow.isVisible) {
-          self.nameChangeWindow.refresh()
+        if (self.popover.isShown) {
+          (self.popover.contentViewController as? ViewController)?.refreshViews()
         }
       }
     }
@@ -133,88 +84,65 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ aNotification: Notification) {
     if let button = statusItem.button {
       button.image = NSImage(named:NSImage.Name("StatusBarIcon"))
+      button.target = self
+      button.action = #selector(AppDelegate.statusItemClicked(_:))
     }
 
-    // Move it to the /Applications folder, and add it as a login item
-    PFMoveToApplicationsFolderIfNecessary()
+    // Add it as a login item
     Utils.addPathToLoginItemsIfNecessary(path: Bundle.main.bundlePath, name: "SpacesRenamer")
 
-    // Listen for left click (without Command)
-    NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
-      if event.window == self?.statusItem.button?.window && !event.modifierFlags.contains(NSEvent.ModifierFlags.command) {
-        self?.togglePopover(self?.statusItem.button)
-        return nil
-      }
+    popover.contentViewController = ViewController.freshController()
 
-      return event
-    }
-
-    // Create the bundle folder if it doesn't exist
-    do {
-      try FileManager.default.createDirectory(atPath: Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)"), withIntermediateDirectories: true, attributes: nil)
-    } catch {
-      print("Not really sure.")
-    }
-
-    nameChangeWindow.contentViewController = ViewController.freshController(isPopover: false)
-    hiddenPopover.contentViewController = ViewController.freshController(isPopover: true)
-    hiddenPopover.animates = false
-
+    // Close on clicks in other apps, rather than with NSPopover's transient behavior: on macOS 27 the
+    // menu bar runs in MenuBarAgent, so a click on the status item also arrives here, before the
+    // status item sees it. Leave those to the status item.
     eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
       if let strongSelf = self {
-        if (strongSelf.nameChangeWindow.isVisible) {
-          strongSelf.closeNameChangeWindow(sender: event)
+        let onStatusItem = strongSelf.statusItem.button?.window?.frame.contains(NSEvent.mouseLocation) ?? false
+        if (strongSelf.popover.isShown && !onStatusItem) {
+          strongSelf.closePopover(sender: event)
         }
       }
     }
 
     configureObservers()
     configureSpaceMonitor()
+    Utils.importLegacyNames()
     updateActiveSpaces()
+    PluginLoader.shared.start()
+  }
 
-    if !FileManager.default.fileExists(atPath: Utils.listOfSpacesPlist) {
-      guard let spacesDict = NSDictionary(contentsOfFile: Utils.spacesPath) else { return }
-      let allSpaces = (spacesDict.value(forKeyPath: "SpacesDisplayConfiguration.Management Data.Monitors") as! NSArray)
-
-      let listOfSpacesDict = NSMutableDictionary()
-      listOfSpacesDict.setValue(allSpaces, forKey: "Monitors")
-
-      listOfSpacesDict.write(toFile: Utils.listOfSpacesPlist, atomically: true)
+  // Left click without Command; Command-dragging rearranges the menu bar
+  @objc func statusItemClicked(_ sender: Any?) {
+    if NSApp.currentEvent?.modifierFlags.contains(.command) == true {
+      return
     }
+    togglePopover(sender)
   }
 
   @objc func togglePopover(_ sender: Any?) {
-    if nameChangeWindow.isVisible {
-      closeNameChangeWindow(sender: sender)
+    if popover.isShown {
+      closePopover(sender: sender)
     } else {
-      showNameChangeWindow(sender: sender)
+      showPopover(sender: sender)
     }
   }
 
-  func showNameChangeWindow(sender: Any?) {
-    NSApplication.shared.activate(ignoringOtherApps: true)
+  func showPopover(sender: Any?) {
+    guard let button = statusItem.button else { return }
+    NSApp.activate(ignoringOtherApps: true)
+    popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    if let window = popover.contentViewController?.view.window {
+      // Stay open while switching spaces, and hide for Mission Control
+      window.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle]
+      // So the current space's name field takes typing
+      window.makeKey()
+    }
     eventMonitor?.start()
-    self.statusItem.button?.isHighlighted = true
-    if let button = statusItem.button {
-      // Use the hidden popover to get the dimensions, and then immediately hide it
-      hiddenPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-      if let frame = hiddenPopover.contentViewController?.view.window?.frame {
-        nameChangeWindow.setFrame(frame, display: true)
-      }
-      hiddenPopover.close()
-
-      nameChangeWindow.makeKeyAndOrderFront(nil)
-      nameChangeWindow.selectCurrent()
-      nameChangeWindow.backgroundColor = .windowBackgroundColor
-      NSApp.activate(ignoringOtherApps: true)
-    }
   }
 
-  @objc func closeNameChangeWindow(sender: Any?) {
-    nameChangeWindow.setIsVisible(false)
-    DispatchQueue.main.async {
-      self.statusItem.button?.isHighlighted = false
-    }
+  @objc func closePopover(sender: Any?) {
+    popover.close()
     eventMonitor?.stop()
   }
 }

@@ -12,9 +12,6 @@ class ViewController: NSViewController {
   @IBOutlet var updateButton: NSButton!
 
   private var appearanceChangeObservation: NSKeyValueObservation?
-  
-  // Doesn't do some of the setup logic if it's not going to affect layout
-  var isPopover = false
 
   var desktops: [String: NSTextField] = [String: NSTextField]()
   var constraints: [NSLayoutConstraint] = []
@@ -59,8 +56,8 @@ class ViewController: NSViewController {
 
   func setupViews() {
     // Load in a list of all of the spaces
-    guard let spacesDict = NSDictionary(contentsOfFile: Utils.listOfSpacesPlist),
-      let allMonitors = spacesDict.value(forKeyPath: "Monitors") as? NSArray else { return }
+    let allMonitors = Utils.monitors as NSArray
+    guard allMonitors.count > 0 else { return }
 
     // Keep reference to previous for constraint
     var prev: NSView?
@@ -242,21 +239,12 @@ class ViewController: NSViewController {
   func refreshViews() {
     teardownViews()
     setupViews()
-    
-    if (isPopover) {
-      return
-    }
-
-    var currentMapping = NSMutableDictionary()
-    if let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist),
-      let spacesRemaining = preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary {
-      currentMapping = spacesRemaining
-    }
 
     // Update with the current names
+    let currentMapping = Utils.names
     for (uuid, textField) in desktops {
-      if let newName = currentMapping.value(forKey: uuid) {
-        textField.stringValue = newName as! String
+      if let newName = currentMapping[uuid] {
+        textField.stringValue = newName
       }
     }
     
@@ -319,30 +307,23 @@ class ViewController: NSViewController {
   }
 
   @IBAction func pressChangeName(_ sender: Any) {
-    // Load from preferences the current mapping
-    let preferencesDict = NSMutableDictionary(contentsOfFile: Utils.customNamesPlist) ?? NSMutableDictionary()
-    let currentMapping = (preferencesDict.value(forKey: "spaces_renaming") as? NSMutableDictionary) ?? NSMutableDictionary()
-
-    // Update accordingly
+    // Update the current mapping, keeping names of spaces on other displays
+    var currentMapping = Utils.names
     for (uuid, textField) in desktops {
-      currentMapping.setValue(textField.stringValue, forKey: uuid)
+      currentMapping[uuid] = textField.stringValue.isEmpty ? nil : textField.stringValue
     }
-
-    preferencesDict.setValue(currentMapping, forKey: "spaces_renaming")
-
-    // Resave
-    preferencesDict.write(toFile: Utils.customNamesPlist, atomically: true)
+    Utils.names = currentMapping
 
     // Close the popup
     let delegate = NSApplication.shared.delegate as! AppDelegate
-    delegate.closeNameChangeWindow(sender: delegate)
+    delegate.closePopover(sender: delegate)
   }
 }
 
 extension ViewController: NSTextFieldDelegate {
   override func cancelOperation(_ sender: Any?) {
     if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
-      appDelegate.closeNameChangeWindow(sender: nil)
+      appDelegate.closePopover(sender: nil)
     }
   }
 
@@ -356,13 +337,12 @@ extension ViewController: NSTextFieldDelegate {
 }
 
 extension ViewController {
-  static func freshController(isPopover: Bool) -> ViewController {
+  static func freshController() -> ViewController {
     let storyboard = NSStoryboard(name: NSStoryboard.Name(rawValue: "Main"), bundle: nil)
     let identifier = NSStoryboard.SceneIdentifier(rawValue: "Popup")
     guard let viewcontroller = storyboard.instantiateController(withIdentifier: identifier) as? ViewController else {
       fatalError("Bugged")
     }
-    viewcontroller.isPopover = isPopover
     return viewcontroller
   }
 }
