@@ -9,11 +9,50 @@ import Foundation
 
 class Utils {
   static let libraryPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
-  static let customNamesPlist = Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)/com.alexbeals.spacesrenamer.plist")
-  static let listOfSpacesPlist = Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)/com.alexbeals.spacesrenamer.currentspaces.plist")
   static let spacesPath = Utils.libraryPath.appending("/Preferences/com.apple.spaces.plist")
+  // Where Spaces Renamer 1.x saved names
+  static let legacyNamesPlist = Utils.libraryPath.appending("/Containers/\(Bundle.main.bundleIdentifier!)/com.alexbeals.spacesrenamer.plist")
   
   static let escapeKey: UInt16 = 0x35
+
+  // The names and the layout live in WindowManager's domain, which the plugin can read from
+  // WindowManager's sandbox. Setting them notifies the plugin.
+  static let store = UserDefaults(suiteName: "com.apple.WindowManager")!
+
+  // Space UUID to name
+  static var names: [String: String] {
+    get {
+      return store.dictionary(forKey: "SpacesRenamerNames") as? [String: String] ?? [:]
+    }
+    set {
+      store.set(newValue, forKey: "SpacesRenamerNames")
+      notifyPlugin()
+    }
+  }
+
+  // The displays and their spaces, from CGSCopyManagedDisplaySpaces
+  static var monitors: [NSDictionary] {
+    get {
+      return store.array(forKey: "SpacesRenamerMonitors") as? [NSDictionary] ?? []
+    }
+    set {
+      store.set(newValue, forKey: "SpacesRenamerMonitors")
+      // True when "Displays have separate Spaces" is off, so desktops are numbered across displays.
+      store.set(UserDefaults(suiteName: "com.apple.spaces")?.bool(forKey: "spans-displays") ?? false, forKey: "SpacesRenamerSpansDisplays")
+      notifyPlugin()
+    }
+  }
+
+  private static func notifyPlugin() {
+    store.synchronize()
+    notify_post("com.alexbeals.spacesrenamer.names-changed")
+  }
+
+  static func importLegacyNames() {
+    guard store.object(forKey: "SpacesRenamerNames") == nil,
+      let legacy = NSDictionary(contentsOfFile: legacyNamesPlist)?["spaces_renaming"] as? [String: String] else { return }
+    names = legacy
+  }
   
   static func addPathToLoginItems(_ path: String) {
     let scriptPath = Bundle.main.path(forResource: "AddToLogin", ofType: "scpt")

@@ -10,6 +10,7 @@
 #define SpacesRenamerBridge_h
 
 #import <Foundation/Foundation.h>
+#import <notify.h>
 
 typedef int CGSConnectionID;
 

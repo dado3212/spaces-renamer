@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
-               BuildableName = "spaces-renamer.bundle"
-               BlueprintName = "spaces-renamer"
+               BlueprintIdentifier = "A80DDE281FBCE4D500794F8F"
+               BuildableName = "SpacesRenamer.app"
+               BlueprintName = "SpacesRenamer"
                ReferencedContainer = "container:spaces-renamer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,6 +40,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "A80DDE281FBCE4D500794F8F"
+            BuildableName = "SpacesRenamer.app"
+            BlueprintName = "SpacesRenamer"
+            ReferencedContainer = "container:spaces-renamer.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -50,9 +60,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
-            BuildableName = "spaces-renamer.bundle"
-            BlueprintName = "spaces-renamer"
+            BlueprintIdentifier = "A80DDE281FBCE4D500794F8F"
+            BuildableName = "SpacesRenamer.app"
+            BlueprintName = "SpacesRenamer"
             ReferencedContainer = "container:spaces-renamer.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
