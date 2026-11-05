@@ -21,6 +21,7 @@ static char REQUESTED_WIDTH;
 static char REQUESTED_POSITION;
 static char RENAMED;
 static char APPLYING;
+static char HIDDEN_OPACITY;
 static char RETRYING;
 
 // WindowManager's own preferences, the domain its sandbox can read and write. The app writes the
@@ -151,6 +152,12 @@ static NSDictionary *getSpace(NSDictionary *monitor, NSInteger number) {
   return number > 0 && number <= (NSInteger)spaces.count ? spaces[number - 1] : nil;
 }
 
+static NSString *getCustomName(NSDictionary *monitor, NSInteger number) {
+  id uuid = getSpace(monitor, number)[@"uuid"];
+  id custom = [uuid isKindOfClass:[NSString class]] ? customNames[uuid] : nil;
+  return [custom isKindOfClass:[NSString class]] && [custom length] ? custom : nil;
+}
+
 // The unexpanded bar: each container sits in "SpacesBar" and shows only its label. WindowManager
 // sizes a label for its string, capped at 87pt, and spaces the containers for its own "Desktop N"
 // titles, 22pt apart. As in the Dock version, a renamed label gets its full width and every
@@ -182,13 +189,23 @@ static CATextLayer *getTextLayer(CALayer *container) {
   return nil;
 }
 
-// The label's width in the unexpanded bar, given the width WindowManager asked for.
-static CGFloat getUnexpandedWidth(CATextLayer *label, CGFloat requested) {
-  if (![objc_getAssociatedObject(label, &RENAMED) boolValue]) return requested;
-  return MAX(requested, MIN(ceil(label.preferredFrameSize.width), kMaxLabelWidth));
+// The holder's x in the unexpanded bar, given the x WindowManager asked for. WindowManager centers
+// the holder with rounding for the width it measured, which is "Desktop N" at first and the name
+// at its next layout, so a renamed label could move half a point. Center it exactly instead.
+static CGFloat getHolderX(CALayer *holder, CGFloat requested) {
+  if (![objc_getAssociatedObject(getHolderTextLayer(holder), &RENAMED) boolValue]) return requested;
+  return holder.superlayer.bounds.size.width / 2 + (holder.anchorPoint.x - 0.5) * holder.bounds.size.width;
 }
 
-// How much wider the label is than the title WindowManager spaced the container for.
+// The label's width in the unexpanded bar, given the width WindowManager asked for. A renamed
+// label fits its name: WindowManager sizes a label for the string it had at its last layout,
+// which is "Desktop N" when the bar opens
+static CGFloat getUnexpandedWidth(CATextLayer *label, CGFloat requested) {
+  if (![objc_getAssociatedObject(label, &RENAMED) boolValue]) return requested;
+  return MIN(ceil(label.preferredFrameSize.width), kMaxLabelWidth);
+}
+
+// How much wider the label is than the title WindowManager spaced the container for
 static CGFloat getExtraWidth(CALayer *container) {
   CATextLayer *label = getTextLayer(container);
   NSNumber *requested = objc_getAssociatedObject(label, &REQUESTED_WIDTH);
@@ -249,6 +266,26 @@ static void refreshFrames(CALayer *bar) {
       sibling.bounds = pill;
       sibling.position = CGPointMake(bounds.size.width / 2, sibling.position.y);
     }
+    CALayer *holder = label.superlayer;
+    holder.position = CGPointMake(getHolderX(holder, holder.position.x), holder.position.y);
+  }
+  [CATransaction commit];
+}
+
+// WindowManager draws a container before adding it to the bar, when its display isn't known yet,
+// and fades from that drawing to the bar. This hides those labels so it doesn't show the old
+// Desktop 1 while loading in.
+static void hideHolder(CALayer *holder, BOOL hide) {
+  NSNumber *opacity = objc_getAssociatedObject(holder, &HIDDEN_OPACITY);
+  if (hide == (opacity != nil)) return;
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+  if (hide) {
+    assign(holder, &HIDDEN_OPACITY, @(holder.opacity));
+    holder.opacity = 0;
+  } else {
+    holder.opacity = opacity.floatValue;
+    assign(holder, &HIDDEN_OPACITY, nil);
   }
   [CATransaction commit];
 }
@@ -264,12 +301,22 @@ static BOOL overrideTextLayer(CATextLayer *label) {
   // Reused layers may now show full-screen apps. Restore the host's own title.
   NSString *desired = original;
   if (number) {
-    NSDictionary *monitor = getMonitor(getDisplayUUID(container));
-    if (!monitor) return NO;
-    id uuid = getSpace(monitor, number)[@"uuid"];
-    id custom = [uuid isKindOfClass:[NSString class]] ? customNames[uuid] : nil;
-    if ([custom isKindOfClass:[NSString class]] && [custom length]) desired = custom;
+    NSString *display = getDisplayUUID(container);
+    NSDictionary *monitor = getMonitor(display);
+    if (!monitor) {
+      if (!display) {
+        for (id candidate in listOfMonitors) {
+          if ([candidate isKindOfClass:[NSDictionary class]] && getCustomName(candidate, number)) {
+            hideHolder(label.superlayer, YES);
+            break;
+          }
+        }
+      }
+      return NO;
+    }
+    desired = getCustomName(monitor, number) ?: original;
   }
+  hideHolder(label.superlayer, NO);
   BOOL renamed = ![desired isEqual:original];
   if (!renamed && ![objc_getAssociatedObject(label, &RENAMED) boolValue]) return YES;
   // Setting the same string again would only redraw the label.
@@ -277,7 +324,11 @@ static BOOL overrideTextLayer(CATextLayer *label) {
     assign(label, &APPLYING, @YES);
     // Call the original setter directly. A custom name equal to another desktop
     // title must not become the label's original identity on this recursive pass.
+    // Without actions, so the text swaps instead of cross-fading.
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     originalSetString(label, @selector(setString:), desired);
+    [CATransaction commit];
     assign(label, &APPLYING, nil);
   }
   assign(label, &RENAMED, @(renamed));
@@ -289,6 +340,7 @@ static BOOL overrideTextLayer(CATextLayer *label) {
 }
 
 static void retryOverride(CATextLayer *label, int attempts) {
+  if (attempts <= 0) hideHolder(label.superlayer, NO);
   if (attempts <= 0 || objc_getAssociatedObject(label, &RETRYING)) return;
   assign(label, &RETRYING, @YES);
   __weak CATextLayer *weakLabel = label;
@@ -319,6 +371,7 @@ static void hookedSetString(id self, SEL selector, id string) {
   // Only track plain host titles; attributed labels are left to WindowManager.
   if (![string isKindOfClass:[NSString class]]) {
     assign(label, &NATIVE_STRING, nil);
+    hideHolder(label.superlayer, NO);
     return;
   }
   assign(label, &NATIVE_STRING, [string copy]);
@@ -369,6 +422,8 @@ static void hookedSetPosition(CALayer *self, SEL selector, CGPoint position) {
     CATextLayer *label = getHolderTextLayer(self.superlayer);
     if (label && isUnexpanded(self.superlayer.superlayer))
       position.x = getUnexpandedWidth(label, position.x * 2) / 2;
+  } else if ([NSThread isMainThread] && isUnexpanded(self.superlayer) && getHolderTextLayer(self)) {
+    position.x = getHolderX(self, position.x);
   }
   originalSetPosition(self, selector, position);
 }
